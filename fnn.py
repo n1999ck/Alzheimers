@@ -9,18 +9,20 @@ class FeedforwardNeuralNetModel(nn.Module):
         super(FeedforwardNeuralNetModel, self).__init__()
         # Linear function
         self.fc1 = nn.Linear(input_dim, hidden_dim) 
-        # Non-linearity
-        self.sigmoid = nn.Sigmoid()
-        # Linear function (readout)
-        self.fc2 = nn.Linear(hidden_dim, output_dim)  
+        # Linear function
+        self.fc2 = nn.Linear(hidden_dim, hidden_dim)  
+        self.fc3 = nn.Linear(hidden_dim, output_dim)  
+        self.relu = nn.ReLU()
     
     def forward(self, x):
         # Linear function  # LINEAR
         out = self.fc1(x)
         # Non-linearity  # NON-LINEAR
-        out = self.sigmoid(out)
+        out = self.relu(out)
         # Linear function (readout)  # LINEAR
         out = self.fc2(out)
+        out = self.relu(out)
+        out = self.fc3(out)
         return out
 
 class CSVDataset(Dataset):
@@ -43,6 +45,7 @@ test_portion_dataset_labels = dataset_labels[int((len(dataset) * (7/8))):]
 train_portion_dataset = dataset[:int((len(dataset) * (7/8)))]
 train_portion_dataset_labels = dataset_labels[:int((len(dataset) * (7/8)))]
 
+
 print(len(test_portion_dataset))
 print(len(test_portion_dataset_labels))
 print(len(train_portion_dataset))
@@ -51,6 +54,12 @@ print(len(train_portion_dataset_labels))
 dataset_features = np.vstack(train_portion_dataset.values).astype(np.float32)
 test_dataset_features = np.vstack(test_portion_dataset.values).astype(np.float32)
 
+
+mean = dataset_features.mean(axis=0)
+std = dataset_features.std(axis=0)
+dataset_features = (dataset_features - mean) / std
+test_dataset_features = (test_dataset_features - mean) / std
+
 batch_size = 100
 n_iters = 3000
 num_epochs = n_iters / (len(dataset_features) / batch_size)
@@ -58,7 +67,7 @@ num_epochs = int(num_epochs)
 print(num_epochs)
 input_dim = 33
 output_dim = 2
-hidden_dim = 100
+hidden_dim = 1000
 
 train_dataset = CSVDataset(dataset_features, train_portion_dataset_labels)
 test_dataset = CSVDataset(test_dataset_features, test_portion_dataset_labels)
@@ -75,7 +84,7 @@ model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
 
 criterion = nn.CrossEntropyLoss()
 
-learning_rate = 0.1
+learning_rate = 0.001
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
 iter = 0
