@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from torch.utils.data import Dataset
 
 class FeedforwardNeuralNetModel(nn.Module):
@@ -10,8 +11,8 @@ class FeedforwardNeuralNetModel(nn.Module):
         # Linear function
         self.fc1 = nn.Linear(input_dim, hidden_dim) 
         # Linear function
-        self.fc2 = nn.Linear(hidden_dim, hidden_dim)  
-        self.fc3 = nn.Linear(hidden_dim, output_dim)  
+        self.fc2 = nn.Linear(hidden_dim, hidden_dim * 2)  
+        self.fc3 = nn.Linear(hidden_dim * 2, output_dim)  
         self.relu = nn.ReLU()
     
     def forward(self, x):
@@ -60,32 +61,31 @@ dataset_features = (dataset_features - mean) / std
 test_dataset_features = (test_dataset_features - mean) / std
 
 batch_size = 100
-n_iters = 3000
+n_iters = 6000
 num_epochs = n_iters / (len(dataset_features) / batch_size)
 num_epochs = int(num_epochs)
 print(num_epochs)
 input_dim = 33
 output_dim = 2
-hidden_dim = 1000
+hidden_dim = 100
 
 train_dataset = CSVDataset(dataset_features, train_portion_dataset_labels)
 test_dataset = CSVDataset(test_dataset_features, test_portion_dataset_labels)
 dataset_loader =torch.utils.data.DataLoader(dataset=train_dataset,
-                                            batch_size = batch_size,
-                                            shuffle = True)
+                                            batch_size = batch_size,)
 
 test_loader =torch.utils.data.DataLoader(dataset=test_dataset,
-                                            batch_size = batch_size,
-                                            shuffle = True)
+                                            batch_size = batch_size)
 
 
 model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
 
 criterion = nn.CrossEntropyLoss()
 
-learning_rate = 0.001
+learning_rate = 0.1
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
-
+accuracies = []
+iterations = []
 iter = 0
 for epoch in range(num_epochs):
     for i, (fields, labels) in enumerate(dataset_loader):
@@ -96,7 +96,6 @@ for epoch in range(num_epochs):
         optimizer.step()
         iter += 1
         if iter % 500 == 0:
-            print(fields, labels)
             # Calculate Accuracy         
             correct = 0
             total = 0
@@ -113,10 +112,19 @@ for epoch in range(num_epochs):
                 total += labels.size(0)
                 
                 # Total correct predictions
-                correct += (predicted == labels).sum()
+                correct += (predicted == labels).sum().item()
             
             accuracy = 100 * correct / total
-        
-
+            accuracies.append(accuracy)
+            iterations.append(iter)
             # Print Loss
             print('Iteration: {}. Loss: {}. Accuracy: {}'.format(iter, loss.item(), accuracy))
+print(accuracies)
+fig, ax = plt.subplots()
+
+ax.plot(iterations, accuracies)
+ax.set(xlabel="Iteration", ylabel="Accuracy %",
+       title="Accuracy over time")
+ax.grid()
+fig.savefig("test.png")
+plt.show()
