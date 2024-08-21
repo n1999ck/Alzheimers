@@ -54,10 +54,10 @@ dataset_features = np.vstack(train_portion_dataset.values).astype(np.float32)
 test_dataset_features = np.vstack(test_portion_dataset.values).astype(np.float32)
 
 
-# mean = dataset_features.mean(axis=0)
-# std = dataset_features.std(axis=0)
-# dataset_features = (dataset_features - mean) / std
-# test_dataset_features = (test_dataset_features - mean) / std
+mean = dataset_features.mean(axis=0)
+std = dataset_features.std(axis=0)
+dataset_features = (dataset_features - mean) / std
+test_dataset_features = (test_dataset_features - mean) / std
 
 batch_size = 100
 n_iters = 3000
