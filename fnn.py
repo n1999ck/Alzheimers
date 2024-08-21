@@ -37,7 +37,6 @@ class CSVDataset(Dataset):
 # Create test and train datasets    
 dataset = pd.read_csv('Dataset.csv', encoding="ISO-8859-1")
 dataset_labels = dataset.pop("Diagnosis")
-dataset = dataset[1:]
 dataset.pop("DoctorInCharge")
 
 test_portion_dataset = dataset[int((len(dataset) * (7/8))):]
@@ -55,10 +54,10 @@ dataset_features = np.vstack(train_portion_dataset.values).astype(np.float32)
 test_dataset_features = np.vstack(test_portion_dataset.values).astype(np.float32)
 
 
-mean = dataset_features.mean(axis=0)
-std = dataset_features.std(axis=0)
-dataset_features = (dataset_features - mean) / std
-test_dataset_features = (test_dataset_features - mean) / std
+# mean = dataset_features.mean(axis=0)
+# std = dataset_features.std(axis=0)
+# dataset_features = (dataset_features - mean) / std
+# test_dataset_features = (test_dataset_features - mean) / std
 
 batch_size = 100
 n_iters = 3000
@@ -97,6 +96,7 @@ for epoch in range(num_epochs):
         optimizer.step()
         iter += 1
         if iter % 500 == 0:
+            print(fields, labels)
             # Calculate Accuracy         
             correct = 0
             total = 0
