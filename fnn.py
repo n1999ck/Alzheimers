@@ -13,18 +13,19 @@ class FeedforwardNeuralNetModel(nn.Module):
         self.fc2 = nn.Linear(hidden_dim, hidden_dim * 2)  
         self.bn2 = nn.BatchNorm1d(hidden_dim * 2)
         self.fc3 = nn.Linear(hidden_dim * 2, output_dim)  
-        self.relu = nn.ReLU()
+        self.sigmoid = nn.Sigmoid()
         self.dropout = nn.Dropout(p=0.5)
     
     def forward(self, x):
+
         out = self.fc1(x)
         out = self.bn1(out)
-        out = self.relu(out)
+        out = self.sigmoid(out)
         out = self.dropout(out)
 
         out = self.fc2(out)
         out = self.bn2(out)
-        out = self.relu(out)
+        out = self.sigmoid(out)
         out = self.dropout(out)
 
         out = self.fc3(out)
@@ -65,7 +66,7 @@ dataset_features = (dataset_features - mean) / std
 test_dataset_features = (test_dataset_features - mean) / std
 
 batch_size = 100
-n_iters = 6000
+n_iters = 1000
 num_epochs = n_iters / (len(dataset_features) / batch_size)
 num_epochs = int(num_epochs)
 print(num_epochs)
@@ -141,11 +142,14 @@ for epoch in range(num_epochs):
 
 print(accuracies)
 fig, ax = plt.subplots()
+plt.figure(figsize=(12,6))
+ax = fig.add_subplot(1,2,1)
 
 ax.plot(iterations, accuracies, label="Validation set accuracy %")
 ax.set(xlabel="Iteration", ylabel="Accuracy %",
        title="Accuracy over time")
 ax.grid()
+plt.legend()
 
 model.eval()
 correct = 0
@@ -160,8 +164,21 @@ with torch.no_grad():  # Disable gradient calculation
 test_accuracy = 100 * correct / total
 print(f'Test Accuracy: {test_accuracy}%')
 
-ax.plot(iterations[-1], test_accuracy, 'ro', label="Test accuracy %")
-ax.legend()
+with open('accuracies.txt', 'a') as accuraciesFile:
+    accuraciesFile.write(str(test_accuracy))
 
+with open('accuracies.txt', 'r') as accuraciesFile:
+    accuraciesList = [float(line.strip()) for line in accuraciesFile]
+    print(accuraciesList)
+
+ax = fig.add_subplot(1,2,2)
+plt.plot(range(1,len(accuraciesList) + 1), accuraciesList, 'ro-', label="Test accuracy %")
+ax.plot(iterations[-1], test_accuracy, 'ro-', label="Test accuracy %")
+accuraciesList = []
+
+
+
+ax.legend()
+plt.tight_layout()
 fig.savefig("test.png")
 plt.show()
