@@ -9,20 +9,27 @@ class FeedforwardNeuralNetModel(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim):
         super(FeedforwardNeuralNetModel, self).__init__()
         # Linear function
-        self.fc1 = nn.Linear(input_dim, hidden_dim) 
+        self.fc1 = nn.Linear(input_dim, hidden_dim)
+        self.bn1 = nn.BatchNorm1d(hidden_dim)
         # Linear function
         self.fc2 = nn.Linear(hidden_dim, hidden_dim * 2)  
+        self.bn2 = nn.BatchNorm1d(hidden_dim * 2)
         self.fc3 = nn.Linear(hidden_dim * 2, output_dim)  
         self.relu = nn.ReLU()
+        self.dropout = nn.Dropout(p=0.5)
     
     def forward(self, x):
         # Linear function  # LINEAR
         out = self.fc1(x)
+        out = self.bn1(out)
         # Non-linearity  # NON-LINEAR
         out = self.relu(out)
+        out = self.dropout(out)
         # Linear function (readout)  # LINEAR
         out = self.fc2(out)
+        out = self.bn2(out)
         out = self.relu(out)
+        out = self.dropout(out)
         out = self.fc3(out)
         return out
 
@@ -67,7 +74,7 @@ num_epochs = int(num_epochs)
 print(num_epochs)
 input_dim = 33
 output_dim = 2
-hidden_dim = 100
+hidden_dim = 1000
 
 train_dataset = CSVDataset(dataset_features, train_portion_dataset_labels)
 test_dataset = CSVDataset(test_dataset_features, test_portion_dataset_labels)
@@ -83,7 +90,17 @@ model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
 criterion = nn.CrossEntropyLoss()
 
 learning_rate = 0.1
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate) 
+
+ 
+val_split = 0.2
+val_size = int(len(train_portion_dataset) - val_split)
+train_size = len(train_portion_dataset) - val_size
+ 
+train_dataset, val_dataset = torch.utils.data.random_split(train_dataset,[train_size, val_size])
+val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False)
+ 
+
 accuracies = []
 iterations = []
 iter = 0
@@ -100,7 +117,11 @@ for epoch in range(num_epochs):
             correct = 0
             total = 0
             # Iterate through test dataset
-            for fields, labels in test_loader:
+            model.eval()
+            with torch.no_grad():
+                correct = 0
+                total = 0
+            for fields, labels in val_loader:
                 
                 # Forward pass only to get logits/output
                 outputs = model(fields)
