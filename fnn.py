@@ -8,10 +8,8 @@ from torch.utils.data import Dataset
 class FeedforwardNeuralNetModel(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim):
         super(FeedforwardNeuralNetModel, self).__init__()
-        # Linear function
         self.fc1 = nn.Linear(input_dim, hidden_dim)
         self.bn1 = nn.BatchNorm1d(hidden_dim)
-        # Linear function
         self.fc2 = nn.Linear(hidden_dim, hidden_dim * 2)  
         self.bn2 = nn.BatchNorm1d(hidden_dim * 2)
         self.fc3 = nn.Linear(hidden_dim * 2, output_dim)  
@@ -19,17 +17,16 @@ class FeedforwardNeuralNetModel(nn.Module):
         self.dropout = nn.Dropout(p=0.5)
     
     def forward(self, x):
-        # Linear function  # LINEAR
         out = self.fc1(x)
         out = self.bn1(out)
-        # Non-linearity  # NON-LINEAR
         out = self.relu(out)
         out = self.dropout(out)
-        # Linear function (readout)  # LINEAR
+
         out = self.fc2(out)
         out = self.bn2(out)
         out = self.relu(out)
         out = self.dropout(out)
+
         out = self.fc3(out)
         return out
 
@@ -78,10 +75,10 @@ hidden_dim = 1000
 
 train_dataset = CSVDataset(dataset_features, train_portion_dataset_labels)
 test_dataset = CSVDataset(test_dataset_features, test_portion_dataset_labels)
-dataset_loader =torch.utils.data.DataLoader(dataset=train_dataset,
+dataset_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                             batch_size = batch_size,)
 
-test_loader =torch.utils.data.DataLoader(dataset=test_dataset,
+test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
                                             batch_size = batch_size)
 
 
@@ -89,17 +86,20 @@ model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
 
 criterion = nn.CrossEntropyLoss()
 
-learning_rate = 0.1
+learning_rate = 0.001
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate) 
 
  
 val_split = 0.2
-val_size = int(len(train_portion_dataset) - val_split)
+val_size = int(len(train_portion_dataset) * val_split)
 train_size = len(train_portion_dataset) - val_size
+print(val_size)
+print(train_size)
  
 train_dataset, val_dataset = torch.utils.data.random_split(train_dataset,[train_size, val_size])
+print("Length of train_dataset:" + str(len(train_dataset)))
+print("Length of val_dataset:" + str(len(val_dataset)))
 val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False)
- 
 
 accuracies = []
 iterations = []
@@ -119,33 +119,49 @@ for epoch in range(num_epochs):
             # Iterate through test dataset
             model.eval()
             with torch.no_grad():
-                correct = 0
-                total = 0
-            for fields, labels in val_loader:
-                
-                # Forward pass only to get logits/output
-                outputs = model(fields)
-                
-                # Get predictions from the maximum value
-                _, predicted = torch.max(outputs.data, 1)
-                
-                # Total number of labels
-                total += labels.size(0)
-                
-                # Total correct predictions
-                correct += (predicted == labels).sum().item()
+                for fields, labels in val_loader:
+                    
+                    # Forward pass only to get logits/output
+                    outputs = model(fields)
+                    
+                    # Get predictions from the maximum value
+                    _, predicted = torch.max(outputs.data, 1)
+                    
+                    # Total number of labels
+                    total += labels.size(0)
+                    
+                    # Total correct predictions
+                    correct += (predicted == labels).sum().item()
             
             accuracy = 100 * correct / total
             accuracies.append(accuracy)
             iterations.append(iter)
             # Print Loss
             print('Iteration: {}. Loss: {}. Accuracy: {}'.format(iter, loss.item(), accuracy))
+
 print(accuracies)
 fig, ax = plt.subplots()
 
-ax.plot(iterations, accuracies)
+ax.plot(iterations, accuracies, label="Validation set accuracy %")
 ax.set(xlabel="Iteration", ylabel="Accuracy %",
        title="Accuracy over time")
 ax.grid()
+
+model.eval()
+correct = 0
+total = 0
+with torch.no_grad():  # Disable gradient calculation
+    for fields, labels in test_loader:
+        outputs = model(fields)
+        _, predicted = torch.max(outputs.data, 1)
+        total += labels.size(0)
+        correct += (predicted == labels).sum().item()
+
+test_accuracy = 100 * correct / total
+print(f'Test Accuracy: {test_accuracy}%')
+
+ax.plot(iterations[-1], test_accuracy, 'ro', label="Test accuracy %")
+ax.legend()
+
 fig.savefig("test.png")
 plt.show()
