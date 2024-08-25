@@ -31,6 +31,31 @@ class FeedforwardNeuralNetModel(nn.Module):
         out = self.fc3(out)
         return out
 
+class RecurrentNeuralNetModel(nn.Module):
+    def __init__(self, input_dim, hidden_dim, layer_dim, output_dim):
+        super(RecurrentNeuralNetModel, self).__init__()
+        self.hidden_dim = hidden_dim
+        self.layer_dim = layer_dim
+        self.lstm = nn.LSTM(input_dim, hidden_dim, layer_dim, batch_first=True)
+        self.fc = nn.Linear(hidden_dim, output_dim)
+        self.sigmoid = nn.Sigmoid()
+        self.dropout = nn.Dropout(p=0.5)
+    
+    def forward(self, x):
+
+        #Init hidden state with 0s
+        h0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).to(device)
+
+        c0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).to(device)
+        #Detach hidden state to avoid exploding gradients
+        out, _ = self.lstm(x, (h0, c0))
+
+        #index hidden state of last time step
+        #out.size() => 100, 20, 10
+        # We just want last time step hidden states
+        out = self.fc(out[:, -1, :])
+        return out
+
 class CSVDataset(Dataset):
     def __init__(self, features, labels):
         self.features = torch.tensor(features, dtype=torch.float32)
@@ -66,13 +91,14 @@ dataset_features = (dataset_features - mean) / std
 test_dataset_features = (test_dataset_features - mean) / std
 
 batch_size = 100
-n_iters = 50000
+n_iters = 3000
 num_epochs = n_iters / (len(dataset_features) / batch_size)
 num_epochs = int(num_epochs)
 print(num_epochs)
 input_dim = 33
 output_dim = 2
 hidden_dim = 800
+layer_dim = 2
 
 train_dataset = CSVDataset(dataset_features, train_portion_dataset_labels)
 test_dataset = CSVDataset(test_dataset_features, test_portion_dataset_labels)
@@ -83,12 +109,12 @@ test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
                                             batch_size = batch_size)
 
 
-model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
+model = RecurrentNeuralNetModel(input_dim, hidden_dim, layer_dim, output_dim)
 
 criterion = nn.CrossEntropyLoss()
 
-learning_rate = 0.001
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate) 
+learning_rate = 0.01
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate) 
 
  
 val_split = 0.2
