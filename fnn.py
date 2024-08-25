@@ -66,13 +66,13 @@ dataset_features = (dataset_features - mean) / std
 test_dataset_features = (test_dataset_features - mean) / std
 
 batch_size = 100
-n_iters = 1000
+n_iters = 50000
 num_epochs = n_iters / (len(dataset_features) / batch_size)
 num_epochs = int(num_epochs)
 print(num_epochs)
 input_dim = 33
 output_dim = 2
-hidden_dim = 1000
+hidden_dim = 800
 
 train_dataset = CSVDataset(dataset_features, train_portion_dataset_labels)
 test_dataset = CSVDataset(test_dataset_features, test_portion_dataset_labels)
@@ -165,7 +165,7 @@ test_accuracy = 100 * correct / total
 print(f'Test Accuracy: {test_accuracy}%')
 
 with open('accuracies.txt', 'a') as accuraciesFile:
-    accuraciesFile.write(str(test_accuracy))
+    accuraciesFile.write(str(test_accuracy) + '\n')
 
 with open('accuracies.txt', 'r') as accuraciesFile:
     accuraciesList = [float(line.strip()) for line in accuraciesFile]
