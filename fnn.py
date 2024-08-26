@@ -64,7 +64,9 @@ class CSVDataset(Dataset):
         return len(self.features)
     def __getitem__(self, index):
         return self.features[index], self.labels[index]
-    
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 # Create test and train datasets    
 dataset = pd.read_csv('Dataset.csv', encoding="ISO-8859-1")
 dataset_labels = dataset.pop("Diagnosis")
@@ -91,13 +93,13 @@ dataset_features = (dataset_features - mean) / std
 test_dataset_features = (test_dataset_features - mean) / std
 
 batch_size = 100
-n_iters = 3000
+n_iters = 30000
 num_epochs = n_iters / (len(dataset_features) / batch_size)
 num_epochs = int(num_epochs)
 print(num_epochs)
 input_dim = 33
 output_dim = 2
-hidden_dim = 800
+hidden_dim = 500
 layer_dim = 2
 
 train_dataset = CSVDataset(dataset_features, train_portion_dataset_labels)
@@ -114,7 +116,7 @@ model = RecurrentNeuralNetModel(input_dim, hidden_dim, layer_dim, output_dim)
 criterion = nn.CrossEntropyLoss()
 
 learning_rate = 0.01
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate) 
+optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate) 
 
  
 val_split = 0.2
@@ -133,6 +135,9 @@ iterations = []
 iter = 0
 for epoch in range(num_epochs):
     for i, (fields, labels) in enumerate(dataset_loader):
+        if len(fields.shape) == 2:
+            fields = fields.unsqueeze(1)  # Add sequence dimension if missing
+        
         optimizer.zero_grad()
         outputs = model(fields)
         loss = criterion(outputs, labels)
@@ -147,6 +152,9 @@ for epoch in range(num_epochs):
             model.eval()
             with torch.no_grad():
                 for fields, labels in val_loader:
+                    if len(fields.shape) == 2:
+                        fields = fields.unsqueeze(1)  # Add sequence dimension if missing
+        
                     
                     # Forward pass only to get logits/output
                     outputs = model(fields)
@@ -169,7 +177,6 @@ for epoch in range(num_epochs):
 print(accuracies)
 fig, ax = plt.subplots()
 plt.figure(figsize=(12,6))
-ax = fig.add_subplot(1,2,1)
 
 ax.plot(iterations, accuracies, label="Validation set accuracy %")
 ax.set(xlabel="Iteration", ylabel="Accuracy %",
@@ -182,6 +189,9 @@ correct = 0
 total = 0
 with torch.no_grad():  # Disable gradient calculation
     for fields, labels in test_loader:
+        if len(fields.shape) == 2:
+            fields = fields.unsqueeze(1)  # Add sequence dimension if missing
+        
         outputs = model(fields)
         _, predicted = torch.max(outputs.data, 1)
         total += labels.size(0)
@@ -197,7 +207,7 @@ with open('accuracies.txt', 'r') as accuraciesFile:
     accuraciesList = [float(line.strip()) for line in accuraciesFile]
     print(accuraciesList)
 
-ax = fig.add_subplot(1,2,2)
+ax = fig.add_subplot(1,2,1)
 plt.plot(range(1,len(accuraciesList) + 1), accuraciesList, 'ro-', label="Test accuracy %")
 ax.plot(iterations[-1], test_accuracy, 'ro-', label="Test accuracy %")
 accuraciesList = []
