@@ -6,31 +6,28 @@ import matplotlib.pyplot as plt
 from torch.utils.data import Dataset
 from sklearn.metrics import confusion_matrix,classification_report
 import seaborn as sns
+from sklearn.preprocessing import StandardScaler
 
 class FeedforwardNeuralNetModel(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim):
         super(FeedforwardNeuralNetModel, self).__init__()
         self.fc1 = nn.Linear(input_dim, hidden_dim)
-        self.bn1 = nn.BatchNorm1d(hidden_dim)
-        self.fc2 = nn.Linear(hidden_dim, hidden_dim * 2)  
-        self.bn2 = nn.BatchNorm1d(hidden_dim * 2)
-        self.fc3 = nn.Linear(hidden_dim * 2, output_dim)  
+        self.fc2 = nn.Linear(hidden_dim, 1)  
+        self.fc3 = nn.Linear(hidden_dim, 1)  
+        self.relu1 = nn.ReLU()
+        self.relu2 = nn.ReLU()
+        self.relu3 = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
         self.dropout = nn.Dropout(p=0.5)
     
     def forward(self, x):
-
+# Error is somewhere here??
         out = self.fc1(x)
-        out = self.bn1(out)
-        out = self.sigmoid(out)
-        out = self.dropout(out)
+        out = self.relu1(out)
 
         out = self.fc2(out)
-        out = self.bn2(out)
         out = self.sigmoid(out)
-        out = self.dropout(out)
 
-        out = self.fc3(out)
         return out
 
 class RecurrentNeuralNetModel(nn.Module):
@@ -61,7 +58,7 @@ class RecurrentNeuralNetModel(nn.Module):
 class CSVDataset(Dataset):
     def __init__(self, features, labels):
         self.features = torch.tensor(features, dtype=torch.float32)
-        self.labels = torch.tensor(labels.values, dtype=torch.long)
+        self.labels = torch.tensor(labels.values, dtype=torch.float32).unsqueeze(1)
     def __len__(self):
         return len(self.features)
     def __getitem__(self, index):
@@ -81,20 +78,19 @@ train_portion_dataset = dataset[:int((len(dataset) * (7/8)))]
 train_portion_dataset_labels = dataset_labels[:int((len(dataset) * (7/8)))]
 
 
-print(len(test_portion_dataset))
-print(len(test_portion_dataset_labels))
-print(len(train_portion_dataset))
-print(len(train_portion_dataset_labels))
+print(test_portion_dataset.shape)
+print(test_portion_dataset_labels.shape)
+print(train_portion_dataset.shape)
+for i in range(len(train_portion_dataset_labels)):
+    print(train_portion_dataset_labels[i], end="")
 
 dataset_features = np.vstack(train_portion_dataset.values).astype(np.float32)
 test_dataset_features = np.vstack(test_portion_dataset.values).astype(np.float32)
 
 
-mean = dataset_features.mean(axis=0)
-std = dataset_features.std(axis=0)
-dataset_features = (dataset_features - mean) / std
-test_dataset_features = (test_dataset_features - mean) / std
-
+scaler = StandardScaler()
+train_portion_dataset = scaler.fit_transform(train_portion_dataset)
+test_portion_dataset = scaler.fit_transform(test_portion_dataset)
 batch_size = 100
 n_iters = 1000
 num_epochs = n_iters / (len(dataset_features) / batch_size)
@@ -102,7 +98,7 @@ num_epochs = int(num_epochs)
 print(num_epochs)
 input_dim = 33
 output_dim = 2
-hidden_dim = 500
+hidden_dim = 200
 layer_dim = 2
 
 train_dataset = CSVDataset(dataset_features, train_portion_dataset_labels)
@@ -114,12 +110,12 @@ test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
                                             batch_size = batch_size)
 
 
-model = RecurrentNeuralNetModel(input_dim, hidden_dim, layer_dim, output_dim)
+model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
+print(sum([x.reshape(-1).shape[0] for x in model.parameters()]))  
+criterion = nn.BCELoss()
 
-criterion = nn.CrossEntropyLoss()
-
-learning_rate = 0.01
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate) 
+learning_rate = 0.001
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate) 
 
  
 val_split = 0.2
@@ -138,9 +134,7 @@ iterations = []
 iter = 0
 for epoch in range(num_epochs):
     for i, (fields, labels) in enumerate(dataset_loader):
-        if len(fields.shape) == 2:
-            fields = fields.unsqueeze(1)  # Add sequence dimension if missing
-        
+        model.train()
         optimizer.zero_grad()
         outputs = model(fields)
         loss = criterion(outputs, labels)
@@ -154,13 +148,10 @@ for epoch in range(num_epochs):
             # Iterate through test dataset
             model.eval()
             with torch.no_grad():
-                for fields, labels in val_loader:
-                    if len(fields.shape) == 2:
-                        fields = fields.unsqueeze(1)  # Add sequence dimension if missing
+                for fields, labels in val_loader: # Add sequence dimension if missing
         
-                    
                     # Forward pass only to get logits/output
-                    outputs = model(fields)
+                    testOutputs = model(fields).round()
                     
                     # Get predictions from the maximum value
                     _, predicted = torch.max(outputs.data, 1)
