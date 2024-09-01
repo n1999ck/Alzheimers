@@ -90,7 +90,8 @@ test_dataset_features = np.vstack(test_portion_dataset.values).astype(np.float32
 
 scaler = StandardScaler()
 train_portion_dataset = scaler.fit_transform(train_portion_dataset)
-test_portion_dataset = scaler.fit_transform(test_portion_dataset)
+test_portion_dataset = scaler.transform(test_portion_dataset)
+
 batch_size = 100
 n_iters = 1000
 num_epochs = n_iters / (len(dataset_features) / batch_size)
@@ -126,6 +127,7 @@ print(train_size)
  
 train_dataset, val_dataset = torch.utils.data.random_split(train_dataset,[train_size, val_size])
 print("Length of train_dataset:" + str(len(train_dataset)))
+print(train_dataset)
 print("Length of val_dataset:" + str(len(val_dataset)))
 val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False)
 
