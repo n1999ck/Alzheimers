@@ -12,8 +12,8 @@ class FeedforwardNeuralNetModel(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim):
         super(FeedforwardNeuralNetModel, self).__init__()
         self.fc1 = nn.Linear(input_dim, hidden_dim)
-        self.fc2 = nn.Linear(hidden_dim, 1)  
-        self.fc3 = nn.Linear(hidden_dim, 1)  
+        self.fc2 = nn.Linear(hidden_dim, hidden_dim)  
+        self.fc3 = nn.Linear(hidden_dim, output_dim)  
         self.relu1 = nn.ReLU()
         self.relu2 = nn.ReLU()
         self.relu3 = nn.ReLU()
@@ -21,13 +21,11 @@ class FeedforwardNeuralNetModel(nn.Module):
         self.dropout = nn.Dropout(p=0.5)
     
     def forward(self, x):
-# Error is somewhere here??
+    #Error is somewhere here??
         out = self.fc1(x)
-        out = self.relu1(out)
-
         out = self.fc2(out)
+        out = self.fc3(out)
         out = self.sigmoid(out)
-
         return out
 
 class RecurrentNeuralNetModel(nn.Module):
@@ -58,7 +56,7 @@ class RecurrentNeuralNetModel(nn.Module):
 class CSVDataset(Dataset):
     def __init__(self, features, labels):
         self.features = torch.tensor(features, dtype=torch.float32)
-        self.labels = torch.tensor(labels.values, dtype=torch.float32).unsqueeze(1)
+        self.labels = torch.tensor(labels.values, dtype=torch.long)
     def __len__(self):
         return len(self.features)
     def __getitem__(self, index):
@@ -113,10 +111,10 @@ test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
 
 model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
 print(sum([x.reshape(-1).shape[0] for x in model.parameters()]))  
-criterion = nn.BCELoss()
+criterion = nn.CrossEntropyLoss()
 
-learning_rate = 0.001
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate) 
+learning_rate = 0.01
+optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate) 
 
  
 val_split = 0.2
@@ -130,6 +128,7 @@ print("Length of train_dataset:" + str(len(train_dataset)))
 print(train_dataset)
 print("Length of val_dataset:" + str(len(val_dataset)))
 val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False)
+
 
 accuracies = []
 iterations = []
@@ -148,22 +147,20 @@ for epoch in range(num_epochs):
             correct = 0
             total = 0
             # Iterate through test dataset
-            model.eval()
-            with torch.no_grad():
-                for fields, labels in val_loader: # Add sequence dimension if missing
+            for fields, labels in val_loader:
+
+                # Forward pass only to get logits/output
+                outputs = model(fields)
+                
+                # Get predictions from the maximum value
+                _, predicted = torch.max(outputs.data, 1)
+                
+                # Total number of labels
+                total += labels.size(0)
+                
+                # Total correct predictions
+                correct += (predicted == labels).sum().item()
         
-                    # Forward pass only to get logits/output
-                    testOutputs = model(fields).round()
-                    
-                    # Get predictions from the maximum value
-                    _, predicted = torch.max(outputs.data, 1)
-                    
-                    # Total number of labels
-                    total += labels.size(0)
-                    
-                    # Total correct predictions
-                    correct += (predicted == labels).sum().item()
-            
             accuracy = 100 * correct / total
             accuracies.append(accuracy)
             iterations.append(iter)
@@ -181,38 +178,37 @@ ax.grid()
 plt.legend()
 
 model.eval()
+print("In Evaluation Stage")
 correct = 0
 total = 0
 predictedArray = []
 with torch.no_grad():  # Disable gradient calculation
     for fields, labels in test_loader:
         
-        if len(fields.shape) == 2:
-            fields = fields.unsqueeze(1)  # Add sequence dimension if missing
         
         outputs = model(fields)
-        _, predicted = torch.max(outputs.data, 1)
+        predicted = outputs.round()
         predictedArray.append(outputs)
         total += labels.size(0)
-        correct += (predicted == labels).sum().item()
+        correct += (predicted == labels).sum()
 #print(actual)
 #print(predictedArray)
 test_accuracy = 100 * correct / total
-print(f'Test Accuracy: {test_accuracy}%')
+print(f'Test Accuracy: {test_accuracy}%') 
 
 with open('accuracies.txt', 'a') as accuraciesFile:
     accuraciesFile.write(str(test_accuracy) + '\n')
-
+"""
 with open('accuracies.txt', 'r') as accuraciesFile:
     accuraciesList = [float(line.strip()) for line in accuraciesFile]
     print(accuraciesList)
 
 ax = fig.add_subplot(1,2,1)
 plt.plot(range(1,len(accuraciesList) + 1), accuraciesList, 'ro-', label="Test accuracy %")
-ax.plot(iterations[-1], test_accuracy, 'ro-', label="Test accuracy %")
+# ax.plot(iterations[-1], test_accuracy, 'ro-', label="Test accuracy %")
 accuraciesList = []
 
 ax.legend()
 plt.tight_layout()
 fig.savefig("test.png")
-plt.show()
+plt.show() """
