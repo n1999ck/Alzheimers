@@ -37,15 +37,16 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Create test and train datasets    
 dataset = pd.read_csv('Dataset.csv', encoding="ISO-8859-1")
-dataset_labels = np.array(dataset.pop("Diagnosis"))
+dataset_labels = dataset.pop("Diagnosis")
 dataset.pop("DoctorInCharge")
 
-for i in range(len(dataset_labels)):
-    print(dataset_labels[i], end="")
-num_1s = np.sum(dataset_labels)
-num_0s = np.sum(1-dataset_labels)
-percent_positive = num_1s / len(dataset_labels)
-percent_negative = num_0s / len(dataset_labels)
+dataset_labels_array = np.array(dataset_labels)
+for i in range(len(dataset_labels_array)):
+    print(dataset_labels_array[i], end="")
+num_1s = np.sum(dataset_labels_array)
+num_0s = np.sum(1-dataset_labels_array)
+percent_positive = num_1s / len(dataset_labels_array)
+percent_negative = num_0s / len(dataset_labels_array)
 
 test_portion_dataset = dataset[int((len(dataset) * (7/8))):]
 test_portion_dataset_labels = dataset_labels[int((len(dataset) * (7/8))):]
