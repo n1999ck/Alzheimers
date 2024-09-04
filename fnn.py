@@ -50,7 +50,7 @@ class RecurrentNeuralNetModel(nn.Module):
         #Detach hidden state to avoid exploding gradients
         out, _ = self.lstm(x, (h0, c0))
 
-        #index hidden state of last time step
+        #index hidden  state of last time step
         #out.size() => 100, 20, 10
         # We just want last time step hidden states
         out = self.fc(out[:, -1, :])
