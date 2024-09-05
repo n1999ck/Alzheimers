@@ -14,13 +14,14 @@ from torch.optim.lr_scheduler import StepLR
 from sklearn import metrics
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import ElasticNet
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
 
-modelLR = LogisticRegression(penalty='12')
+#modelLR = LogisticRegression(penalty='12')
 modelEN = ElasticNet(alpha=1.0, l1_ratio=0.5)
-#import seaborn as sns
-
 class FeedforwardNeuralNetModel(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim):
+    #def init(self, input_dim, hidden_dim, output_dim):
         super(FeedforwardNeuralNetModel, self).__init__()
         # Linear function
         self.fc1 = nn.Linear(input_dim, hidden_dim)
@@ -28,6 +29,7 @@ class FeedforwardNeuralNetModel(nn.Module):
         # Linear function
         self.fc2 = nn.Linear(hidden_dim, hidden_dim) 
         self.bn2 = nn.BatchNorm1d(hidden_dim) 
+        
         self.fc3 = nn.Linear(hidden_dim, output_dim)  
         self.sigmoid = nn.Sigmoid()
         self.dropout = nn.Dropout(p=0.5)
@@ -43,6 +45,7 @@ class FeedforwardNeuralNetModel(nn.Module):
         out = self.bn2(out)
         out = self.sigmoid(out)
         out = self.dropout(out)
+        
         out = self.fc3(out)
         return out
 
@@ -65,12 +68,17 @@ y = dataset_labels
 
 model = RandomForestClassifier()
 
-modelLR = LogisticRegression(penalty='l2')
+#modelLR = LogisticRegression(penalty='l2')
+modelLR = LogisticRegression(solver='saga', max_iter=1000)
 modelEN = ElasticNet(alpha=1.0, l1_ratio=0.5)
 modelLR.fit(x, y)
 modelEN.fit(x, y)
+#normalizing data
+pipeline = make_pipeline(StandardScaler(), LogisticRegression(max_iter=1000))
+pipeline.fit(x, y)
 
 kf = KFold(n_splits=5, shuffle=True, random_state=42)
+model.fit(x,y) #Fit the random forest model
 #Cross-Validation for Logistic Regression
 scores_rf = cross_val_score(model,x,y,cv=kf)
 print("Random Forest Cross-validation scores:", scores_rf)
@@ -80,7 +88,6 @@ print("Random Forest Mean score:", np.mean(scores_rf))
 scores_en = cross_val_score(modelEN, x,y,cv=kf)
 print("Elastic Net Cross-validation scores:", scores_en)
 print("Elastic Net Mean Score:", np.mean(scores_en))
- 
 
 test_portion_dataset = dataset[int((len(dataset) * (7/8))):]
 test_portion_dataset_labels = dataset_labels[int((len(dataset) * (7/8))):]
@@ -96,14 +103,17 @@ print(len(train_portion_dataset_labels))
 dataset_features = np.vstack(train_portion_dataset.values).astype(np.float32)
 test_dataset_features = np.vstack(test_portion_dataset.values).astype(np.float32)
 
+scaler = StandardScaler()
+dataset_features_scaled = scaler.fit_transform(dataset_features)
+
 
 mean = dataset_features.mean(axis=0)
 std = dataset_features.std(axis=0)
 dataset_features = (dataset_features - mean) / std
 test_dataset_features = (test_dataset_features - mean) / std
 
-batch_size = 128
-n_iters = 2000
+batch_size = 32
+n_iters = 1000  # was - changed from 2000
 num_epochs = n_iters / (len(dataset_features) / batch_size)
 num_epochs = int(num_epochs)
 print(num_epochs)
@@ -119,8 +129,7 @@ dataset_loader =torch.utils.data.DataLoader(dataset=train_dataset,
 
 test_loader =torch.utils.data.DataLoader(dataset=test_dataset,
                                             batch_size = batch_size,
-                                            shuffle = True)
-
+                                            shuffle = False)
 
 model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
 
@@ -138,8 +147,8 @@ train_size = len(train_portion_dataset) - val_size
 train_dataset, val_dataset = torch.utils.data.random_split(train_dataset,[train_size, val_size])
 val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False)
 
-actual = np.random.binomial(1,.9, size=1000)
-predicted = np.random.binomial(1,.9, size =1000)
+actual = np.random.binomial(1,.9, size=1504)
+predicted = np.random.binomial(1,.9, size =1504)
 
 confusion_matrix = metrics.confusion_matrix(actual, predicted)
 
@@ -162,13 +171,15 @@ class RNNModel(nn.Module):
         #Number of Hidden Layers
         self.layer_dim = layer_dim
         #Building RNN
-        self.rnn = nn.RNN(input_dim, hidden_dim, layer_dim, batch_first=True, nonlinearity='relu')
+        self.rnn = nn.GRU(input_dim, hidden_dim, layer_dim, batch_first=True)
         #Readout layer
         self.fc = nn.Linear(hidden_dim, output_dim)
     def forward(self, x):
         #Initialize hidden state w/ zeros
         h0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).requires_grad_()
-        out, hn = self.rnn(x, h0.detach())
+        c0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).requires_grad_()
+        #out, hn = self.rnn(x, h0.detach())
+        out, (hn, cn) = self.rnn(x, (h0.detach(), c0.detach()))
         #Index hidden state of last time step
         out = self.fc(out[:, -1, :])
         return out
@@ -222,10 +233,21 @@ for epoch in range(num_epochs):
                 correct += (predicted == labels).sum().item()
             
             val_accuracy = 100 * correct / total
-            print(f'Epoch [{epoch+1}/{num_epochs}], Validation Accuracy: {val_accuracy:.2f}%')
+            
+            print_interval = 100
+            for epoch in range(num_epochs):
+                if (epoch +1) % print_interval ==0:
+                    print(f'Epoch [{epoch+1}/{num_epochs}], Validation Accuracy: {val_accuracy:.2f}%')
         
 
             # Print Loss
             print('Iteration: {}. Loss: {}. Accuracy: {}'.format(iter, loss.item(), val_accuracy))                      
-total_accuracy = 100 * correct/total
-print('Testing Accuracy:', total_accuracy)
+for data in test_loader:
+    inputs, labels=data
+    outputs = model(inputs)
+    __, predicted = torch.max(outputs.data, 1)
+    total += labels.size(0)
+    correct += (predicted == labels).sum().item()
+    
+test_accuracy = 100 * correct/total
+print('Testing Accuracy:', test_accuracy)
