@@ -5,7 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset
 from sklearn.metrics import confusion_matrix,classification_report
-import seaborn as sns
 
 class FeedforwardNeuralNetModel(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim):
@@ -14,7 +13,8 @@ class FeedforwardNeuralNetModel(nn.Module):
         self.bn1 = nn.BatchNorm1d(hidden_dim)
         self.fc2 = nn.Linear(hidden_dim, hidden_dim * 2)  
         self.bn2 = nn.BatchNorm1d(hidden_dim * 2)
-        self.fc3 = nn.Linear(hidden_dim * 2, output_dim)  
+        self.fc3 = nn.Linear(hidden_dim * 2, output_dim) 
+        print(self.fc3) 
         self.sigmoid = nn.Sigmoid()
         self.dropout = nn.Dropout(p=0.5)
     
@@ -31,31 +31,6 @@ class FeedforwardNeuralNetModel(nn.Module):
         out = self.dropout(out)
 
         out = self.fc3(out)
-        return out
-
-class RecurrentNeuralNetModel(nn.Module):
-    def __init__(self, input_dim, hidden_dim, layer_dim, output_dim):
-        super(RecurrentNeuralNetModel, self).__init__()
-        self.hidden_dim = hidden_dim
-        self.layer_dim = layer_dim
-        self.lstm = nn.LSTM(input_dim, hidden_dim, layer_dim, batch_first=True)
-        self.fc = nn.Linear(hidden_dim, output_dim)
-        self.sigmoid = nn.Sigmoid()
-        self.dropout = nn.Dropout(p=0.5)
-    
-    def forward(self, x):
-
-        #Init hidden state with 0s
-        h0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).to(device)
-
-        c0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).to(device)
-        #Detach hidden state to avoid exploding gradients
-        out, _ = self.lstm(x, (h0, c0))
-
-        #index hidden state of last time step
-        #out.size() => 100, 20, 10
-        # We just want last time step hidden states
-        out = self.fc(out[:, -1, :])
         return out
 
 class CSVDataset(Dataset):
@@ -81,11 +56,10 @@ train_portion_dataset = dataset[:int((len(dataset) * (7/8)))]
 train_portion_dataset_labels = dataset_labels[:int((len(dataset) * (7/8)))]
 
 
-print(len(test_portion_dataset))
-print(len(test_portion_dataset_labels))
-print(len(train_portion_dataset))
-print(len(train_portion_dataset_labels))
-
+print("Testing dataset:\t {}".format(len(test_portion_dataset)))
+print("Testing datalabels:\t {}".format(len(test_portion_dataset_labels)))
+print("Training dataset:\t {}".format(len(train_portion_dataset)))
+print("Training datalabels:\t {}".format(len(train_portion_dataset_labels)))
 dataset_features = np.vstack(train_portion_dataset.values).astype(np.float32)
 test_dataset_features = np.vstack(test_portion_dataset.values).astype(np.float32)
 
@@ -103,7 +77,6 @@ print(num_epochs)
 input_dim = 33
 output_dim = 2
 hidden_dim = 500
-layer_dim = 2
 
 train_dataset = CSVDataset(dataset_features, train_portion_dataset_labels)
 test_dataset = CSVDataset(test_dataset_features, test_portion_dataset_labels)
@@ -114,7 +87,7 @@ test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
                                             batch_size = batch_size)
 
 
-model = RecurrentNeuralNetModel(input_dim, hidden_dim, layer_dim, output_dim)
+model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
 
 criterion = nn.CrossEntropyLoss()
 
@@ -125,12 +98,12 @@ optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 val_split = 0.2
 val_size = int(len(train_portion_dataset) * val_split)
 train_size = len(train_portion_dataset) - val_size
-print(val_size)
-print(train_size)
+print("Val_size: {}".format(val_size))
+print("Train_size: {}".format(train_size))
  
 train_dataset, val_dataset = torch.utils.data.random_split(train_dataset,[train_size, val_size])
-print("Length of train_dataset:" + str(len(train_dataset)))
-print("Length of val_dataset:" + str(len(val_dataset)))
+print("Length of train_dataset: {}".format(len(train_dataset)))
+print("Length of val_dataset: {}".format(len(val_dataset)))
 val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False)
 
 accuracies = []
@@ -138,8 +111,6 @@ iterations = []
 iter = 0
 for epoch in range(num_epochs):
     for i, (fields, labels) in enumerate(dataset_loader):
-        if len(fields.shape) == 2:
-            fields = fields.unsqueeze(1)  # Add sequence dimension if missing
         
         optimizer.zero_grad()
         outputs = model(fields)
@@ -155,10 +126,7 @@ for epoch in range(num_epochs):
             model.eval()
             with torch.no_grad():
                 for fields, labels in val_loader:
-                    if len(fields.shape) == 2:
-                        fields = fields.unsqueeze(1)  # Add sequence dimension if missing
-        
-                    
+                            
                     # Forward pass only to get logits/output
                     outputs = model(fields)
                     
@@ -185,7 +153,7 @@ ax.plot(iterations, accuracies, label="Validation set accuracy %")
 ax.set(xlabel="Iteration", ylabel="Accuracy %",
        title="Accuracy over time")
 ax.grid()
-plt.legend()
+
 
 model.eval()
 correct = 0
@@ -193,9 +161,6 @@ total = 0
 predictedArray = []
 with torch.no_grad():  # Disable gradient calculation
     for fields, labels in test_loader:
-        
-        if len(fields.shape) == 2:
-            fields = fields.unsqueeze(1)  # Add sequence dimension if missing
         
         outputs = model(fields)
         _, predicted = torch.max(outputs.data, 1)
@@ -212,14 +177,13 @@ with open('accuracies.txt', 'a') as accuraciesFile:
 
 with open('accuracies.txt', 'r') as accuraciesFile:
     accuraciesList = [float(line.strip()) for line in accuraciesFile]
-    print(accuraciesList)
+    #print(accuraciesList)
 
 ax = fig.add_subplot(1,2,1)
 plt.plot(range(1,len(accuraciesList) + 1), accuraciesList, 'ro-', label="Test accuracy %")
 ax.plot(iterations[-1], test_accuracy, 'ro-', label="Test accuracy %")
 accuraciesList = []
 
-ax.legend()
 plt.tight_layout()
 fig.savefig("test.png")
 plt.show()
