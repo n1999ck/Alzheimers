@@ -66,26 +66,27 @@ dataset.pop("DoctorInCharge")
 x = dataset.values
 y = dataset_labels
 
-model = RandomForestClassifier()
+model = RandomForestClassifier(n_estimators=100)
 
-#modelLR = LogisticRegression(penalty='l2')
-modelLR = LogisticRegression(solver='saga', max_iter=1000)
+#modelLR = LogisticRegression(solver='saga', max_iter=2000, C=0.5)
+modelLR = LogisticRegression(solver='saga', max_iter=7600)
 modelEN = ElasticNet(alpha=1.0, l1_ratio=0.5)
 modelLR.fit(x, y)
 modelEN.fit(x, y)
 #normalizing data
-pipeline = make_pipeline(StandardScaler(), LogisticRegression(max_iter=1000))
+#pipeline = make_pipeline(StandardScaler(), LogisticRegression(max_iter=2000))
+pipeline = make_pipeline(StandardScaler(), modelLR)
 pipeline.fit(x, y)
 
 kf = KFold(n_splits=5, shuffle=True, random_state=42)
 model.fit(x,y) #Fit the random forest model
 #Cross-Validation for Logistic Regression
-scores_rf = cross_val_score(model,x,y,cv=kf)
+scores_rf = cross_val_score(model,x, y, cv=kf)
 print("Random Forest Cross-validation scores:", scores_rf)
 print("Random Forest Mean score:", np.mean(scores_rf))
 
 #Cross-Validation for Elastic Net
-scores_en = cross_val_score(modelEN, x,y,cv=kf)
+scores_en = cross_val_score(modelEN, x, y, cv=kf)
 print("Elastic Net Cross-validation scores:", scores_en)
 print("Elastic Net Mean Score:", np.mean(scores_en))
 
@@ -138,7 +139,7 @@ criterion = nn.CrossEntropyLoss()
 learning_rate = 0.1
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9, nesterov=True)
 
-scheduler = StepLR(optimizer, step_size=1, gamma=0.1)
+scheduler = StepLR(optimizer, step_size=5, gamma=0.1)
 
 val_split = 0.2  
 val_size = int(len(train_portion_dataset) - val_split)
@@ -189,55 +190,58 @@ hidden_dim = 100
 layer_dim = 1
 output_dim = 10
     
+
+torch.manual_seed(42)
 model2 = RNNModel(input_dim, hidden_dim, layer_dim, output_dim)
 
 iter = 0
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.to(device)
 for epoch in range(num_epochs):
-    optimizer.step()
-    scheduler.step()
-    print('Epoch:', epoch, 'LR:', scheduler.get_last_lr())
-    
     model.train()
+    total_loss = 0
+    
     for i, (fields, labels) in enumerate(dataset_loader):
+        fields, labels= fields.to(device), labels.to(device)
+        
         optimizer.zero_grad()
         outputs = model(fields)
         loss = criterion(outputs, labels)
         loss.backward()
         optimizer.step()
         
+        total_loss += loss.item()
+    scheduler.step()
         
-        iter += 1
-        if iter % 500 == 0:
-            print(fields, labels)
-            # Calculate Accuracy         
-            correct = 0
-            total = 0
-            # Iterate through test dataset
-            # t
-            model.eval()
-            with torch.no_grad():
-                correct = 0
-                total = 0
-            for fields, labels in val_loader:
+    print(f'Epoch: {epoch +1}/{num_epochs}, Loss: {total_loss/ len(dataset_loader):.4f},LR: {scheduler.get_last_lr()[0]:.6f}')
+        
+    # Validation Phase
+    model.eval()
+    with torch.no_grad():
+        correct = 0
+        total = 0   
+        
+        for fields, labels in val_loader:
+            fields, labels = fields.to(device), labels.to(device)
                 
                 # Forward pass only to get logits/output
-                outputs = model(fields)
+            outputs = model(fields)
                 
                 # Get predictions from the maximum value
-                _, predicted = torch.max(outputs.data, 1)
+            _, predicted = torch.max(outputs.data, 1)
                 
                 # Total number of labels
-                total += labels.size(0)
+            total += labels.size(0)
                 
                 # Total correct predictions
-                correct += (predicted == labels).sum().item()
+            correct += (predicted == labels).sum().item()
+    print(f'Accuracy: {100 * correct/ total:.2f}%')
+            #val_accuracy = 100 * correct / total
             
-            val_accuracy = 100 * correct / total
-            
-            print_interval = 100
-            for epoch in range(num_epochs):
-                if (epoch +1) % print_interval ==0:
-                    print(f'Epoch [{epoch+1}/{num_epochs}], Validation Accuracy: {val_accuracy:.2f}%')
+    print_interval = 100
+    for epoch in range(num_epochs):
+        if (epoch +1) % print_interval ==0:
+            print(f'Epoch [{epoch+1}/{num_epochs}], Validation Accuracy: {val_accuracy:.2f}%')
         
 
             # Print Loss
