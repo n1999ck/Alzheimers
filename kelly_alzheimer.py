@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset
+from torch.optim.lr_scheduler import CosineAnnealingLR
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.metrics import classification_report
 from sklearn.model_selection import cross_val_score, KFold
@@ -137,10 +138,11 @@ model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
 criterion = nn.CrossEntropyLoss()
 
 learning_rate = 0.1
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9, nesterov=True)
-
-scheduler = StepLR(optimizer, step_size=5, gamma=0.1)
-
+optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9, nesterov=True, weight_decay=1e-4)
+#weight_decay is an L2 regularization that helps prevent overfitting chatGPT
+#scheduler = StepLR(optimizer, step_size=5, gamma=0.1)
+scheduler = CosineAnnealingLR(optimizer, T_max=20, eta_min=0)
+# got this information from chatgpt, but changed the T_max, 10 was the starting pt.
 val_split = 0.2  
 val_size = int(len(train_portion_dataset) - val_split)
 train_size = len(train_portion_dataset) - val_size
