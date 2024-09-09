@@ -187,7 +187,7 @@ class RNNModel(nn.Module):
         out = self.fc(out[:, -1, :])
         return out
     
-input_dim = 28
+input_dim = 32
 hidden_dim = 100
 layer_dim = 1
 output_dim = 10
