@@ -10,18 +10,18 @@ class FeedforwardNeuralNetModel(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim):
         super(FeedforwardNeuralNetModel, self).__init__()
         self.fc1 = nn.Linear(input_dim, hidden_dim)
-        self.fc2 = nn.Linear(hidden_dim, output_dim)  
+        self.fc2 = nn.Linear(hidden_dim, hidden_dim)  
         self.fc3 = nn.Linear(hidden_dim, output_dim)  
-        self.relu1 = nn.ReLU()
-        self.relu2 = nn.ReLU()
-        self.relu3 = nn.ReLU()
+        self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
         self.dropout = nn.Dropout(p=0.5)
     
     def forward(self, x):
         out = self.fc1(x)
+        out = self.relu(out)
         out = self.fc2(out)
-        out = self.sigmoid(out)
+        out = self.relu(out)
+        out = self.fc3(out)
         return out
 
 class CSVDataset(Dataset):
@@ -59,10 +59,10 @@ test_dataset_features = np.vstack(test_portion_dataset.values).astype(np.float32
 
 scaler = StandardScaler()
 train_portion_dataset = scaler.fit_transform(train_portion_dataset)
-test_portion_dataset = scaler.transform(test_portion_dataset)
+test_portion_dataset = scaler.fit_transform(test_portion_dataset)
 
-batch_size = 100
-n_iters = 1000
+batch_size = 10
+n_iters = 10000
 num_epochs = int(n_iters / (len(dataset_features) / batch_size))
 input_dim = 33
 output_dim = 2
@@ -82,7 +82,7 @@ model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
 print(sum([x.reshape(-1).shape[0] for x in model.parameters()]))  
 criterion = nn.CrossEntropyLoss()
 
-learning_rate = 0.01
+learning_rate = 0.0005
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate) 
 
 accuracies = []
@@ -90,7 +90,6 @@ iterations = []
 iter = 0
 for epoch in range(num_epochs):
     for i, (fields, labels) in enumerate(dataset_loader):
-        model.train()
         optimizer.zero_grad()
         outputs = model(fields)
         loss = criterion(outputs, labels)
