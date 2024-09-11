@@ -102,7 +102,7 @@ print(len(test_portion_dataset_labels))
 print(len(train_portion_dataset))
 print(len(train_portion_dataset_labels))
 
-dataset_features = np.vstack(train_portion_dataset.values).astype(np.float32)
+dataset_features = np.vstack(train_portion_dataset.values).astype(np.float32)   # research this to see if I need this in my code
 test_dataset_features = np.vstack(test_portion_dataset.values).astype(np.float32)
 
 scaler = StandardScaler()
@@ -131,7 +131,7 @@ dataset_loader =torch.utils.data.DataLoader(dataset=train_dataset,
 
 test_loader =torch.utils.data.DataLoader(dataset=test_dataset,
                                             batch_size = batch_size,
-                                            shuffle = False)
+                                            shuffle = True)
 
 model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
 
