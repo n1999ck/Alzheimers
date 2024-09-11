@@ -19,8 +19,10 @@ class FeedforwardNeuralNetModel(nn.Module):
     def forward(self, x):
         out = self.fc1(x)
         out = self.relu(out)
+        out = self.dropout(out)
         out = self.fc2(out)
         out = self.relu(out)
+        out = self.sigmoid(out)
         out = self.fc3(out)
         return out
 
@@ -54,14 +56,14 @@ actual = np.array(test_portion_dataset_labels)
 train_portion_dataset = dataset[:int((len(dataset) * (7/8)))]
 train_portion_dataset_labels = dataset_labels[:int((len(dataset) * (7/8)))]
 
-dataset_features = np.vstack(train_portion_dataset.values).astype(np.float32)
-test_dataset_features = np.vstack(test_portion_dataset.values).astype(np.float32)
+dataset_features = train_portion_dataset.to_numpy().astype(np.float32)
+test_dataset_features = test_portion_dataset.to_numpy().astype(np.float32)
 
 scaler = StandardScaler()
-train_portion_dataset = scaler.fit_transform(train_portion_dataset)
+train_poartion_dataset = scaler.fit_transform(train_portion_dataset)
 test_portion_dataset = scaler.fit_transform(test_portion_dataset)
 
-batch_size = 10
+batch_size = 100
 n_iters = 10000
 num_epochs = int(n_iters / (len(dataset_features) / batch_size))
 input_dim = 33
@@ -72,18 +74,18 @@ layer_dim = 2
 train_dataset = CSVDataset(dataset_features, train_portion_dataset_labels)
 test_dataset = CSVDataset(test_dataset_features, test_portion_dataset_labels)
 dataset_loader = torch.utils.data.DataLoader(dataset=train_dataset,
-                                            batch_size = batch_size,)
+                                            batch_size = batch_size, shuffle=True)
 
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
-                                            batch_size = batch_size)
+                                            batch_size = batch_size, shuffle=True)
 
 
 model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
-print(sum([x.reshape(-1).shape[0] for x in model.parameters()]))  
+print("\n" + str(sum([x.reshape(-1).shape[0] for x in model.parameters()]))  )
 criterion = nn.CrossEntropyLoss()
 
-learning_rate = 0.0005
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate) 
+learning_rate = 0.001
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate) 
 
 accuracies = []
 iterations = []
