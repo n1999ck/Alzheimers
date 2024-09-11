@@ -4,13 +4,13 @@ import torch.nn as nn
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import torch.optim as optim
 from torch.utils.data import Dataset
-from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch.optim.lr_scheduler import CosineAnnealingLR, ReduceLROnPlateau
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.metrics import classification_report
 from sklearn.model_selection import cross_val_score, KFold
 from sklearn.ensemble import RandomForestClassifier 
-import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
 from sklearn import metrics
 from sklearn.linear_model import LogisticRegression
@@ -114,7 +114,7 @@ std = dataset_features.std(axis=0)
 dataset_features = (dataset_features - mean) / std
 test_dataset_features = (test_dataset_features - mean) / std
 
-batch_size = 32
+batch_size = 128
 n_iters = 1000  # was - changed from 2000
 num_epochs = n_iters / (len(dataset_features) / batch_size)
 num_epochs = int(num_epochs)
@@ -142,6 +142,8 @@ optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9, 
 #weight_decay is an L2 regularization that helps prevent overfitting chatGPT
 #scheduler = StepLR(optimizer, step_size=5, gamma=0.1)
 scheduler = CosineAnnealingLR(optimizer, T_max=20, eta_min=0)
+plateau_scheduler = ReduceLROnPlateau(optimizer, factor=0.5, patience=5)
+
 # got this information from chatgpt, but changed the T_max, 10 was the starting pt.
 val_split = 0.2  
 val_size = int(len(train_portion_dataset) - val_split)
@@ -175,6 +177,8 @@ class RNNModel(nn.Module):
         self.layer_dim = layer_dim
         #Building RNN
         self.rnn = nn.GRU(input_dim, hidden_dim, layer_dim, batch_first=True)
+        self.bn = nn.BatchNorm1d(64)
+        self.fc = nn.Linear(64,input_dim )
         #Readout layer
         self.fc = nn.Linear(hidden_dim, output_dim)
     def forward(self, x):
@@ -184,7 +188,10 @@ class RNNModel(nn.Module):
         #out, hn = self.rnn(x, h0.detach())
         out, (hn, cn) = self.rnn(x, (h0.detach(), c0.detach()))
         #Index hidden state of last time step
-        out = self.fc(out[:, -1, :])
+        out, _=self.lstm(x)
+        out = out[:, -1, :]
+        out = self.bn(out)
+        out = self.fc(out)
         return out
     
 input_dim = 32
@@ -237,15 +244,15 @@ for epoch in range(num_epochs):
                 
                 # Total correct predictions
             correct += (predicted == labels).sum().item()
+                     
     print(f'Accuracy: {100 * correct/ total:.2f}%')
-            #val_accuracy = 100 * correct / total
+        
             
     print_interval = 100
     for epoch in range(num_epochs):
         if (epoch +1) % print_interval ==0:
             print(f'Epoch [{epoch+1}/{num_epochs}], Validation Accuracy: {val_accuracy:.2f}%')
-        
-
+            print(plateau_scheduler.step(loss.item()))
             # Print Loss
             print('Iteration: {}. Loss: {}. Accuracy: {}'.format(iter, loss.item(), val_accuracy))                      
 for data in test_loader:
@@ -255,5 +262,6 @@ for data in test_loader:
     total += labels.size(0)
     correct += (predicted == labels).sum().item()
     
+
 test_accuracy = 100 * correct/total
 print('Testing Accuracy:', test_accuracy)
