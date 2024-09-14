@@ -172,8 +172,7 @@ plt.figure(figsize=(12,6))
 ax = fig.add_subplot(1,2,1)
 
 ax.plot(iterations, accuracies, label="Validation set accuracy %")
-ax.set(xlabel="Iteration", ylabel="Accuracy %",
-       title="Accuracy over time")
+ax.set(xlabel="Iteration", ylabel="Accuracy %", title="Accuracy over time")
 ax.grid()
 plt.legend()
 

@@ -1,6 +1,7 @@
 
 import torch
 import torch.nn as nn
+nn.Dropout
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -17,7 +18,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import ElasticNet
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
-
+torch.optim.Adam
 #modelLR = LogisticRegression(penalty='12')
 modelEN = ElasticNet(alpha=1.0, l1_ratio=0.5)
 class FeedforwardNeuralNetModel(nn.Module):
@@ -138,7 +139,7 @@ model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
 criterion = nn.CrossEntropyLoss()
 
 learning_rate = 0.1
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9, nesterov=True, weight_decay=1e-4)
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=1e-4)
 #weight_decay is an L2 regularization that helps prevent overfitting chatGPT
 #scheduler = StepLR(optimizer, step_size=5, gamma=0.1)
 scheduler = CosineAnnealingLR(optimizer, T_max=20, eta_min=0)
@@ -169,7 +170,7 @@ F1_score = metrics.f1_score(actual, predicted)
 print({"Accuracy":Accuracy,"Precision":Precision,"Sensitivity_recall":Sensitivity_recall,"Specificity":Specificity,"F1_score":F1_score})
 
 class RNNModel(nn.Module):
-    def __init__(self, input_dim, hidden_dim, layer_dim, output_dim):
+    def __init__(self, input_dim, hidden_dim, layer_dim, output_dim, dropout_prob):
         super(RNNModel, self).__init__()
         #Hidden Dimensions
         self.hidden_dim = hidden_dim
@@ -177,31 +178,32 @@ class RNNModel(nn.Module):
         self.layer_dim = layer_dim
         #Building RNN
         self.rnn = nn.GRU(input_dim, hidden_dim, layer_dim, batch_first=True)
-        self.bn = nn.BatchNorm1d(64)
-        self.fc = nn.Linear(64,input_dim )
+        self.bn = nn.BatchNorm1d(hidden_dim)
+        self.dropout = nn.Dropout(dropout_prob) # Dropout layer
         #Readout layer
         self.fc = nn.Linear(hidden_dim, output_dim)
     def forward(self, x):
         #Initialize hidden state w/ zeros
-        h0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).requires_grad_()
-        c0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).requires_grad_()
-        #out, hn = self.rnn(x, h0.detach())
-        out, (hn, cn) = self.rnn(x, (h0.detach(), c0.detach()))
+        h0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).to(x.device).requires_grad_()
+        #c0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).requires_grad_()
+        out, hn = self.rnn(x, h0.detach())
+        #out, (hn, cn) = self.rnn(x, (h0.detach(), c0.detach()))
         #Index hidden state of last time step
-        out, _=self.lstm(x)
+        #out, _=self.lstm(x)
         out = out[:, -1, :]
-        out = self.bn(out)
+        out = self.bn(out) 
+        out = self.dropout(out)   #applying dropout
         out = self.fc(out)
         return out
     
-input_dim = 32
+input_dim = 33
 hidden_dim = 100
 layer_dim = 1
-output_dim = 10
-    
+output_dim = 2
+dropout_prob = 0.5 
 
 torch.manual_seed(42)
-model2 = RNNModel(input_dim, hidden_dim, layer_dim, output_dim)
+model2 = RNNModel(input_dim, hidden_dim, layer_dim, output_dim, dropout_prob)
 
 iter = 0
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -226,6 +228,7 @@ for epoch in range(num_epochs):
         
     # Validation Phase
     model.eval()
+    val_loss = 0.0
     with torch.no_grad():
         correct = 0
         total = 0   
@@ -244,10 +247,11 @@ for epoch in range(num_epochs):
                 
                 # Total correct predictions
             correct += (predicted == labels).sum().item()
-                     
-    print(f'Accuracy: {100 * correct/ total:.2f}%')
-        
-            
+            loss = criterion(outputs, labels)
+            val_loss += loss.item()
+        val_loss /= len(val_loader)
+        print(f'Validation Loss: {val_loss:.4f}')    
+        print(f'Accuracy: {100 * correct/ total:.2f}%')
     print_interval = 100
     for epoch in range(num_epochs):
         if (epoch +1) % print_interval ==0:
