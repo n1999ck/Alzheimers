@@ -1,3 +1,5 @@
 /Dataset.xlsx
-venv/
+.venv
 data/
+.venv/
+/venv/
