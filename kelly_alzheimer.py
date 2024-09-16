@@ -31,21 +31,23 @@ class FeedforwardNeuralNetModel(nn.Module):
         # Linear function
         self.fc2 = nn.Linear(hidden_dim, hidden_dim) 
         self.bn2 = nn.BatchNorm1d(hidden_dim) 
-        
         self.fc3 = nn.Linear(hidden_dim, output_dim)  
-        self.sigmoid = nn.Sigmoid()
+        self.reLU = nn.ReLU()  #Rectified Linear Unit
+        #self.sigmoid = nn.Sigmoid() #works best for outputs of 0/1
         self.dropout = nn.Dropout(p=0.5)
     def forward(self, x):
         # Linear function  # LINEAR
         out = self.fc1(x)
         out = self.bn1(out)
         # Non-linearity  # NON-LINEAR
-        out = self.sigmoid(out)
+        #out = self.sigmoid(out)
+        out = self.reLU(out)
         out = self.dropout(out)
         # Linear function (readout)  # LINEAR
         out = self.fc2(out)
         out = self.bn2(out)
-        out = self.sigmoid(out)
+        #out = self.sigmoid(out)
+        out = self.reLU(out)
         out = self.dropout(out)
         
         out = self.fc3(out)
@@ -108,7 +110,6 @@ test_dataset_features = np.vstack(test_portion_dataset.values).astype(np.float32
 
 scaler = StandardScaler()
 dataset_features_scaled = scaler.fit_transform(dataset_features)
-
 
 mean = dataset_features.mean(axis=0)
 std = dataset_features.std(axis=0)
@@ -210,6 +211,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 for epoch in range(num_epochs):
     model.train()
+    #model2.train()
     total_loss = 0
     
     for i, (fields, labels) in enumerate(dataset_loader):
@@ -224,20 +226,22 @@ for epoch in range(num_epochs):
         total_loss += loss.item()
     scheduler.step()
         
-    print(f'Epoch: {epoch +1}/{num_epochs}, Loss: {total_loss/ len(dataset_loader):.4f},LR: {scheduler.get_last_lr()[0]:.6f}')
+    print(f'Epoch: {epoch +1}/{num_epochs}, Loss: {total_loss/ len(dataset_loader):.4f}, LR: {scheduler.get_last_lr()[0]:.4f}')
         
     # Validation Phase
     model.eval()
+    model2.eval()
     val_loss = 0.0
+    correct = 0
+    total = 0
     with torch.no_grad():
-        correct = 0
-        total = 0   
         
         for fields, labels in val_loader:
             fields, labels = fields.to(device), labels.to(device)
                 
                 # Forward pass only to get logits/output
             outputs = model(fields)
+            #outputs = model2(fields)
                 
                 # Get predictions from the maximum value
             _, predicted = torch.max(outputs.data, 1)
@@ -247,25 +251,23 @@ for epoch in range(num_epochs):
                 
                 # Total correct predictions
             correct += (predicted == labels).sum().item()
+                # Calculate loss
             loss = criterion(outputs, labels)
             val_loss += loss.item()
+            # Avg validation loss over all batches
         val_loss /= len(val_loader)
         print(f'Validation Loss: {val_loss:.4f}')    
-        print(f'Accuracy: {100 * correct/ total:.2f}%')
+        print(f'Training Accuracy: {100 * correct/ total:.2f}%')
+        
+        plateau_scheduler.step(val_loss)
     print_interval = 100
-    for epoch in range(num_epochs):
-        if (epoch +1) % print_interval ==0:
-            print(f'Epoch [{epoch+1}/{num_epochs}], Validation Accuracy: {val_accuracy:.2f}%')
-            print(plateau_scheduler.step(loss.item()))
-            # Print Loss
-            print('Iteration: {}. Loss: {}. Accuracy: {}'.format(iter, loss.item(), val_accuracy))                      
-for data in test_loader:
-    inputs, labels=data
-    outputs = model(inputs)
-    __, predicted = torch.max(outputs.data, 1)
-    total += labels.size(0)
-    correct += (predicted == labels).sum().item()
     
-
+    for data in test_loader:
+        inputs, labels=data
+        outputs = model(inputs)
+        #outputs = model2(inputs)
+        __, predicted = torch.max(outputs.data, 1)
+        total += labels.size(0)
+        correct += (predicted == labels).sum().item()
 test_accuracy = 100 * correct/total
-print('Testing Accuracy:', test_accuracy)
+print(f'Testing Accuracy: {100 * correct/ total:.2f}%')
