@@ -1,55 +1,64 @@
 import torch
 import torch.nn as nn
-nn.Dropout
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import torch.optim as optim
 from torch.utils.data import Dataset
 from torch.optim.lr_scheduler import CosineAnnealingLR, ReduceLROnPlateau
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-from sklearn.metrics import classification_report
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
 from sklearn.model_selection import cross_val_score, KFold
 from sklearn.ensemble import RandomForestClassifier 
 from torch.optim.lr_scheduler import StepLR
-from sklearn import metrics
-from sklearn.linear_model import LogisticRegression
-from sklearn.linear_model import ElasticNet
+from sklearn.linear_model import LogisticRegression, ElasticNet
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
-torch.optim.Adam
-#modelLR = LogisticRegression(penalty='12')
+
 modelEN = ElasticNet(alpha=1.0, l1_ratio=0.5)
 class FeedforwardNeuralNetModel(nn.Module):
+    #Basic structure derived from https://www.deeplearningwizard.com/deep_learning/practical_pytorch/pytorch_feedforward_neuralnetwork/#steps_5
+    
     def __init__(self, input_dim, hidden_dim, output_dim):
-    #def init(self, input_dim, hidden_dim, output_dim):
         super(FeedforwardNeuralNetModel, self).__init__()
-        # Linear function
         self.fc1 = nn.Linear(input_dim, hidden_dim)
-        self.bn1 = nn.BatchNorm1d(hidden_dim) 
-        # Linear function
+        self.bn1 = nn.BatchNorm1d(hidden_dim)
         self.fc2 = nn.Linear(hidden_dim, hidden_dim) 
         self.bn2 = nn.BatchNorm1d(hidden_dim) 
         self.fc3 = nn.Linear(hidden_dim, output_dim)  
         self.reLU = nn.ReLU()  #Rectified Linear Unit
-        #self.sigmoid = nn.Sigmoid() #works best for outputs of 0/1
         self.dropout = nn.Dropout(p=0.5)
+
     def forward(self, x):
-        # Linear function  # LINEAR
-        out = self.fc1(x)
-        out = self.bn1(out)
-        # Non-linearity  # NON-LINEAR
-        #out = self.sigmoid(out)
-        out = self.reLU(out)
+        out = self.fc1(x) # Linear
+        out = self.bn1(out) # Batch normalization
+        out = self.reLU(out) # Non linear
         out = self.dropout(out)
-        # Linear function (readout)  # LINEAR
         out = self.fc2(out)
         out = self.bn2(out)
-        #out = self.sigmoid(out)
         out = self.reLU(out)
-        out = self.dropout(out)
-        
+        out = self.dropout(out)        
         out = self.fc3(out)
+        return out
+
+class RNNModel(nn.Module):
+    def __init__(self, input_dim, hidden_dim, layer_dim, output_dim, dropout_prob):
+        super(RNNModel, self).__init__()
+        self.rnn = nn.GRU(input_dim, hidden_dim, layer_dim, batch_first=True)
+        self.bn = nn.BatchNorm1d(hidden_dim)
+        self.dropout = nn.Dropout(dropout_prob)
+        self.fc = nn.Linear(hidden_dim, output_dim)
+
+    def forward(self, x):
+        #Initialize hidden state w/ zeros
+        h0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).to(x.device).requires_grad_()
+        out, hn = self.rnn(x, h0.detach())
+        #out, (hn, cn) = self.rnn(x, (h0.detach(), c0.detach()))
+        #Index hidden state of last time step
+        #out, _=self.lstm(x)
+        out = out[:, -1, :]
+        out = self.bn(out) 
+        out = self.dropout(out)   #applying dropout
+        out = self.fc(out)
         return out
 
 class CSVDataset(Dataset):
@@ -65,24 +74,24 @@ class CSVDataset(Dataset):
 dataset = pd.read_csv('Dataset.csv', encoding="ISO-8859-1")
 dataset_labels = dataset.pop("Diagnosis")
 dataset.pop("DoctorInCharge")
-#adding cross validation
+
+# Add cross validation
 x = dataset.values
 y = dataset_labels
 
 model = RandomForestClassifier(n_estimators=100)
 
-#modelLR = LogisticRegression(solver='saga', max_iter=2000, C=0.5)
 modelLR = LogisticRegression(solver='saga', max_iter=7600)
 modelEN = ElasticNet(alpha=1.0, l1_ratio=0.5)
 modelLR.fit(x, y)
 modelEN.fit(x, y)
-#normalizing data
-#pipeline = make_pipeline(StandardScaler(), LogisticRegression(max_iter=2000))
+
 pipeline = make_pipeline(StandardScaler(), modelLR)
 pipeline.fit(x, y)
 
 kf = KFold(n_splits=5, shuffle=True, random_state=42)
 model.fit(x,y) #Fit the random forest model
+
 #Cross-Validation for Logistic Regression
 scores_rf = cross_val_score(model,x, y, cv=kf)
 print("Random Forest Cross-validation scores:", scores_rf)
@@ -98,13 +107,8 @@ test_portion_dataset_labels = dataset_labels[int((len(dataset) * (7/8))):]
 train_portion_dataset = dataset[:int((len(dataset) * (7/8)))]
 train_portion_dataset_labels = dataset_labels[:int((len(dataset) * (7/8)))]
 
-
-print(len(test_portion_dataset))
-print(len(test_portion_dataset_labels))
-print(len(train_portion_dataset))
-print(len(train_portion_dataset_labels))
-
-dataset_features = np.vstack(train_portion_dataset.values).astype(np.float32)   # research this to see if I need this in my code
+#TODO: vstack was not necessary
+dataset_features = np.vstack(train_portion_dataset.values).astype(np.float32)
 test_dataset_features = np.vstack(test_portion_dataset.values).astype(np.float32)
 
 scaler = StandardScaler()
@@ -126,11 +130,12 @@ hidden_dim = 1000
 
 train_dataset = CSVDataset(dataset_features, train_portion_dataset_labels)
 test_dataset = CSVDataset(test_dataset_features, test_portion_dataset_labels)
-dataset_loader =torch.utils.data.DataLoader(dataset=train_dataset,
+
+dataset_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                             batch_size = batch_size,
                                             shuffle = True)
 
-test_loader =torch.utils.data.DataLoader(dataset=test_dataset,
+test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
                                             batch_size = batch_size,
                                             shuffle = True)
 
@@ -169,32 +174,7 @@ Specificity = metrics.recall_score(actual, predicted, pos_label=0)
 F1_score = metrics.f1_score(actual, predicted)
 print({"Accuracy":Accuracy,"Precision":Precision,"Sensitivity_recall":Sensitivity_recall,"Specificity":Specificity,"F1_score":F1_score})
 
-class RNNModel(nn.Module):
-    def __init__(self, input_dim, hidden_dim, layer_dim, output_dim, dropout_prob):
-        super(RNNModel, self).__init__()
-        #Hidden Dimensions
-        self.hidden_dim = hidden_dim
-        #Number of Hidden Layers
-        self.layer_dim = layer_dim
-        #Building RNN
-        self.rnn = nn.GRU(input_dim, hidden_dim, layer_dim, batch_first=True)
-        self.bn = nn.BatchNorm1d(hidden_dim)
-        self.dropout = nn.Dropout(dropout_prob) # Dropout layer
-        #Readout layer
-        self.fc = nn.Linear(hidden_dim, output_dim)
-    def forward(self, x):
-        #Initialize hidden state w/ zeros
-        h0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).to(x.device).requires_grad_()
-        #c0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).requires_grad_()
-        out, hn = self.rnn(x, h0.detach())
-        #out, (hn, cn) = self.rnn(x, (h0.detach(), c0.detach()))
-        #Index hidden state of last time step
-        #out, _=self.lstm(x)
-        out = out[:, -1, :]
-        out = self.bn(out) 
-        out = self.dropout(out)   #applying dropout
-        out = self.fc(out)
-        return out
+
     
 input_dim = 33
 hidden_dim = 100
