@@ -18,7 +18,7 @@ from sklearn.linear_model import ElasticNet
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 torch.optim.Adam
-#modelLR = LogisticRegression(penalty='12')
+
 modelEN = ElasticNet(alpha=1.0, l1_ratio=0.5)
 class FeedforwardNeuralNetModel(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim):
@@ -65,6 +65,7 @@ class CSVDataset(Dataset):
 dataset = pd.read_csv('Dataset.csv', encoding="ISO-8859-1")
 dataset_labels = dataset.pop("Diagnosis")
 dataset.pop("DoctorInCharge")
+dataset.pop("PatientID")
 #adding cross validation
 x = dataset.values
 y = dataset_labels
@@ -77,7 +78,6 @@ modelEN = ElasticNet(alpha=1.0, l1_ratio=0.5)
 modelLR.fit(x, y)
 modelEN.fit(x, y)
 #normalizing data
-#pipeline = make_pipeline(StandardScaler(), LogisticRegression(max_iter=2000))
 pipeline = make_pipeline(StandardScaler(), modelLR)
 pipeline.fit(x, y)
 
@@ -104,9 +104,9 @@ print(len(test_portion_dataset_labels))
 print(len(train_portion_dataset))
 print(len(train_portion_dataset_labels))
 
-dataset_features = np.vstack(train_portion_dataset.values).astype(np.float32)   # research this to see if I need this in my code
+dataset_features = np.vstack(train_portion_dataset.values).astype(np.float32)   
 test_dataset_features = np.vstack(test_portion_dataset.values).astype(np.float32)
-
+#print(dataset_features)
 scaler = StandardScaler()
 dataset_features_scaled = scaler.fit_transform(dataset_features)
 
@@ -115,14 +115,16 @@ std = dataset_features.std(axis=0)
 dataset_features = (dataset_features - mean) / std
 test_dataset_features = (test_dataset_features - mean) / std
 
-batch_size = 128
-n_iters = 1000  # was - changed from 2000
+batch_size = 64
+n_iters = 1000 # was - changed from 2000
 num_epochs = n_iters / (len(dataset_features) / batch_size)
 num_epochs = int(num_epochs)
 print(num_epochs)
-input_dim = 33
+input_dim = 32
 output_dim = 2
-hidden_dim = 1000
+hidden_dim = 512
+dropout_prob = 0.5
+layer_dim = 1
 
 train_dataset = CSVDataset(dataset_features, train_portion_dataset_labels)
 test_dataset = CSVDataset(test_dataset_features, test_portion_dataset_labels)
@@ -147,8 +149,8 @@ plateau_scheduler = ReduceLROnPlateau(optimizer, factor=0.5, patience=5)
 
 # got this information from chatgpt, but changed the T_max, 10 was the starting pt.
 val_split = 0.2  
-val_size = int(len(train_portion_dataset) - val_split)
-train_size = len(train_portion_dataset) - val_size
+val_size = int(len(train_portion_dataset) * val_split)
+train_size = int(len(train_portion_dataset) * (1- val_split))
 
 train_dataset, val_dataset = torch.utils.data.random_split(train_dataset,[train_size, val_size])
 val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False)
@@ -185,22 +187,15 @@ class RNNModel(nn.Module):
     def forward(self, x):
         #Initialize hidden state w/ zeros
         h0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).to(x.device).requires_grad_()
-        #c0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).requires_grad_()
         out, hn = self.rnn(x, h0.detach())
         #out, (hn, cn) = self.rnn(x, (h0.detach(), c0.detach()))
         #Index hidden state of last time step
-        #out, _=self.lstm(x)
         out = out[:, -1, :]
         out = self.bn(out) 
         out = self.dropout(out)   #applying dropout
         out = self.fc(out)
         return out
     
-input_dim = 33
-hidden_dim = 100
-layer_dim = 1
-output_dim = 2
-dropout_prob = 0.5 
 
 torch.manual_seed(42)
 model2 = RNNModel(input_dim, hidden_dim, layer_dim, output_dim, dropout_prob)
@@ -224,12 +219,12 @@ for epoch in range(num_epochs):
         
         total_loss += loss.item()
     scheduler.step()
-        
+                
     print(f'Epoch: {epoch +1}/{num_epochs}, Loss: {total_loss/ len(dataset_loader):.4f}, LR: {scheduler.get_last_lr()[0]:.4f}')
         
     # Validation Phase
     model.eval()
-    model2.eval()
+    #model2.eval()
     val_loss = 0.0
     correct = 0
     total = 0
@@ -259,8 +254,10 @@ for epoch in range(num_epochs):
         print(f'Training Accuracy: {100 * correct/ total:.2f}%')
         
         plateau_scheduler.step(val_loss)
+        
     print_interval = 100
-    
+    correct = 0
+    total = 0
     for data in test_loader:
         inputs, labels=data
         outputs = model(inputs)
