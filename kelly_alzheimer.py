@@ -8,10 +8,11 @@ import torch.optim as optim
 from torch.utils.data import Dataset
 from torch.optim.lr_scheduler import CosineAnnealingLR, ReduceLROnPlateau
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, log_loss, balanced_accuracy_score
 from sklearn.model_selection import cross_val_score, KFold
 from sklearn.ensemble import RandomForestClassifier 
-from torch.optim.lr_scheduler import StepLR
+from sklearn.metrics import roc_auc_score, matthews_corrcoef, cohen_kappa_score
+from torch.optim.lr_scheduler import StepLR, CyclicLR, OneCycleLR
 from sklearn import metrics
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import ElasticNet
@@ -87,7 +88,7 @@ model.fit(x,y) #Fit the random forest model
 scores_rf = cross_val_score(model,x, y, cv=kf)
 print("Random Forest Cross-validation scores:", scores_rf)
 print("Random Forest Mean score:", np.mean(scores_rf))
-
+print("Random Forest Standard Deviation:", np.std(scores_rf))
 #Cross-Validation for Elastic Net
 scores_en = cross_val_score(modelEN, x, y, cv=kf)
 print("Elastic Net Cross-validation scores:", scores_en)
@@ -143,9 +144,11 @@ criterion = nn.CrossEntropyLoss()
 learning_rate = 0.1
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=1e-4)
 #weight_decay is an L2 regularization that helps prevent overfitting chatGPT
-#scheduler = StepLR(optimizer, step_size=5, gamma=0.1)
+step_scheduler = StepLR(optimizer, step_size=5, gamma=0.1)
 scheduler = CosineAnnealingLR(optimizer, T_max=20, eta_min=0)
 plateau_scheduler = ReduceLROnPlateau(optimizer, factor=0.5, patience=5)
+cyclic_scheduler = CyclicLR(optimizer, base_lr=1e-5, max_lr=1e-1, step_size_up=2000, mode='triangular')
+one_cycle_scheduler = OneCycleLR(optimizer, max_lr=0.1, total_steps=100)
 
 # got this information from chatgpt, but changed the T_max, 10 was the starting pt.
 val_split = 0.2  
@@ -158,8 +161,15 @@ val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=batch_s
 actual = np.random.binomial(1,.9, size=1504)
 predicted = np.random.binomial(1,.9, size =1504)
 
-confusion_matrix = metrics.confusion_matrix(actual, predicted)
+AUC = roc_auc_score(actual, predicted)
+MCC = matthews_corrcoef(actual, predicted)
+Kappa = cohen_kappa_score(actual, predicted)
+LogLoss = log_loss(actual, predicted)
+Balanced_Accuracy = balanced_accuracy_score(actual, predicted)
 
+confusion_matrix = metrics.confusion_matrix(actual, predicted)
+FPR = confusion_matrix[0][1] / (confusion_matrix[0][1] + confusion_matrix[0][0])
+FNR = confusion_matrix[1][0] / (confusion_matrix[1][0] + confusion_matrix[1][1])
 cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix = confusion_matrix, display_labels = [0, 1])
 
 cm_display.plot()
@@ -179,7 +189,8 @@ class RNNModel(nn.Module):
         #Number of Hidden Layers
         self.layer_dim = layer_dim
         #Building RNN
-        self.rnn = nn.GRU(input_dim, hidden_dim, layer_dim, batch_first=True)
+        #self.rnn = nn.GRU(input_dim, hidden_dim, layer_dim, batch_first=True)
+        self.rnn = nn.GRU(input_dim, hidden_dim, layer_dim, batch_first=True, bidirectional=True)
         self.bn = nn.BatchNorm1d(hidden_dim)
         self.dropout = nn.Dropout(dropout_prob) # Dropout layer
         #Readout layer
@@ -203,6 +214,7 @@ model2 = RNNModel(input_dim, hidden_dim, layer_dim, output_dim, dropout_prob)
 iter = 0
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
+
 for epoch in range(num_epochs):
     model.train()
     #model2.train()
