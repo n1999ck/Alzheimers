@@ -82,7 +82,7 @@ modelEN.fit(x, y)
 pipeline = make_pipeline(StandardScaler(), modelLR)
 pipeline.fit(x, y)
 
-kf = KFold(n_splits=5, shuffle=True, random_state=42)
+kf = KFold(n_splits=4, shuffle=True, random_state=42)
 model.fit(x,y) #Fit the random forest model
 #Cross-Validation for Logistic Regression
 scores_rf = cross_val_score(model,x, y, cv=kf)
@@ -141,17 +141,17 @@ model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
 
 criterion = nn.CrossEntropyLoss()
 
-learning_rate = 0.1
+learning_rate = 0.01
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=1e-4)
 #weight_decay is an L2 regularization that helps prevent overfitting chatGPT
 step_scheduler = StepLR(optimizer, step_size=5, gamma=0.1)
 scheduler = CosineAnnealingLR(optimizer, T_max=20, eta_min=0)
 plateau_scheduler = ReduceLROnPlateau(optimizer, factor=0.5, patience=5)
 cyclic_scheduler = CyclicLR(optimizer, base_lr=1e-5, max_lr=1e-1, step_size_up=2000, mode='triangular')
-one_cycle_scheduler = OneCycleLR(optimizer, max_lr=0.1, total_steps=100)
+one_cycle_scheduler = OneCycleLR(optimizer, max_lr=0.1, total_steps=2000)
 
 # got this information from chatgpt, but changed the T_max, 10 was the starting pt.
-val_split = 0.2  
+val_split = 0.15 
 val_size = int(len(train_portion_dataset) * val_split)
 train_size = int(len(train_portion_dataset) * (1- val_split))
 
@@ -217,7 +217,7 @@ model.to(device)
 
 for epoch in range(num_epochs):
     model.train()
-    #model2.train()
+    model2.train()
     total_loss = 0
     
     for i, (fields, labels) in enumerate(dataset_loader):
@@ -226,17 +226,22 @@ for epoch in range(num_epochs):
         optimizer.zero_grad()
         outputs = model(fields)
         loss = criterion(outputs, labels)
+        L1_Lambda = 1 #regularization tech to prevent overfitting
+        l1_norm = sum(p.abs().sum() for p in model.parameters())
+        loss += L1_Lambda 
+        
         loss.backward()
         optimizer.step()
-        
+        one_cycle_scheduler.step()
         total_loss += loss.item()
     scheduler.step()
-                
+    step_scheduler.step()
+                    
     print(f'Epoch: {epoch +1}/{num_epochs}, Loss: {total_loss/ len(dataset_loader):.4f}, LR: {scheduler.get_last_lr()[0]:.4f}')
         
     # Validation Phase
     model.eval()
-    #model2.eval()
+    model2.eval()
     val_loss = 0.0
     correct = 0
     total = 0
