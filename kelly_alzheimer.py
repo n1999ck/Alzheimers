@@ -33,7 +33,7 @@ class FeedforwardNeuralNetModel(nn.Module):
         self.bn2 = nn.BatchNorm1d(hidden_dim) 
         self.fc3 = nn.Linear(hidden_dim, output_dim)  
         self.reLU = nn.ReLU()  #Rectified Linear Unit
-        #self.sigmoid = nn.Sigmoid() #works best for outputs of 0/1
+        #self.sigmoid = nn.Sigmoid(out)
         self.dropout = nn.Dropout(p=0.5)
     def forward(self, x):
         # Linear function  # LINEAR
@@ -72,8 +72,6 @@ x = dataset.values
 y = dataset_labels
 
 model = RandomForestClassifier(n_estimators=100)
-
-#modelLR = LogisticRegression(solver='saga', max_iter=2000, C=0.5)
 modelLR = LogisticRegression(solver='saga', max_iter=7600)
 modelEN = ElasticNet(alpha=1.0, l1_ratio=0.5)
 modelLR.fit(x, y)
@@ -108,8 +106,9 @@ print(len(train_portion_dataset_labels))
 dataset_features = np.vstack(train_portion_dataset.values).astype(np.float32)   
 test_dataset_features = np.vstack(test_portion_dataset.values).astype(np.float32)
 #print(dataset_features)
-scaler = StandardScaler()
-dataset_features_scaled = scaler.fit_transform(dataset_features)
+scaler = StandardScaler()           # the scaler is used correctly-
+#dataset_features_scaled = scaler.fit_transform(dataset_features)
+test_dataset_features_scaled = scaler.fit_transform(test_dataset_features)
 
 mean = dataset_features.mean(axis=0)
 std = dataset_features.std(axis=0)
@@ -117,13 +116,13 @@ dataset_features = (dataset_features - mean) / std
 test_dataset_features = (test_dataset_features - mean) / std
 
 batch_size = 64
-n_iters = 1000 # was - changed from 2000
+n_iters = 30000 # was - changed from 1000
 num_epochs = n_iters / (len(dataset_features) / batch_size)
 num_epochs = int(num_epochs)
 print(num_epochs)
 input_dim = 32
 output_dim = 2
-hidden_dim = 512
+hidden_dim = 64    #512
 dropout_prob = 0.5
 layer_dim = 1
 
@@ -141,17 +140,17 @@ model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
 
 criterion = nn.CrossEntropyLoss()
 
-learning_rate = 0.01
+learning_rate = 0.1
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=1e-4)
 #weight_decay is an L2 regularization that helps prevent overfitting chatGPT
 step_scheduler = StepLR(optimizer, step_size=5, gamma=0.1)
 scheduler = CosineAnnealingLR(optimizer, T_max=20, eta_min=0)
 plateau_scheduler = ReduceLROnPlateau(optimizer, factor=0.5, patience=5)
-cyclic_scheduler = CyclicLR(optimizer, base_lr=1e-5, max_lr=1e-1, step_size_up=2000, mode='triangular')
-one_cycle_scheduler = OneCycleLR(optimizer, max_lr=0.1, total_steps=2000)
+cyclic_scheduler = CyclicLR(optimizer, base_lr=1e-5, max_lr=1e-1, step_size_up=35000, mode='triangular')
+one_cycle_scheduler = OneCycleLR(optimizer, max_lr=0.1, total_steps=35000)
 
 # got this information from chatgpt, but changed the T_max, 10 was the starting pt.
-val_split = 0.15 
+val_split = 0.2    #.15
 val_size = int(len(train_portion_dataset) * val_split)
 train_size = int(len(train_portion_dataset) * (1- val_split))
 
@@ -170,17 +169,18 @@ Balanced_Accuracy = balanced_accuracy_score(actual, predicted)
 confusion_matrix = metrics.confusion_matrix(actual, predicted)
 FPR = confusion_matrix[0][1] / (confusion_matrix[0][1] + confusion_matrix[0][0])
 FNR = confusion_matrix[1][0] / (confusion_matrix[1][0] + confusion_matrix[1][1])
-cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix = confusion_matrix, display_labels = [0, 1])
 
+cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix = confusion_matrix, display_labels = [0, 1])
 cm_display.plot()
 plt.show()
+
 Accuracy = metrics.accuracy_score(actual, predicted)
 Precision = metrics.precision_score(actual, predicted)
 Sensitivity_recall = metrics.recall_score(actual, predicted)
 Specificity = metrics.recall_score(actual, predicted, pos_label=0)
 F1_score = metrics.f1_score(actual, predicted)
-print({"Accuracy":Accuracy,"Precision":Precision,"Sensitivity_recall":Sensitivity_recall,"Specificity":Specificity,"F1_score":F1_score})
 
+print({"Accuracy":Accuracy,"Precision":Precision,"Sensitivity_recall":Sensitivity_recall,"Specificity":Specificity,"F1_score":F1_score})
 class RNNModel(nn.Module):
     def __init__(self, input_dim, hidden_dim, layer_dim, output_dim, dropout_prob):
         super(RNNModel, self).__init__()
