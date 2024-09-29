@@ -2,188 +2,181 @@ import torch
 import torch.nn as nn
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from torch.utils.data import Dataset
-from sklearn.metrics import confusion_matrix,classification_report
-
-class FeedforwardNeuralNetModel(nn.Module):
-    def __init__(self, input_dim, hidden_dim, output_dim):
-        super(FeedforwardNeuralNetModel, self).__init__()
-        self.fc1 = nn.Linear(input_dim, hidden_dim)
-        self.bn1 = nn.BatchNorm1d(hidden_dim)
-        self.fc2 = nn.Linear(hidden_dim, hidden_dim * 2)  
-        self.bn2 = nn.BatchNorm1d(hidden_dim * 2)
-        self.fc3 = nn.Linear(hidden_dim * 2, output_dim) 
-        print(self.fc3) 
-        self.sigmoid = nn.Sigmoid()
-        self.dropout = nn.Dropout(p=0.5)
-    
-    def forward(self, x):
-
-        out = self.fc1(x)
-        out = self.bn1(out)
-        out = self.sigmoid(out)
-        out = self.dropout(out)
-
-        out = self.fc2(out)
-        out = self.bn2(out)
-        out = self.sigmoid(out)
-        out = self.dropout(out)
-
-        out = self.fc3(out)
-        return out
-
-class CSVDataset(Dataset):
-    def __init__(self, features, labels):
-        self.features = torch.tensor(features, dtype=torch.float32)
-        self.labels = torch.tensor(labels.values, dtype=torch.long)
-    def __len__(self):
-        return len(self.features)
-    def __getitem__(self, index):
-        return self.features[index], self.labels[index]
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+'''
+STEP 1: LOADING DATASET
+'''
 # Create test and train datasets    
-dataset = pd.read_csv('Dataset.csv', encoding="ISO-8859-1")
+dataset = pd.read_csv('Dataset.csv', encoding="Latin-1") #ISO-8859-1 used in basic latin. UTF-8 for anything else
 dataset_labels = dataset.pop("Diagnosis")
 dataset.pop("DoctorInCharge")
+dataset.pop("PatientID") 
 
-test_portion_dataset = dataset[int((len(dataset) * (7/8))):]
-test_portion_dataset_labels = dataset_labels[int((len(dataset) * (7/8))):]
+train_portion_dataset = dataset[:int(len(dataset) * (7/8))]
+test_portion_dataset = dataset[int(len(dataset) * (7/8)):]
+train_portion_dataset_labels = dataset_labels[:int(len(train_portion_dataset))]
+test_portion_dataset_labels = dataset_labels[int(len(train_portion_dataset)):]
 actual = np.array(test_portion_dataset_labels)
-train_portion_dataset = dataset[:int((len(dataset) * (7/8)))]
-train_portion_dataset_labels = dataset_labels[:int((len(dataset) * (7/8)))]
-
 
 print("Testing dataset:\t {}".format(len(test_portion_dataset)))
 print("Testing datalabels:\t {}".format(len(test_portion_dataset_labels)))
 print("Training dataset:\t {}".format(len(train_portion_dataset)))
 print("Training datalabels:\t {}".format(len(train_portion_dataset_labels)))
-dataset_features = np.vstack(train_portion_dataset.values).astype(np.float32)
-test_dataset_features = np.vstack(test_portion_dataset.values).astype(np.float32)
 
+train_dataset_features = train_portion_dataset.to_numpy().astype(np.float32)
+test_dataset_features = test_portion_dataset.to_numpy().astype(np.float32)
 
-mean = dataset_features.mean(axis=0)
-std = dataset_features.std(axis=0)
-dataset_features = (dataset_features - mean) / std
-test_dataset_features = (test_dataset_features - mean) / std
+mean_train = train_dataset_features.mean(axis=0)
+std_train = train_dataset_features.std(axis=0)
+mean_test = test_dataset_features.mean(axis=0)
+std_test = test_dataset_features.std(axis=0)
 
-batch_size = 100
-n_iters = 1000
-num_epochs = n_iters / (len(dataset_features) / batch_size)
-num_epochs = int(num_epochs)
-print(num_epochs)
-input_dim = 33
-output_dim = 2
-hidden_dim = 500
+train_dataset_features = (train_dataset_features - mean_train) / std_train
+test_dataset_features = (test_dataset_features - mean_test) / std_test
 
-train_dataset = CSVDataset(dataset_features, train_portion_dataset_labels)
+'''
+STEP 2: MAKING DATASET ITERABLE
+'''
+
+class CSVDataset(Dataset):
+    def __init__(self, features, labels):
+        self.features = torch.tensor(features, dtype=torch.float32)
+        self.labels = torch.tensor(labels.values, dtype=torch.float32)
+
+    def __len__(self):
+        return len(self.features)
+    def __getitem__(self, index):
+        return self.features[index], self.labels[index]
+
+train_dataset = CSVDataset(train_dataset_features, train_portion_dataset_labels)
 test_dataset = CSVDataset(test_dataset_features, test_portion_dataset_labels)
-dataset_loader = torch.utils.data.DataLoader(dataset=train_dataset,
-                                            batch_size = batch_size,)
 
-test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
-                                            batch_size = batch_size)
+batch_size = 8
+dataset_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
+test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=4, shuffle=True)
 
-
-model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
-
-criterion = nn.CrossEntropyLoss()
-
-learning_rate = 0.01
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate) 
-
- 
 val_split = 0.2
 val_size = int(len(train_portion_dataset) * val_split)
 train_size = len(train_portion_dataset) - val_size
-print("Val_size: {}".format(val_size))
-print("Train_size: {}".format(train_size))
+print("Validation_size:\t{}".format(val_size))
+print("Training_size:\t\t{}".format(train_size))
  
 train_dataset, val_dataset = torch.utils.data.random_split(train_dataset,[train_size, val_size])
-print("Length of train_dataset: {}".format(len(train_dataset)))
-print("Length of val_dataset: {}".format(len(val_dataset)))
-val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False)
+print("Validation_size:\t{}".format(len(val_dataset)))
+print("Training_size:\t\t{}".format(len(train_dataset)))
+train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
+val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=True)
 
+
+n_iters = 1880*5
+num_epochs = int(n_iters / (len(train_dataset) / batch_size)) # ((n_iters)/ (1504/32)) = n_iters / 47... n_iters = epochs * 47
+print("Epochs: {}".format(num_epochs))
+input_dim = int(len(dataset.columns)) #32 as of now
+output_dim = 1
+hidden_dim = 24
+
+'''
+STEP 3: CREATE MODEL CLASS
+'''
+class FNN(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim):
+        super(FNN, self).__init__()
+        self.fc1 = nn.Linear(input_dim, hidden_dim)     
+        self.fc2 = nn.Linear(hidden_dim, output_dim)
+        self.sigmoid = nn.Sigmoid()                     
+        self.relu = nn.ReLU()
+        self.dropout = nn.Dropout(p=0.5)
+    
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.fc2(x)
+        x = self.sigmoid(x)
+        return x
+
+'''
+STEP 4: INSTANTIATE MODEL CLASS
+'''
+model = FNN(input_dim, hidden_dim,output_dim)
+
+'''
+STEP 5: INSTANTIATE LOSS CLASS
+'''
+criterion = nn.BCELoss()
+
+'''
+STEP 6: INSTANTIATE OPTIMIZER CLASS
+'''
+learning_rate = 0.001
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate) 
+ 
+'''
+STEP 7: TRAIN THE MODEL
+''' 
 accuracies = []
 iterations = []
 iter = 0
 for epoch in range(num_epochs):
-    for i, (fields, labels) in enumerate(dataset_loader):
-        
-        optimizer.zero_grad()
-        outputs = model(fields)
-        loss = criterion(outputs, labels)
+    train_loss = train_acc = total_train_acc = 0
+    val_loss = val_acc = total_val_acc = 0
+    train_total = 0
+    for i, (fields, labels) in enumerate(train_loader):
+        model.train()
+        output = model(fields).squeeze(1)
+        loss = criterion(output, labels) 
+        train_loss += loss.item()
+        train_acc = (output.round() == labels).sum().item()
+        total_train_acc += train_acc
+        train_total += labels.size(0)
+
+        train_acc = 100 * total_train_acc / train_total
+        train_loss = train_loss / train_total
         loss.backward()
         optimizer.step()
+        optimizer.zero_grad()
+
         iter += 1
-        if iter % 500 == 0:
-            # Calculate Accuracy         
-            correct = 0
-            total = 0
-            # Iterate through test dataset
-            model.eval()
+        if((iter % (188*5)) == 0):
+            val_total = 0
             with torch.no_grad():
-                for fields, labels in val_loader:
-                            
-                    # Forward pass only to get logits/output
-                    outputs = model(fields)
-                    
-                    # Get predictions from the maximum value
-                    _, predicted = torch.max(outputs.data, 1)
-                    
-                    # Total number of labels
-                    total += labels.size(0)
-                    
-                    # Total correct predictions
-                    correct += (predicted == labels).sum().item()
-            
-            accuracy = 100 * correct / total
-            accuracies.append(accuracy)
-            iterations.append(iter)
-            # Print Loss
-            print('Iteration: {}. Loss: {}. Accuracy: {}'.format(iter, loss.item(), accuracy))
+                for fields, labels in val_loader:     
+                    output = model(fields).squeeze(1)
+                    loss = criterion((output), labels) 
+                    val_loss += loss.item()
+                    val_acc = (output.round() == labels).sum().item()
+                    total_val_acc += val_acc
+                    val_total += labels.size(0)
+            val_acc = 100 * total_val_acc / val_total
+            val_loss = val_loss / val_total
+            print("Iteration: {}, Training Loss: {}, Training accuracy: {}".format(iter, train_loss, train_acc))
+            print("Iteration: {}, Validation Loss: {}, Validation accuracy: {}".format(iter, val_loss, val_acc))
 
-print(accuracies)
-fig, ax = plt.subplots()
-plt.figure(figsize=(12,6))
-
-ax.plot(iterations, accuracies, label="Validation set accuracy %")
-ax.set(xlabel="Iteration", ylabel="Accuracy %",
-       title="Accuracy over time")
-ax.grid()
-
-
-model.eval()
-correct = 0
-total = 0
-predictedArray = []
-with torch.no_grad():  # Disable gradient calculation
+'''
+STEP 8: TEST THE MODEL
+'''
+test_loss = test_acc = total_test_acc = test_total = 0
+with torch.no_grad():  
     for fields, labels in test_loader:
-        
-        outputs = model(fields)
-        _, predicted = torch.max(outputs.data, 1)
-        predictedArray.append(outputs)
-        total += labels.size(0)
-        correct += (predicted == labels).sum().item()
-#print(actual)
-#print(predictedArray)
-test_accuracy = 100 * correct / total
-print(f'Test Accuracy: {test_accuracy}%')
+        output = model(fields).squeeze(1)
+        loss = criterion((output), labels) 
+        test_loss += loss.item()
+        test_acc = (output.round() == labels).sum().item()
+        total_test_acc += test_acc
+        test_total += labels.size(0)
+test_acc = 100 * total_test_acc / test_total
+test_loss = test_loss / test_total
+print("Testing Loss: {}, Testing accuracy: {}".format(test_loss, test_acc))
 
-with open('accuracies.txt', 'a') as accuraciesFile:
-    accuraciesFile.write(str(test_accuracy) + '\n')
+'''
+Feature Scaling
+-   Read
+https://medium.com/@punya8147_26846/understanding-feature-scaling-in-machine-learning-fe2ea8933b66
+https://datascience.stackexchange.com/questions/27615/should-we-apply-normalization-to-test-data-as-well
+-   To Read
+https://builtin.com/data-science/when-and-why-standardize-your-data
+https://www.geeksforgeeks.org/logistic-regression-and-the-feature-scaling-ensemble/
 
-with open('accuracies.txt', 'r') as accuraciesFile:
-    accuraciesList = [float(line.strip()) for line in accuraciesFile]
-    #print(accuraciesList)
-
-ax = fig.add_subplot(1,2,1)
-plt.plot(range(1,len(accuraciesList) + 1), accuraciesList, 'ro-', label="Test accuracy %")
-ax.plot(iterations[-1], test_accuracy, 'ro-', label="Test accuracy %")
-accuraciesList = []
-
-plt.tight_layout()
-fig.savefig("test.png")
-plt.show()
+https://medium.com/@rsvmukhesh/determining-the-number-of-epochs-d8b3526d8d06
+'''
