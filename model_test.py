@@ -125,6 +125,7 @@ for epoch in range(EPOCHS):
 with torch.no_grad():
     total_loss_test = 0
     total_acc_test = 0
+    acc = 0
     for data in testing_dataloader:
         inputs, labels = data
         prediction = model(inputs).squeeze(1)
@@ -133,7 +134,7 @@ with torch.no_grad():
         total_loss_test += batch_loss_test.item()
         acc = ((prediction).round() == labels).sum().item()
         #print("Predictions:\n {}".format(prediction.round()))
-        #print("Labels:\n {}".format(labels))
+        #print("Labels:\n {}\n".format(labels))
         total_acc_test += acc
     
 print(f"Test Accuracy: {round((total_acc_test/X_test.shape[0])*100, 4)}%")
