@@ -104,6 +104,8 @@ total_loss_train_plot = []
 total_loss_validation_plot = []
 total_acc_train_plot = []
 total_acc_validation_plot = []
+allPredictions = []
+allLabels = []
 for epoch in range(EPOCHS):
     total_acc_train = 0
     total_loss_train = 0
@@ -116,6 +118,9 @@ for epoch in range(EPOCHS):
         total_loss_train += batch_loss.item()
         acc = ((prediction).round() == labels).sum().item()
         total_acc_train += acc
+        if(epoch == len(range(EPOCHS)) - 1):
+            allPredictions.append(prediction.round())
+            allLabels.append(labels)
 
         batch_loss.backward()
         optimizer.step()
@@ -144,7 +149,7 @@ for epoch in range(EPOCHS):
     print(validation_dataloader.__len__())
     print("="*60)
 
-cmatrix = confusion_matrix(prediction, labels)
+cmatrix = confusion_matrix(prediction.round(), labels)
 print("Confusion Matrix:\n {}".format(cmatrix))
 
 '''
