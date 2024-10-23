@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+<<<<<<< Updated upstream
 from torch.optim import adam
 from torch.utils.data import Dataset, DataLoader
 from torchsummary import summary
@@ -8,6 +9,16 @@ from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+=======
+from torch.utils.data import Dataset, DataLoader
+from torchsummary import summary
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+import math
+>>>>>>> Stashed changes
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -61,7 +72,11 @@ LR=1e-2
 
 train_dataloader = DataLoader(training_data, batch_size=BATCH_SIZE, shuffle=True)
 validation_dataloader = DataLoader(validation_data, batch_size=BATCH_SIZE, shuffle=True)
+<<<<<<< Updated upstream
 testing_dataloader = DataLoader(testing_data, batch_size=BATCH_SIZE, shuffle=True)
+=======
+testing_dataloader = DataLoader(testing_data, batch_size=BATCH_SIZE, shuffle=False)
+>>>>>>> Stashed changes
 
 '''
 STEP 3: CREATE MODEL CLASS
@@ -96,7 +111,10 @@ STEP 6: INSTANTIATE OPTIMIZER CLASS
 '''
 optimizer = torch.optim.Adam(model.parameters(), lr=LR)
 
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 '''
 STEP 7: TRAIN THE MODEL
 '''
@@ -131,9 +149,15 @@ for epoch in range(EPOCHS):
             acc = ((prediction).round() == labels).sum().item()
             total_acc_val += acc
 
+<<<<<<< Updated upstream
     total_loss_train_plot.append(round(total_loss_train/(training_data.__len__())*100, 4))
     total_loss_validation_plot.append(round(total_loss_val/(training_data.__len__())*100, 4))
     total_acc_train_plot.append(round(total_acc_train/(training_data.__len__())*100, 4))
+=======
+    total_loss_train_plot.append(round(total_loss_train/(training_data.__len__()), 4))
+    total_acc_train_plot.append(round(total_acc_train/(training_data.__len__())*100, 4))
+    total_loss_validation_plot.append(round(total_loss_val/(validation_data.__len__()), 4))
+>>>>>>> Stashed changes
     total_acc_validation_plot.append(round(total_acc_val/(validation_data.__len__())*100, 4))
 
     print(f"Epoch no. {epoch+1}, Train Loss: {total_loss_train/1000:.4f}, Train Accuracy {(total_acc_train/(X_train.shape[0])*100):.4f}")
@@ -150,10 +174,16 @@ STEP 8: TEST THE MODEL
 with torch.no_grad():
     total_loss_test = 0
     total_acc_test = 0
+<<<<<<< Updated upstream
+=======
+    y_pred=[]
+    y_label=[]
+>>>>>>> Stashed changes
     acc=0
     for data in testing_dataloader:
         inputs, labels = data
         prediction = model(inputs).squeeze(1)
+<<<<<<< Updated upstream
 
         batch_loss_test = criterion((prediction), labels)
         total_loss_test += batch_loss_test.item()
@@ -171,21 +201,90 @@ STEP 9: PLOT METRICS
 '''
 figs, axs = plt.subplots(nrows=1, ncols=2, figsize=(15,5))
 
+=======
+        batch_loss_test = criterion((prediction), labels)
+        total_loss_test += batch_loss_test.item()
+        acc = ((prediction).round() == labels).sum().item()
+        total_acc_test += acc
+
+        for item in prediction:
+            y_pred.append(int(item.round()))
+        for item in labels:
+            y_label.append(int(item))  
+
+'''
+STEP 9: ASSESS TESTING OUTCOME
+'''
+# Confusion matrix with true neg, false pos, false neg, true pos respectively
+tn, fp, fn, tp = confusion_matrix(y_true=y_label, y_pred=y_pred).ravel()      
+
+precision = tp /(tp+fp)     # Correctly predicted positives over all predicted positives
+specificity = tn / (tn+fp)  # Correctly predicted negatives over all actual negatives
+recall = tp / (fn+tp)       # Correctly predicted positives over all actual positives
+
+f1 = 2 * ((precision*recall)/(precision+recall))                        # F1 Score 
+mcc = ((tp*tn) - (fp*fn))/(math.sqrt((tp+fp)*(tp+fn)*(tn+fp)*(tn+fn)))  # Matthews Correlation Coefficient
+
+# Print all calculated metrics for test samples
+print("Test Accuracy:\t\t{}%".format(round((total_acc_test/X_test.shape[0])*100, 4)))
+print("Total correct:\t\t{}".format(total_acc_test))
+print("Total predictions:\t{}".format(X_test.shape[0]))
+print("-"*60)
+print("Precision:\t{}".format(round(precision, 4)))
+print("Specificity:\t{}".format(round(specificity, 4)))
+print("Recall:\t\t{}".format(round(recall, 4)))
+print("F1:\t\t{}".format(round(f1, 4)))
+print("MCC:\t\t{}".format(round(mcc, 4)))
+
+'''
+STEP 10: PLOT METRICS
+'''
+# Plot confusion matrix for test samples
+confmat = confusion_matrix(y_true=y_label, y_pred=y_pred)
+fig, ax = plt.subplots(figsize=(2.5, 2.5))
+ax.matshow(confmat, cmap=plt.cm.Blues, alpha=0.3)
+for i in range(confmat.shape[0]):
+    for j in range(confmat.shape[1]):
+        ax.text(x=j, y=i, s=confmat[i,j], va='center', ha='center')
+ax.xaxis.set_ticks_position('bottom')
+plt.xlabel('Predicted Label')
+plt.ylabel('True label')
+plt.show()
+
+# Plot accuracy and loss for test samples
+figs, axs = plt.subplots(nrows=1, ncols=2, figsize=(15,5))
+>>>>>>> Stashed changes
 axs[0].plot(total_loss_train_plot, label="Train Loss")
 axs[0].plot(total_loss_validation_plot, label="Validation Loss")
 axs[0].set_title("Train and Validation Loss Over Epochs")
 axs[0].set_xlabel('Epochs')
 axs[0].set_ylabel('Loss')
+<<<<<<< Updated upstream
 axs[0].set_ylim([0,2])
+=======
+axs[0].set_ylim([0,.2])
+>>>>>>> Stashed changes
 axs[0].legend()
 
 axs[1].plot(total_acc_train_plot, label="Train Accuracy")
 axs[1].plot(total_acc_validation_plot, label="Validation Accuracy")
 axs[1].set_title("Train and Validation Accuracy Over Epochs")
+<<<<<<< Updated upstream
 axs[1].set_xlabel('Epoch')
+=======
+axs[1].set_xlabel('Epochs')
+>>>>>>> Stashed changes
 axs[1].set_ylabel('Accuracy')
 axs[1].set_ylim([0,100])
 axs[1].legend()
 
 plt.tight_layout()
 plt.show()
+<<<<<<< Updated upstream
+=======
+
+#https://github.com/manujosephv/pytorch_tabular
+#https://stackoverflow.com/questions/25009284/how-to-plot-roc-curve-in-python
+
+#https://www.isanasystems.com/machine-learning-handling-dataset-having-multiple-features/
+>>>>>>> Stashed changes
