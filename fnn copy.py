@@ -1,216 +1,165 @@
 import torch
 import torch.nn as nn
+from torch.optim import Adam
+from torch.utils.data import Dataset, DataLoader
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-from torch.utils.data import Dataset
-from sklearn.metrics import confusion_matrix,classification_report
-import seaborn as sns
-from sklearn.preprocessing import StandardScaler
 
-class FeedforwardNeuralNetModel(nn.Module):
-    def __init__(self, input_dim, hidden_dim, output_dim):
-        super(FeedforwardNeuralNetModel, self).__init__()
-        self.fc1 = nn.Linear(input_dim, hidden_dim)
-        self.fc2 = nn.Linear(hidden_dim, 1)  
-        self.fc3 = nn.Linear(hidden_dim, 1)  
-        self.relu1 = nn.ReLU()
-        self.relu2 = nn.ReLU()
-        self.relu3 = nn.ReLU()
-        self.sigmoid = nn.Sigmoid()
-        self.dropout = nn.Dropout(p=0.5)
-    
-    def forward(self, x):
-# Error is somewhere here??
-        out = self.fc1(x)
-        out = self.relu1(out)
+# Set the device to GPU if available, otherwise use CPU
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-        out = self.fc2(out)
-        out = self.sigmoid(out)
+# Loading Dataset
+dataset = pd.read_csv('Dataset.csv', encoding="Latin-1")  # Read the dataset
+dataset.dropna(inplace=True)  # Remove rows with missing values
+dataset.pop("DoctorInCharge")  # Remove the "DoctorInCharge" column
+dataset.pop("PatientID")  # Remove the "PatientID" column
 
-        return out
+# Normalize each feature column using Mac-abs normalization
+for column in dataset.columns:
+    dataset[column] = dataset[column] / dataset[column].abs().max()
 
-class RecurrentNeuralNetModel(nn.Module):
-    def __init__(self, input_dim, hidden_dim, layer_dim, output_dim):
-        super(RecurrentNeuralNetModel, self).__init__()
-        self.hidden_dim = hidden_dim
-        self.layer_dim = layer_dim
-        self.lstm = nn.LSTM(input_dim, hidden_dim, layer_dim, batch_first=True)
-        self.fc = nn.Linear(hidden_dim, output_dim)
-        self.sigmoid = nn.Sigmoid()
-        self.dropout = nn.Dropout(p=0.5)
-    
-    def forward(self, x):
+# Split features and labels
+X = np.array(dataset.iloc[:, :-1])  # Features (all columns except the last one)
+Y = np.array(dataset.iloc[:, -1])    # Labels (last column)
 
-        #Init hidden state with 0s
-        h0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).to(device)
+# Splitting the dataset into training, validation, and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3)
+X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5)
 
-        c0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).to(device)
-        #Detach hidden state to avoid exploding gradients
-        out, _ = self.lstm(x, (h0, c0))
+# Print dataset shapes to understand the split
+print(f"Training set: {X_train.shape} rows, {round(X_train.shape[0] / dataset.shape[0], 4) * 100}%")
+print(f"Validation set: {X_val.shape} rows, {round(X_val.shape[0] / dataset.shape[0], 4) * 100}%")
+print(f"Testing set: {X_test.shape} rows, {round(X_test.shape[0] / dataset.shape[0], 4) * 100}%")
 
-        #index hidden state of last time step
-        #out.size() => 100, 20, 10
-        # We just want last time step hidden states
-        out = self.fc(out[:, -1, :])
-        return out
-
+# Custom Dataset class for loading data
 class CSVDataset(Dataset):
-    def __init__(self, features, labels):
-        self.features = torch.tensor(features, dtype=torch.float32)
-        self.labels = torch.tensor(labels.values, dtype=torch.float32).unsqueeze(1)
+    def __init__(self, X, Y):
+        self.X = torch.tensor(X, dtype=torch.float32).to(device)  # Convert features to tensor and move to device
+        self.Y = torch.tensor(Y, dtype=torch.float32).to(device)  # Convert labels to tensor and move to device
+
     def __len__(self):
-        return len(self.features)
+        return len(self.X)  # Return the number of samples
+
     def __getitem__(self, index):
-        return self.features[index], self.labels[index]
+        return self.X[index], self.Y[index]  # Return a sample and its label
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# Hyperparameters for the model
+BATCH_SIZE = 4
+EPOCHS = 50
+HIDDEN_NEURONS = 8
+LR = 1e-2
 
-# Create test and train datasets    
-dataset = pd.read_csv('Dataset.csv', encoding="ISO-8859-1")
-dataset_labels = dataset.pop("Diagnosis")
-dataset.pop("DoctorInCharge")
+# Create DataLoader for each dataset
+train_dataloader = DataLoader(CSVDataset(X_train, y_train), batch_size=BATCH_SIZE, shuffle=True)
+validation_dataloader = DataLoader(CSVDataset(X_val, y_val), batch_size=BATCH_SIZE, shuffle=False)
+testing_dataloader = DataLoader(CSVDataset(X_test, y_test), batch_size=BATCH_SIZE, shuffle=False)
 
-test_portion_dataset = dataset[int((len(dataset) * (7/8))):]
-test_portion_dataset_labels = dataset_labels[int((len(dataset) * (7/8))):]
-actual = np.array(test_portion_dataset_labels)
-train_portion_dataset = dataset[:int((len(dataset) * (7/8)))]
-train_portion_dataset_labels = dataset_labels[:int((len(dataset) * (7/8)))]
+# Define the MLP Model Class
+class MLP(nn.Module):
+    def __init__(self):
+        super(MLP, self).__init__()
+        # Define layers of the neural network
+        self.input_layer = nn.Linear(X.shape[1], HIDDEN_NEURONS)
+        self.hidden_layer1 = nn.Linear(HIDDEN_NEURONS, HIDDEN_NEURONS)
+        self.hidden_layer2 = nn.Linear(HIDDEN_NEURONS, HIDDEN_NEURONS)
+        self.output_layer = nn.Linear(HIDDEN_NEURONS, 1)
+        self.relu = nn.ReLU()  # ReLU activation function
+        self.sigmoid = nn.Sigmoid()  # Sigmoid activation for binary classification
 
+    def forward(self, x):
+        # Define forward pass
+        x = self.relu(self.input_layer(x))  # Apply input layer and ReLU
+        x = self.relu(self.hidden_layer1(x))  # Apply first hidden layer and ReLU
+        x = self.relu(self.hidden_layer2(x))  # Apply second hidden layer and ReLU
+        x = self.sigmoid(self.output_layer(x))  # Apply output layer and Sigmoid
+        return x
 
-print(test_portion_dataset.shape)
-print(test_portion_dataset_labels.shape)
-print(train_portion_dataset.shape)
-for i in range(len(train_portion_dataset_labels)):
-    print(train_portion_dataset_labels[i], end="")
+# Instantiate the model and move it to the specified device
+model = MLP().to(device)
 
-dataset_features = np.vstack(train_portion_dataset.values).astype(np.float32)
-test_dataset_features = np.vstack(test_portion_dataset.values).astype(np.float32)
+# Print the model architecture and total parameters
+print(model)
+total_params = sum(p.numel() for p in model.parameters())  # Count total parameters
+print(f"Total parameters: {total_params}")
+total_params_size = abs(total_params * 4.0 / (1024 ** 2.))  # Estimate memory size in MB
+print(f"Total parameters size in MB: {total_params_size:.2f} MB")
 
+# Loss function and optimizer
+criterion = nn.BCELoss()  # Binary Cross-Entropy Loss
+optimizer = Adam(model.parameters(), lr=LR)  # Adam optimizer
 
-scaler = StandardScaler()
-train_portion_dataset = scaler.fit_transform(train_portion_dataset)
-test_portion_dataset = scaler.fit_transform(test_portion_dataset)
-batch_size = 100
-n_iters = 1000
-num_epochs = n_iters / (len(dataset_features) / batch_size)
-num_epochs = int(num_epochs)
-print(num_epochs)
-input_dim = 33
-output_dim = 2
-hidden_dim = 200
-layer_dim = 2
+# Training the Model
+total_loss_train_plot = []
+total_loss_validation_plot = []
+total_acc_train_plot = []
+total_acc_validation_plot = []
 
-train_dataset = CSVDataset(dataset_features, train_portion_dataset_labels)
-test_dataset = CSVDataset(test_dataset_features, test_portion_dataset_labels)
-dataset_loader = torch.utils.data.DataLoader(dataset=train_dataset,
-                                            batch_size = batch_size,)
+for epoch in range(EPOCHS):
+    total_loss_train = 0
+    total_acc_train = 0
+    model.train()  # Set model to training mode
+    for inputs, labels in train_dataloader:
+        optimizer.zero_grad()  # Zero the gradients
+        predictions = model(inputs).squeeze(1)  # Forward pass
+        batch_loss = criterion(predictions, labels)  # Compute loss
+        total_loss_train += batch_loss.item()  # Accumulate loss
+        acc = ((predictions.round() == labels).sum().item())  # Calculate accuracy
+        total_acc_train += acc
+        batch_loss.backward()  # Backward pass
+        optimizer.step()  # Update parameters
 
-test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
-                                            batch_size = batch_size)
+    # Validation phase
+    total_loss_val = 0
+    total_acc_val = 0
+    model.eval()  # Set model to evaluation mode
+    with torch.no_grad():  # No gradient tracking
+        for inputs, labels in validation_dataloader:
+            predictions = model(inputs).squeeze(1)  # Forward pass
+            batch_loss = criterion(predictions, labels)  # Compute loss
+            total_loss_val += batch_loss.item()  # Accumulate validation loss
+            acc = ((predictions.round() == labels).sum().item())  # Calculate accuracy
+            total_acc_val += acc
 
+    # Record metrics for plotting
+    total_loss_train_plot.append(total_loss_train / len(train_dataloader))
+    total_loss_validation_plot.append(total_loss_val / len(validation_dataloader))
+    total_acc_train_plot.append(total_acc_train / len(X_train))
+    total_acc_validation_plot.append(total_acc_val / len(X_val))
 
-model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
-print(sum([x.reshape(-1).shape[0] for x in model.parameters()]))  
-criterion = nn.BCELoss()
+    # Print training and validation results for the epoch
+    print(f"Epoch {epoch + 1}/{EPOCHS}, Train Loss: {total_loss_train:.4f}, Train Accuracy: {total_acc_train / len(X_train) * 100:.2f}%")
+    print(f"Val Loss: {total_loss_val:.4f}, Val Accuracy: {total_acc_val / len(X_val) * 100:.2f}%")
+    print("=" * 60)
 
-learning_rate = 0.001
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate) 
+# Testing the Model
+with torch.no_grad():  # No gradient tracking
+    total_acc_test = 0
+    for inputs, labels in testing_dataloader:
+        predictions = model(inputs).squeeze(1)  # Forward pass
+        acc = ((predictions.round() == labels).sum().item())  # Calculate accuracy
+        total_acc_test += acc
 
- 
-val_split = 0.2
-val_size = int(len(train_portion_dataset) * val_split)
-train_size = len(train_portion_dataset) - val_size
-print(val_size)
-print(train_size)
- 
-train_dataset, val_dataset = torch.utils.data.random_split(train_dataset,[train_size, val_size])
-print("Length of train_dataset:" + str(len(train_dataset)))
-print("Length of val_dataset:" + str(len(val_dataset)))
-val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False)
+print(f"Test Accuracy: {total_acc_test / len(X_test) * 100:.2f}%")
 
-accuracies = []
-iterations = []
-iter = 0
-for epoch in range(num_epochs):
-    for i, (fields, labels) in enumerate(dataset_loader):
-        model.train()
-        optimizer.zero_grad()
-        outputs = model(fields)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
-        iter += 1
-        if iter % 500 == 0:
-            # Calculate Accuracy         
-            correct = 0
-            total = 0
-            # Iterate through test dataset
-            model.eval()
-            with torch.no_grad():
-                for fields, labels in val_loader: # Add sequence dimension if missing
-        
-                    # Forward pass only to get logits/output
-                    testOutputs = model(fields).round()
-                    
-                    # Get predictions from the maximum value
-                    _, predicted = torch.max(outputs.data, 1)
-                    
-                    # Total number of labels
-                    total += labels.size(0)
-                    
-                    # Total correct predictions
-                    correct += (predicted == labels).sum().item()
-            
-            accuracy = 100 * correct / total
-            accuracies.append(accuracy)
-            iterations.append(iter)
-            # Print Loss
-            print('Iteration: {}. Loss: {}. Accuracy: {}'.format(iter, loss.item(), accuracy))
+# Plotting Metrics
+figs, axs = plt.subplots(nrows=1, ncols=2, figsize=(15, 5))
+axs[0].plot(total_loss_train_plot, label="Train Loss")  # Plot training loss
+axs[0].plot(total_loss_validation_plot, label="Validation Loss")  # Plot validation loss
+axs[0].set_title("Train and Validation Loss Over Epochs")  # Set title
+axs[0].set_xlabel('Epochs')  # Set x-label
+axs[0].set_ylabel('Loss')  # Set y-label
+axs[0].set_ylim([0, 2])  # Set y-axis limits
+axs[0].legend()  # Show legend
 
-print(accuracies)
-fig, ax = plt.subplots()
-plt.figure(figsize=(12,6))
+axs[1].plot(total_acc_train_plot, label="Train Accuracy")  # Plot training accuracy
+axs[1].plot(total_acc_validation_plot, label="Validation Accuracy")  # Plot validation accuracy
+axs[1].set_title("Train and Validation Accuracy Over Epochs")  # Set title
+axs[1].set_xlabel('Epoch')  # Set x-label
+axs[1].set_ylabel('Accuracy')  # Set y-label
+axs[1].set_ylim([0, 100])  # Set y-axis limits
+axs[1].legend()  # Show legend
 
-ax.plot(iterations, accuracies, label="Validation set accuracy %")
-ax.set(xlabel="Iteration", ylabel="Accuracy %",
-       title="Accuracy over time")
-ax.grid()
-plt.legend()
-
-model.eval()
-correct = 0
-total = 0
-predictedArray = []
-with torch.no_grad():  # Disable gradient calculation
-    for fields, labels in test_loader:
-        
-        if len(fields.shape) == 2:
-            fields = fields.unsqueeze(1)  # Add sequence dimension if missing
-        
-        outputs = model(fields)
-        _, predicted = torch.max(outputs.data, 1)
-        predictedArray.append(outputs)
-        total += labels.size(0)
-        correct += (predicted == labels).sum().item()
-#print(actual)
-#print(predictedArray)
-test_accuracy = 100 * correct / total
-print(f'Test Accuracy: {test_accuracy}%')
-
-with open('accuracies.txt', 'a') as accuraciesFile:
-    accuraciesFile.write(str(test_accuracy) + '\n')
-
-with open('accuracies.txt', 'r') as accuraciesFile:
-    accuraciesList = [float(line.strip()) for line in accuraciesFile]
-    print(accuraciesList)
-
-ax = fig.add_subplot(1,2,1)
-plt.plot(range(1,len(accuraciesList) + 1), accuraciesList, 'ro-', label="Test accuracy %")
-ax.plot(iterations[-1], test_accuracy, 'ro-', label="Test accuracy %")
-accuraciesList = []
-
-ax.legend()
-plt.tight_layout()
-fig.savefig("test.png")
-plt.show()
+plt.tight_layout()  # Adjust layout
+plt.show()  # Display the plots
