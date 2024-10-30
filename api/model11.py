@@ -31,10 +31,10 @@ Y = np.array(dataset.iloc[:, -1]) #Y=Labels
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3)
 X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5)
 
-print("Training set is: {} rows which is {} %".format(X_train.shape, round(X_train.shape[0]/dataset.shape[0], 4)*100))
+""" print("Training set is: {} rows which is {} %".format(X_train.shape, round(X_train.shape[0]/dataset.shape[0], 4)*100))
 print("Validation set is: {} rows which is {} %".format(X_val.shape, round(X_val.shape[0]/dataset.shape[0], 4)*100))
 print("Testing set is: {} rows which is {} %".format(X_test.shape, round(X_test.shape[0]/dataset.shape[0], 4)*100))
-
+ """
 '''
 STEP 2: MAKING DATASET ITERABLE
 '''
@@ -134,14 +134,14 @@ for epoch in range(EPOCHS):
     total_acc_train_plot.append(round(total_acc_train/(training_data.__len__())*100, 4))
     total_loss_validation_plot.append(round(total_loss_val/(validation_data.__len__()), 4))
     total_acc_validation_plot.append(round(total_acc_val/(validation_data.__len__())*100, 4))
-
+""" 
     print(f"Epoch no. {epoch+1}, Train Loss: {total_loss_train/1000:.4f}, Train Accuracy {(total_acc_train/(X_train.shape[0])*100):.4f}")
     print(total_acc_train)
     print(train_dataloader.__len__())
     print(f"Epoch no. {epoch+1}, Val Loss: {total_loss_val/1000:.4f}, Val Accuracy {(total_acc_val/(X_val.shape[0])*100):.4f}")
     print(total_acc_val)
     print(validation_dataloader.__len__())
-    print("="*60)
+    print("="*60) """
 
 '''
 STEP 8: TEST THE MODEL
@@ -177,7 +177,7 @@ recall = tp / (fn+tp)       # Correctly predicted positives over all actual posi
 
 f1 = 2 * ((precision*recall)/(precision+recall))                        # F1 Score 
 mcc = ((tp*tn) - (fp*fn))/(math.sqrt((tp+fp)*(tp+fn)*(tn+fp)*(tn+fn)))  # Matthews Correlation Coefficient
-
+""" 
 # Print all calculated metrics for test samples
 print("Test Accuracy:\t\t{}%".format(round((total_acc_test/X_test.shape[0])*100, 4)))
 print("Total correct:\t\t{}".format(total_acc_test))
@@ -187,12 +187,12 @@ print("Precision:\t{}".format(round(precision, 4)))
 print("Specificity:\t{}".format(round(specificity, 4)))
 print("Recall:\t\t{}".format(round(recall, 4)))
 print("F1:\t\t{}".format(round(f1, 4)))
-print("MCC:\t\t{}".format(round(mcc, 4)))
+print("MCC:\t\t{}".format(round(mcc, 4))) """
 
 '''
 STEP 10: PLOT METRICS
 '''
-# Plot confusion matrix for test samples
+""" # Plot confusion matrix for test samples
 confmat = confusion_matrix(y_true=y_label, y_pred=y_pred)
 fig, ax = plt.subplots(figsize=(2.5, 2.5))
 ax.matshow(confmat, cmap=plt.cm.Blues, alpha=0.3)
@@ -223,7 +223,7 @@ axs[1].set_ylim([0,100])
 axs[1].legend()
 
 plt.tight_layout()
-plt.show()
+plt.show() """
 
 #https://github.com/manujosephv/pytorch_tabular
 #https://stackoverflow.com/questions/25009284/how-to-plot-roc-curve-in-python
