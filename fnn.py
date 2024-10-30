@@ -1,192 +1,231 @@
 import torch
 import torch.nn as nn
+from torch.utils.data import Dataset, DataLoader
+from torchsummary import summary
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-from torch.utils.data import Dataset
-from sklearn.metrics import confusion_matrix, classification_report
-import seaborn as sns
-from sklearn.preprocessing import StandardScaler
+import math
 
-# Define a feedforward neural network model
-class FeedforwardNeuralNetModel(nn.Module):
-    def __init__(self, input_dim, hidden_dim, output_dim):
-        super(FeedforwardNeuralNetModel, self).__init__()
-        # Define the network layers
-        self.fc1 = nn.Linear(input_dim, hidden_dim)  # First fully connected layer
-        self.fc2 = nn.Linear(hidden_dim, hidden_dim)  # Second fully connected layer
-        self.fc3 = nn.Linear(hidden_dim, output_dim)  # Output layer
-        self.relu1 = nn.ReLU()  # ReLU activation for the first hidden layer
-        self.relu2 = nn.ReLU()  # ReLU activation for the second hidden layer
-        self.sigmoid = nn.Sigmoid()  # Sigmoid activation for the output layer
-        self.dropout = nn.Dropout(p=0.5)  # Dropout layer to prevent overfitting
-    
-    def forward(self, x):
-        # Forward pass through the network
-        out = self.fc1(x)
-        out = self.relu1(out)
-        out = self.dropout(out)  # Apply dropout
-        out = self.fc2(out)
-        out = self.relu2(out)
-        out = self.dropout(out)  # Apply dropout
-        out = self.fc3(out)
-        out = self.sigmoid(out)  # Apply sigmoid activation
-        return out
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-# Define a custom dataset class for loading data
+'''
+STEP 1: LOADING DATASET
+'''
+# Create test and train datasets    
+dataset = pd.read_csv('Dataset.csv', encoding="Latin-1") #ISO-8859-1 used in basic latin. UTF-8 for anything else
+dataset.dropna(inplace=True)
+dataset.pop("DoctorInCharge")
+dataset.pop("PatientID") 
+
+#Mac-abs Normalization
+for column in dataset.columns:
+    dataset[column] = dataset[column]/dataset[column].abs().max()
+
+X = np.array(dataset.iloc[:,:-1]) #X=Features
+Y = np.array(dataset.iloc[:, -1]) #Y=Labels
+
+#Splitting the train, validation, and test set
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3)
+X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5)
+
+print("Training set is: {} rows which is {} %".format(X_train.shape, round(X_train.shape[0]/dataset.shape[0], 4)*100))
+print("Validation set is: {} rows which is {} %".format(X_val.shape, round(X_val.shape[0]/dataset.shape[0], 4)*100))
+print("Testing set is: {} rows which is {} %".format(X_test.shape, round(X_test.shape[0]/dataset.shape[0], 4)*100))
+
+'''
+STEP 2: MAKING DATASET ITERABLE
+'''
+#Stores the samples and their corresponding labels
 class CSVDataset(Dataset):
-    def __init__(self, features, labels):
-        self.features = torch.tensor(features, dtype=torch.float32)  # Convert features to tensor
-        self.labels = torch.tensor(labels.values, dtype=torch.float32).unsqueeze(1)  # Convert labels to tensor and add a dimension
-        
+    def __init__(self, X, Y):
+        self.X = torch.tensor(X, dtype= torch.float32).to(device)
+        self.Y = torch.tensor(Y, dtype= torch.float32).to(device)
+
     def __len__(self):
-        return len(self.features)  # Return the number of samples
-        
+        return len(self.X)
     def __getitem__(self, index):
-        return self.features[index], self.labels[index]  # Return a single sample and its label
+        return self.X[index], self.Y[index]
 
-# Determine if a GPU is available and set the device, my personal machine always seems to use the CPU.
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+training_data = CSVDataset(X_train, y_train)
+validation_data = CSVDataset(X_val, y_val)
+testing_data = CSVDataset(X_test, y_test)
 
-# Load the dataset and preprocess it
-dataset = pd.read_csv('Dataset.csv', encoding="ISO-8859-1")
-dataset_labels = dataset.pop("Diagnosis")  # Separate labels from features
-dataset.pop("DoctorInCharge")  # Remove unnecessary column
+#HYPERPARAMETERS
+BATCH_SIZE=4
+EPOCHS=50
+HIDDEN_NEURONS=8
+LR=1e-2
 
-# Split the dataset into training and testing portions
-test_portion_dataset = dataset[int((len(dataset) * (7/8))):]
-test_portion_dataset_labels = dataset_labels[int((len(dataset) * (7/8))):]
-train_portion_dataset = dataset[:int((len(dataset) * (7/8)))]
-train_portion_dataset_labels = dataset_labels[:int((len(dataset) * (7/8)))]
+train_dataloader = DataLoader(training_data, batch_size=BATCH_SIZE, shuffle=True)
+validation_dataloader = DataLoader(validation_data, batch_size=BATCH_SIZE, shuffle=True)
+testing_dataloader = DataLoader(testing_data, batch_size=BATCH_SIZE, shuffle=False)
 
-# Convert data to numpy arrays
-dataset_features = np.vstack(train_portion_dataset.values).astype(np.float32)
-test_dataset_features = np.vstack(test_portion_dataset.values).astype(np.float32)
+'''
+STEP 3: CREATE MODEL CLASS
+'''
+class FNN(nn.Module):
+    def __init__(self):
+        super(FNN, self).__init__()
 
-# Scale the features
-scaler = StandardScaler()
-train_portion_dataset = scaler.fit_transform(train_portion_dataset)  # Fit and transform training data
-test_portion_dataset = scaler.transform(test_portion_dataset)  # Transform test data
+        self.input_layer = nn.Linear(X.shape[1], HIDDEN_NEURONS)
+        self.linear = nn.Linear(HIDDEN_NEURONS, 1)
+        self.sigmoid = nn.Sigmoid()
 
-# Define training parameters
-batch_size = 100
-n_iters = 1000
-num_epochs = n_iters / (len(dataset_features) / batch_size)  # Calculate number of epochs
-num_epochs = int(num_epochs)
-print(num_epochs)
+    def forward(self, x):
+        x = self.input_layer(x)
+        x = self.linear(x)
+        x = self.sigmoid(x)
+        return x
 
-input_dim = dataset_features.shape[1]  # Number of input features
-output_dim = 1  # Number of output classes (binary classification)
-hidden_dim = 200  # Number of hidden units
+'''
+STEP 4: INSTANTIATE MODEL CLASS
+'''
+model = FNN().to(device)
+summary(model, (X.shape[1],)) 
 
-# Create dataset and dataloaders
-train_dataset = CSVDataset(train_portion_dataset, train_portion_dataset_labels)
-test_dataset = CSVDataset(test_portion_dataset, test_portion_dataset_labels)
-dataset_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
-test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
+'''
+STEP 5: INSTANTIATE LOSS CLASS
+'''
+criterion = nn.BCELoss()
 
-# Initialize the model, loss function, and optimizer
-model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
-model.to(device)  # Move model to GPU if available
-print(sum([x.reshape(-1).shape[0] for x in model.parameters()]))  # Print the number of parameters in the model
-criterion = nn.BCELoss()  # Binary Cross-Entropy loss for binary classification
+'''
+STEP 6: INSTANTIATE OPTIMIZER CLASS
+'''
+optimizer = torch.optim.Adam(model.parameters(), lr=LR)
 
-learning_rate = 0.001
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)  # Adam optimizer
+'''
+STEP 7: TRAIN THE MODEL
+'''
+total_loss_train_plot = []
+total_loss_validation_plot = []
+total_acc_train_plot = []
+total_acc_validation_plot = []
+for epoch in range(EPOCHS):
+    total_acc_train = 0
+    total_loss_train = 0
+    total_acc_val = 0
+    total_loss_val = 0
+    for data in train_dataloader:
+        inputs, labels = data
+        prediction = model(inputs).squeeze(1)
+        batch_loss = criterion(prediction, labels)
+        total_loss_train += batch_loss.item()
+        acc = ((prediction).round() == labels).sum().item()
+        total_acc_train += acc
 
-# Split the training data into training and validation sets
-val_split = 0.2
-val_size = int(len(train_dataset) * val_split)
-train_size = len(train_dataset) - val_size
-print(val_size)
-print(train_size)
+        batch_loss.backward()
+        optimizer.step()
+        optimizer.zero_grad()
 
-train_dataset, val_dataset = torch.utils.data.random_split(train_dataset, [train_size, val_size])
-print("Length of train_dataset:" + str(len(train_dataset)))
-print("Length of val_dataset:" + str(len(val_dataset)))
-val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False)
+    with torch.no_grad():
+        acc=0
+        for data in validation_dataloader:
+            input, labels = data
+            prediction = model(input).squeeze(1)
+            batch_loss = criterion(prediction, labels)
+            total_loss_val += batch_loss.item()
+            acc = ((prediction).round() == labels).sum().item()
+            total_acc_val += acc
 
-# Lists to store accuracy and iteration information
-accuracies = []
-iterations = []
-iter = 0
+    total_loss_train_plot.append(round(total_loss_train/(training_data.__len__()), 4))
+    total_acc_train_plot.append(round(total_acc_train/(training_data.__len__())*100, 4))
+    total_loss_validation_plot.append(round(total_loss_val/(validation_data.__len__()), 4))
+    total_acc_validation_plot.append(round(total_acc_val/(validation_data.__len__())*100, 4))
 
-# Training loop
-for epoch in range(num_epochs):
-    for i, (fields, labels) in enumerate(dataset_loader):
-        model.train()  # Set model to training mode
-        fields, labels = fields.to(device), labels.to(device)  # Move data to GPU if available
-        optimizer.zero_grad()  # Zero the gradients
-        outputs = model(fields)  # Forward pass
-        loss = criterion(outputs, labels)  # Calculate loss
-        loss.backward()  # Backward pass
-        optimizer.step()  # Update weights
-        iter += 1
-        if iter % 500 == 0:
-            # Calculate accuracy on the validation set
-            correct = 0
-            total = 0
-            model.eval()  # Set model to evaluation mode
-            with torch.no_grad():
-                for fields, labels in val_loader:
-                    fields, labels = fields.to(device), labels.to(device)  # Move data to GPU if available
-                    testOutputs = model(fields).round()  # Get predictions and round to 0 or 1
-                    predicted = testOutputs.round()  # Round predictions
-                    total += labels.size(0)  # Update total number of samples
-                    correct += (predicted == labels).sum().item()  # Count correct predictions
-            
-            accuracy = 100 * correct / total  # Calculate accuracy
-            accuracies.append(accuracy)  # Append accuracy to the list
-            iterations.append(iter)  # Append iteration to the list
-            # Print current iteration, loss, and accuracy
-            print('Iteration: {}. Loss: {}. Accuracy: {}'.format(iter, loss.item(), accuracy))
+    print(f"Epoch no. {epoch+1}, Train Loss: {total_loss_train/1000:.4f}, Train Accuracy {(total_acc_train/(X_train.shape[0])*100):.4f}")
+    print(total_acc_train)
+    print(train_dataloader.__len__())
+    print(f"Epoch no. {epoch+1}, Val Loss: {total_loss_val/1000:.4f}, Val Accuracy {(total_acc_val/(X_val.shape[0])*100):.4f}")
+    print(total_acc_val)
+    print(validation_dataloader.__len__())
+    print("="*60)
 
-# Print the list of accuracies
-print(accuracies)
-fig, ax = plt.subplots()
-plt.figure(figsize=(12,6))
-
-# Plot accuracy over iterations
-ax.plot(iterations, accuracies, label="Validation set accuracy %")
-ax.set(xlabel="Iteration", ylabel="Accuracy %",
-       title="Accuracy over time")
-ax.grid()
-plt.legend()
-
-# Evaluate the model on the test set
-model.eval()
-correct = 0
-total = 0
-predictedArray = []
+'''
+STEP 8: TEST THE MODEL
+'''
 with torch.no_grad():
-    for fields, labels in test_loader:
-        fields, labels = fields.to(device), labels.to(device)  # Move data to GPU if available
-        outputs = model(fields)  # Forward pass
-        predicted = outputs.round()  # Round predictions
-        predictedArray.append(outputs)  # Collect outputs
-        total += labels.size(0)  # Update total number of samples
-        correct += (predicted == labels).sum().item()  # Count correct predictions
+    total_loss_test = 0
+    total_acc_test = 0
+    y_pred=[]
+    y_label=[]
+    acc=0
+    for data in testing_dataloader:
+        inputs, labels = data
+        prediction = model(inputs).squeeze(1)
+        batch_loss_test = criterion((prediction), labels)
+        total_loss_test += batch_loss_test.item()
+        acc = ((prediction).round() == labels).sum().item()
+        total_acc_test += acc
 
-# Calculate test accuracy
-test_accuracy = 100 * correct / total
-print(f'Test Accuracy: {test_accuracy}%')
+        for item in prediction:
+            y_pred.append(int(item.round()))
+        for item in labels:
+            y_label.append(int(item))  
 
-# Save test accuracy to a file
-with open('accuracies.txt', 'a') as accuraciesFile:
-    accuraciesFile.write(str(test_accuracy) + '\n')
+'''
+STEP 9: ASSESS TESTING OUTCOME
+'''
+# Confusion matrix with true neg, false pos, false neg, true pos respectively
+tn, fp, fn, tp = confusion_matrix(y_true=y_label, y_pred=y_pred).ravel()      
 
-# Read and print accuracy from the file
-with open('accuracies.txt', 'r') as accuraciesFile:
-    accuraciesList = [float(line.strip()) for line in accuraciesFile]
-    print(accuraciesList)
+precision = tp /(tp+fp)     # Correctly predicted positives over all predicted positives
+specificity = tn / (tn+fp)  # Correctly predicted negatives over all actual negatives
+recall = tp / (fn+tp)       # Correctly predicted positives over all actual positives
 
-# Plot test accuracy over time
-ax = fig.add_subplot(1,2,1)
-plt.plot(range(1, len(accuraciesList) + 1), accuraciesList, 'ro-', label="Test accuracy %")
-ax.plot(iterations[-1], test_accuracy, 'ro-', label="Test accuracy %")
-accuraciesList = []
+f1 = 2 * ((precision*recall)/(precision+recall))                        # F1 Score 
+mcc = ((tp*tn) - (fp*fn))/(math.sqrt((tp+fp)*(tp+fn)*(tn+fp)*(tn+fn)))  # Matthews Correlation Coefficient
 
-ax.legend()
+# Print all calculated metrics for test samples
+print("Test Accuracy:\t\t{}%".format(round((total_acc_test/X_test.shape[0])*100, 4)))
+print("Total correct:\t\t{}".format(total_acc_test))
+print("Total predictions:\t{}".format(X_test.shape[0]))
+print("-"*60)
+print("Precision:\t{}".format(round(precision, 4)))
+print("Specificity:\t{}".format(round(specificity, 4)))
+print("Recall:\t\t{}".format(round(recall, 4)))
+print("F1:\t\t{}".format(round(f1, 4)))
+print("MCC:\t\t{}".format(round(mcc, 4)))
+
+'''
+STEP 10: PLOT METRICS
+'''
+# Plot confusion matrix for test samples
+confmat = confusion_matrix(y_true=y_label, y_pred=y_pred)
+fig, ax = plt.subplots(figsize=(2.5, 2.5))
+ax.matshow(confmat, cmap=plt.cm.Blues, alpha=0.3)
+for i in range(confmat.shape[0]):
+    for j in range(confmat.shape[1]):
+        ax.text(x=j, y=i, s=confmat[i,j], va='center', ha='center')
+ax.xaxis.set_ticks_position('bottom')
+plt.xlabel('Predicted Label')
+plt.ylabel('True label')
+plt.show()
+
+# Plot accuracy and loss for test samples
+figs, axs = plt.subplots(nrows=1, ncols=2, figsize=(15,5))
+axs[0].plot(total_loss_train_plot, label="Train Loss")
+axs[0].plot(total_loss_validation_plot, label="Validation Loss")
+axs[0].set_title("Train and Validation Loss Over Epochs")
+axs[0].set_xlabel('Epochs')
+axs[0].set_ylabel('Loss')
+axs[0].set_ylim([0,.2])
+axs[0].legend()
+
+axs[1].plot(total_acc_train_plot, label="Train Accuracy")
+axs[1].plot(total_acc_validation_plot, label="Validation Accuracy")
+axs[1].set_title("Train and Validation Accuracy Over Epochs")
+axs[1].set_xlabel('Epochs')
+axs[1].set_ylabel('Accuracy')
+axs[1].set_ylim([0,100])
+axs[1].legend()
+
 plt.tight_layout()
-fig.savefig("test.png")  # Save the plot
-plt.show()  # Display the plot
+plt.show()
+
+#https://github.com/manujosephv/pytorch_tabular
+#https://stackoverflow.com/questions/25009284/how-to-plot-roc-curve-in-python
+
+#https://www.isanasystems.com/machine-learning-handling-dataset-having-multiple-features/

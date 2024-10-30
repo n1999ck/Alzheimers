@@ -3,9 +3,12 @@ import torch.nn as nn
 from torch.optim import Adam
 from torch.utils.data import Dataset, DataLoader
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import math
+
 
 # Set the device to GPU if available, otherwise use CPU
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -129,19 +132,52 @@ for epoch in range(EPOCHS):
     total_acc_validation_plot.append(total_acc_val / len(X_val))
 
     # Print training and validation results for the epoch
-    print(f"Epoch {epoch + 1}/{EPOCHS}, Train Loss: {total_loss_train:.4f}, Train Accuracy: {total_acc_train / len(X_train) * 100:.2f}%")
+    print(f"Epoch {epoch + 1}/{EPOCHS}, Train Loss: {total_loss_train/1000:.4f}, Train Accuracy: {total_acc_train / len(X_train) * 100:.2f}%")
     print(f"Val Loss: {total_loss_val:.4f}, Val Accuracy: {total_acc_val / len(X_val) * 100:.2f}%")
     print("=" * 60)
 
 # Testing the Model
 with torch.no_grad():  # No gradient tracking
+    total_loss_test = 0
     total_acc_test = 0
-    for inputs, labels in testing_dataloader:
-        predictions = model(inputs).squeeze(1)  # Forward pass
-        acc = ((predictions.round() == labels).sum().item())  # Calculate accuracy
+    y_pred=[]
+    y_label=[]
+    acc=0
+    for data in testing_dataloader:
+        inputs, labels = data
+        prediction = model(inputs).squeeze(1)
+        batch_loss_test = criterion((prediction), labels)
+        total_loss_test += batch_loss_test.item()
+        acc = ((prediction).round() == labels).sum().item()
         total_acc_test += acc
 
-print(f"Test Accuracy: {total_acc_test / len(X_test) * 100:.2f}%")
+        for item in prediction:
+            y_pred.append(int(item.round()))
+        for item in labels:
+            y_label.append(int(item))
+
+#print(f"Test Accuracy: {total_acc_test / len(X_test) * 100:.2f}%")
+
+# Confusion matrix with true neg, false pos, false neg, true pos respectively
+tn, fp, fn, tp = confusion_matrix(y_true=y_label, y_pred=y_pred).ravel()      
+
+precision = tp /(tp+fp)     # Correctly predicted positives over all predicted positives
+specificity = tn / (tn+fp)  # Correctly predicted negatives over all actual negatives
+recall = tp / (fn+tp)       # Correctly predicted positives over all actual positives
+
+f1 = 2 * ((precision*recall)/(precision+recall))                        # F1 Score 
+mcc = ((tp*tn) - (fp*fn))/(math.sqrt((tp+fp)*(tp+fn)*(tn+fp)*(tn+fn)))  # Matthews Correlation Coefficient
+
+# Print all calculated metrics for test samples
+print("Test Accuracy:\t\t{}%".format(round((total_acc_test/X_test.shape[0])*100, 4)))
+print("Total correct:\t\t{}".format(total_acc_test))
+print("Total predictions:\t{}".format(X_test.shape[0]))
+print("-"*60)
+print("Precision:\t{}".format(round(precision, 4)))
+print("Specificity:\t{}".format(round(specificity, 4)))
+print("Recall:\t\t{}".format(round(recall, 4)))
+print("F1:\t\t{}".format(round(f1, 4)))
+print("MCC:\t\t{}".format(round(mcc, 4)))
 
 # Plotting Metrics
 figs, axs = plt.subplots(nrows=1, ncols=2, figsize=(15, 5))
