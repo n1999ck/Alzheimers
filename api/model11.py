@@ -9,6 +9,8 @@ import pandas as pd
 import numpy as np
 import math
 
+# pip install torch torchsummary scikit-learn matplotlib pandas numpy
+
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 '''
