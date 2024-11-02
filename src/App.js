@@ -26,42 +26,53 @@ function App() {
         <form className="form" action="/api/upload" method="post" onSubmit={handleSubmit(onSubmit)}>
           <h3 className="mt-4">Demographics and Personal Information</h3>
 
+          
           <div className="row mb-3 mb-sm-3">
-            <label className="form-label">PatientID:</label>
-            <input type="number" className="form-control" {...register("patientID", { required: true })} />
+            <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">PatientID:</label>
+            <div className="col-sm-9">
+              <input type="number" className="form-control" {...register("patientID", { required: true })} />
+            </div>
           </div>
 
           <div className="row mb-3 mb-sm-3">
-            <label className="form-label">Age:</label>
-            <input type="number" className="form-control" {...register("age", { min: 0, required: true })} />
+            <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Age:</label>
+            <div className="col-sm-9">
+              <input type="number" className="form-control" {...register("age", { min: 0, required: true })} />
+            </div>
           </div>
 
           <div className="row mb-3 mb-sm-3">
-            <label className="form-label">Gender:</label>
-            <select className="form-select" {...register("gender", { required: true })}>
-              <option value="0">Female</option>
-              <option value="1">Male</option>
-            </select>
+            <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Gender:</label>
+            <div className="col-sm-9">
+              <select className="form-select" {...register("gender", { required: true })}>
+                <option value="0">Female</option>
+                <option value="1">Male</option>
+              </select>
+            </div>
           </div>
 
           <div className="row mb-3 mb-sm-3">
-            <label className="form-label">Ethnicity:</label>
-            <select className="form-select" {...register("ethnicity", { required: true })}>
-              <option value="0">Hispanic or Latino</option>
-              <option value="1">White (Non-Hispanic)</option>
-              <option value="2">Black or African American</option>
-              <option value="3">Asian</option>
-            </select>
+            <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Ethnicity:</label>
+            <div className="col-sm-9">
+              <select className="form-select" {...register("ethnicity", { required: true })}>
+                <option value="0">Hispanic or Latino</option>
+                <option value="1">White (Non-Hispanic)</option>
+                <option value="2">Black or African American</option>
+                <option value="3">Asian</option>
+              </select>
+            </div>
           </div>
 
           <div className="row mb-3 mb-sm-3">
-            <label className="form-label">Education Level:</label>
-            <select className="form-select" {...register("educationLevel", { required: true })}>
-              <option value="0">Less than High School</option>
-              <option value="1">High School Diploma or GED</option>
-              <option value="2">Some College or Associate's Degree</option>
-              <option value="3">Bachelor’s Degree or Higher</option>
-            </select>
+            <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Education Level:</label>
+            <div className="col-sm-9">
+              <select className="form-select" {...register("educationLevel", { required: true })}>
+                <option value="0">Less than High School</option>
+                <option value="1">High School Diploma or GED</option>
+                <option value="2">Some College or Associate's Degree</option>
+                <option value="3">Bachelor’s Degree or Higher</option>
+              </select>
+            </div>
           </div>
 
           <h3 className="mt-4">Lifestyle and Behavior</h3>
@@ -70,41 +81,45 @@ function App() {
             <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">BMI:</label>
             <div className="col-sm-9">
               <input type="number" className="form-control" {...register("bmi", { min: 15, max: 40, step: 0.1, required: true })} />
-              </div>
+            </div>
           </div>
 
           <div className="row mb-3 mb-sm-3">
-            <label className="form-label">Smoking:</label>
-            <select className="form-select" {...register("smoking", { required: true })}>
-              <option value="0">No</option>
-              <option value="1">Yes</option>
-            </select>
+            <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Smoking:</label>
+            <div className="col-sm-9">
+              <select className="form-select" {...register("smoking", { required: true })}>
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+              </select>
+            </div>
           </div>
 
           <div className="row mb-3 mb-sm-3">
-            <label className="form-label">Alcohol Consumption:</label>
-            <input type="number" className="form-control" {...register("alcoholConsumption", { min: 0, max: 20, step: 0.1, required: true })} />
+            <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Alcohol Consumption:</label>
+            <div className="col-sm-9">
+              <input type="number" className="form-control" {...register("alcoholConsumption", { min: 0, max: 20, step: 0.1, required: true })} />
+            </div>
           </div>
 
           <div className="row mb-3 mb-sm-3">
-            <label className="form-label">Physical Activity:</label>
+            <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Physical Activity:</label>
             <input type="number" className="form-control" {...register("physicalActivity", { min: 0, max: 10, step: 0.1, required: true })} />
           </div>
 
           <div className="row mb-3 mb-sm-3">
-            <label className="form-label">Diet Quality:</label>
+            <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Diet Quality:</label>
             <input type="number" className="form-control" {...register("dietQuality", { min: 0, max: 10, step: 0.1, required: true })} />
           </div>
 
           <div className="row mb-3 mb-sm-3">
-            <label className="form-label">Sleep Quality:</label>
+            <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Sleep Quality:</label>
             <input type="number" className="form-control" {...register("sleepQuality", { min: 0, max: 10, step: 0.1, required: true })} />
           </div>
 
           <h3 className="mt-4">Medical History and Conditions</h3>
           
           <div className="row mb-3 mb-sm-3">
-                <label className="form-label">Family History of Alzheimer's:</label>
+                <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Family History of Alzheimer's:</label>
                 <select name="familyHistoryAlzheimers" className="form-select" required>
                     <option value="0">No</option>
                     <option value="1">Yes</option>
@@ -112,7 +127,7 @@ function App() {
             </div>
 
             <div className="row mb-3 mb-sm-3">
-                <label className="form-label">Cardiovascular Disease:</label>
+                <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Cardiovascular Disease:</label>
                 <select name="cardiovascularDisease" className="form-select" required>
                     <option value="0">No</option>
                     <option value="1">Yes</option>
@@ -120,7 +135,7 @@ function App() {
             </div>
 
             <div className="row mb-3 mb-sm-3">
-                <label className="form-label">Diabetes:</label>
+                <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Diabetes:</label>
                 <select name="diabetes" className="form-select" required>
                     <option value="0">No</option>
                     <option value="1">Yes</option>
@@ -128,7 +143,7 @@ function App() {
             </div>
 
             <div className="row mb-3 mb-sm-3">
-                <label className="form-label">Depression:</label>
+                <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Depression:</label>
                 <select name="depression" className="form-select" required>
                     <option value="0">No</option>
                     <option value="1">Yes</option>
@@ -136,121 +151,160 @@ function App() {
             </div>
 
             <div className="row mb-3 mb-sm-3">
-                <label className="form-label">Head Injury:</label>
-                <select name="headInjury" className="form-select" required>
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-            </div>
+    <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Head Injury:</label>
+    <div className="col-sm-9">
+        <select name="headInjury" className="form-select" required>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+    </div>
+</div>
 
-            <div className="row mb-3 mb-sm-3">
-                <label className="form-label">Hypertension:</label>
-                <select name="hypertension" className="form-select" required>
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-            </div>
+<div className="row mb-3 mb-sm-3">
+    <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Hypertension:</label>
+    <div className="col-sm-9">
+        <select name="hypertension" className="form-select" required>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+    </div>
+</div>
 
-            <div className="row mb-3 mb-sm-3">
-                <label className="form-label">Systolic BP:</label>
-                <input type="number" name="systolicBP" min="90" max="179" className="form-control" required />
-            </div>
+<div className="row mb-3 mb-sm-3">
+    <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Systolic BP:</label>
+    <div className="col-sm-9">
+        <input type="number" name="systolicBP" min="90" max="179" className="form-control" required />
+    </div>
+</div>
 
-            <div className="row mb-3 mb-sm-3">
-                <label className="form-label">Diastolic BP:</label>
-                <input type="number" name="diastolicBP" min="60" max="119" className="form-control" required />
-            </div>
+<div className="row mb-3 mb-sm-3">
+    <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Diastolic BP:</label>
+    <div className="col-sm-9">
+        <input type="number" name="diastolicBP" min="60" max="119" className="form-control" required />
+    </div>
+</div>
 
-            <div className="row mb-3 mb-sm-3">
-                <label className="form-label">Cholesterol Total:</label>
-                <input type="number" name="cholesterolTotal" min="150" max="300" step="0.1" className="form-control" required />
-            </div>
+<div className="row mb-3 mb-sm-3">
+    <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Cholesterol Total:</label>
+    <div className="col-sm-9">
+        <input type="number" name="cholesterolTotal" min="150" max="300" step="0.1" className="form-control" required />
+    </div>
+</div>
 
-            <div className="row mb-3 mb-sm-3">
-                <label className="form-label">Cholesterol LDL:</label>
-                <input type="number" name="cholesterolLDL" min="50" max="200" step="0.1" className="form-control" required />
-            </div>
+<div className="row mb-3 mb-sm-3">
+    <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Cholesterol LDL:</label>
+    <div className="col-sm-9">
+        <input type="number" name="cholesterolLDL" min="50" max="200" step="0.1" className="form-control" required />
+    </div>
+</div>
 
-            <div className="row mb-3 mb-sm-3">
-                <label className="form-label">Cholesterol HDL:</label>
-                <input type="number" name="cholesterolHDL" min="20" max="100" step="0.1" className="form-control" required />
-            </div>
+<div className="row mb-3 mb-sm-3">
+    <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Cholesterol HDL:</label>
+    <div className="col-sm-9">
+        <input type="number" name="cholesterolHDL" min="20" max="100" step="0.1" className="form-control" required />
+    </div>
+</div>
 
-            <div className="row mb-3 mb-sm-3">
-                <label className="form-label">Cholesterol Triglycerides:</label>
-                <input type="number" name="cholesterolTriglycerides" min="50" max="400" step="0.1" className="form-control" required />
-            </div>
-          <h3 className="mt-4">Cognitive and Functional Assessments</h3>
-            
-        <div className="row mb-3 mb-sm-3">
-        <label className="form-label">MMSE:</label>
+<div className="row mb-3 mb-sm-3">
+    <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Cholesterol Triglycerides:</label>
+    <div className="col-sm-9">
+        <input type="number" name="cholesterolTriglycerides" min="50" max="400" step="0.1" className="form-control" required />
+    </div>
+</div>
+
+<h3 className="mt-4">Cognitive and Functional Assessments</h3>
+
+<div className="row mb-3 mb-sm-3">
+    <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">MMSE:</label>
+    <div className="col-sm-9">
         <input type="number" className="form-control" {...register("mmse", { min: 0, max: 30, step: 0.1, required: true })} />
-        </div>
-          <div className="row mb-3 mb-sm-3">
-            <label className="form-label">Functional Assessment:</label>
-            <input type="number" maxLength={80} className="form-control" {...register("functionalAssessment", { min: 0, max: 10, step: 0.1, required: true })} />
-            </div>
+    </div>
+</div>
 
-            <div className="row mb-3 mb-sm-3">
-            <label className="form-label">Memory Complaints:</label>
-            <select className="form-select" {...register("memoryComplaints", { required: true })}>
-                <option value="0">No</option>
-                <option value="1">Yes</option>
-            </select>
-            </div>
+<div className="row mb-3 mb-sm-3">
+    <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Functional Assessment:</label>
+    <div className="col-sm-9">
+        <input type="number" maxLength={80} className="form-control" {...register("functionalAssessment", { min: 0, max: 10, step: 0.1, required: true })} />
+    </div>
+</div>
 
-            <div className="row mb-3 mb-sm-3">
-            <label className="form-label">Behavioral Problems:</label>
-            <select className="form-select" {...register("behavioralProblems", { required: true })}>
-                <option value="0">No</option>
-                <option value="1">Yes</option>
-            </select>
-            </div>
+<div className="row mb-3 mb-sm-3">
+    <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Memory Complaints:</label>
+    <div className="col-sm-9">
+        <select className="form-select" {...register("memoryComplaints", { required: true })}>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+    </div>
+</div>
 
-            <div className="row mb-3 mb-sm-3">
-            <label className="form-label">ADL:</label>
-            <input type="number" className="form-control" {...register("adl", { min: 0, max: 10, step: 0.1, required: true })} />
-            </div>
+<div className="row mb-3 mb-sm-3">
+    <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Behavioral Problems:</label>
+    <div className="col-sm-9">
+        <select className="form-select" {...register("behavioralProblems", { required: true })}>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+    </div>
+</div>
 
-            <div className="row mb-3 mb-sm-3">
-            <label className="form-label">Confusion:</label>
-            <select className="form-select" {...register("confusion", { required: true })}>
-                <option value="0">No</option>
-                <option value="1">Yes</option>
-            </select>
-            </div>
+<div className="row mb-3 mb-sm-3">
+    <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">ADL:</label>
+    <div className="col-sm-9">
+        <input type="number" className="form-control" {...register("adl", { min: 0, max: 10, step: 0.1, required: true })} />
+    </div>
+</div>
 
-            <div className="row mb-3 mb-sm-3">
-            <label className="form-label">Disorientation:</label>
-            <select className="form-select" {...register("disorientation", { required: true })}>
-                <option value="0">No</option>
-                <option value="1">Yes</option>
-            </select>
-            </div>
+<div className="row mb-3 mb-sm-3">
+    <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Confusion:</label>
+    <div className="col-sm-9">
+        <select className="form-select" {...register("confusion", { required: true })}>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+    </div>
+</div>
 
-            <div className="row mb-3 mb-sm-3">
-            <label className="form-label">Personality Changes:</label>
-            <select className="form-select" {...register("personalityChanges", { required: true })}>
-                <option value="0">No</option>
-                <option value="1">Yes</option>
-            </select>
-            </div>
+<div className="row mb-3 mb-sm-3">
+    <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Disorientation:</label>
+    <div className="col-sm-9">
+        <select className="form-select" {...register("disorientation", { required: true })}>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+    </div>
+</div>
 
-            <div className="row mb-3 mb-sm-3">
-            <label className="form-label">Difficulty Completing Tasks:</label>
-            <select className="form-select" {...register("difficultyCompletingTasks", { required: true })}>
-                <option value="0">No</option>
-                <option value="1">Yes</option>
-            </select>
-            </div>
+<div className="row mb-3 mb-sm-3">
+    <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Personality Changes:</label>
+    <div className="col-sm-9">
+        <select className="form-select" {...register("personalityChanges", { required: true })}>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+    </div>
+</div>
 
-            <div className="row mb-3 mb-sm-3">
-            <label className="form-label">Forgetfulness:</label>
-            <select className="form-select" {...register("forgetfulness", { required: true })}>
-                <option value="0">No</option>
-                <option value="1">Yes</option>
-            </select>
-            </div>
+<div className="row mb-3 mb-sm-3">
+    <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Difficulty Completing Tasks:</label>
+    <div className="col-sm-9">
+        <select className="form-select" {...register("difficultyCompletingTasks", { required: true })}>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+    </div>
+</div>
+
+<div className="row mb-3 mb-sm-3">
+    <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Forgetfulness:</label>
+    <div className="col-sm-9">
+        <select className="form-select" {...register("forgetfulness", { required: true })}>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+    </div>
+</div>
+
           <button type="submit" className="btn btn-primary mt-4">Submit</button>
         </form>
       </header>
