@@ -9,6 +9,8 @@ model1 = FNN()
 model1.eval()
 
 def get_prediction(user_info):
+    print("Getting prediction")
+    print
     tensor = torch.tensor(user_info)
     print(tensor)
     output1 = model1.forward(tensor)
@@ -34,5 +36,8 @@ def get_current_time():
     return {'time': time.time()}
 
 @app.route('/api/predict', methods=['POST'])
-def predict():
-    return
+def predict(request):
+    print("Request received")
+    print(request.json)
+    prediction = get_prediction(request.json);
+    return prediction

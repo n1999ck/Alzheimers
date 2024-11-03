@@ -2,26 +2,32 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import "halfmoon/css/halfmoon.min.css";
 import {useForm} from 'react-hook-form';
-function App() {
-  const [currentTime, setCurrentTime] = useState(0);
-
-  useEffect(() => {
-    fetch('/api/time').then(res => res.json()).then(data => {
-      setCurrentTime(data.time);
-    });
-  }, []);
-
-  
+function App() {  
   const { register, handleSubmit } = useForm();
   
   const onSubmit = (data) => {
     console.log(data);
+    fetch('/api/predict', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Success:', data);
+      alert("Data has been uploaded successfully!");
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      alert("An error occurred while uploading the data. Please try again.");
+    });
   };
 
   return (
     <div className="App container">
       <header className="App-header">
-        <p>The current time is {currentTime}.</p>
         
         <form className="form" action="/api/upload" method="post" onSubmit={handleSubmit(onSubmit)}>
           <h3 className="mt-4">Demographics and Personal Information</h3>
@@ -103,51 +109,65 @@ function App() {
 
           <div className="row mb-3 mb-sm-3">
             <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Physical Activity:</label>
+            <div className="col-sm-9">
             <input type="number" className="form-control" {...register("physicalActivity", { min: 0, max: 10, step: 0.1, required: true })} />
+            </div>
           </div>
 
           <div className="row mb-3 mb-sm-3">
             <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Diet Quality:</label>
+            <div className="col-sm-9">
             <input type="number" className="form-control" {...register("dietQuality", { min: 0, max: 10, step: 0.1, required: true })} />
+            </div>
           </div>
 
           <div className="row mb-3 mb-sm-3">
             <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Sleep Quality:</label>
+            <div className="col-sm-9">
             <input type="number" className="form-control" {...register("sleepQuality", { min: 0, max: 10, step: 0.1, required: true })} />
+            </div>
           </div>
 
           <h3 className="mt-4">Medical History and Conditions</h3>
           
           <div className="row mb-3 mb-sm-3">
                 <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Family History of Alzheimer's:</label>
+                <div className="col-sm-9">
                 <select name="familyHistoryAlzheimers" className="form-select" required>
                     <option value="0">No</option>
                     <option value="1">Yes</option>
                 </select>
+                </div>
             </div>
 
             <div className="row mb-3 mb-sm-3">
                 <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Cardiovascular Disease:</label>
+                <div className="col-sm-9">
                 <select name="cardiovascularDisease" className="form-select" required>
                     <option value="0">No</option>
                     <option value="1">Yes</option>
                 </select>
+                </div>
             </div>
 
             <div className="row mb-3 mb-sm-3">
                 <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Diabetes:</label>
+                <div className="col-sm-9">
                 <select name="diabetes" className="form-select" required>
                     <option value="0">No</option>
                     <option value="1">Yes</option>
                 </select>
+                </div>
             </div>
 
             <div className="row mb-3 mb-sm-3">
                 <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Depression:</label>
+                <div className="col-sm-9">
                 <select name="depression" className="form-select" required>
                     <option value="0">No</option>
                     <option value="1">Yes</option>
                 </select>
+                </div>
             </div>
 
             <div className="row mb-3 mb-sm-3">
