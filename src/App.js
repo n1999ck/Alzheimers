@@ -6,13 +6,16 @@ function App() {
   const { register, handleSubmit } = useForm();
   
   const onSubmit = (data) => {
+    console.log(typeof data);
     console.log(data);
+    console.log(JSON.stringify(data));
+    console.log(Object.keys(data).length);
     fetch('/api/predict', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+        body: JSON.stringify(data),
     })
     .then(response => response.json())
     .then(data => {
@@ -37,6 +40,7 @@ function App() {
             <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">PatientID:</label>
             <div className="col-sm-9">
               <input type="number" className="form-control" {...register("patientID", { required: true })} />
+              <div className='form-text'>Please enter a unique patient ID.</div>
             </div>
           </div>
 
@@ -44,6 +48,7 @@ function App() {
             <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Age:</label>
             <div className="col-sm-9">
               <input type="number" className="form-control" {...register("age", { min: 0, required: true })} />
+              <div className='form-text'>Enter a whole number above 0.</div>
             </div>
           </div>
 
@@ -86,7 +91,8 @@ function App() {
           <div className="row mb-3 mb-sm-3">
             <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">BMI:</label>
             <div className="col-sm-9">
-              <input type="number" className="form-control" {...register("bmi", { min: 15, max: 40, step: 0.1, required: true })} />
+              <input type="number" className="form-control" {...register("bmi", { min: 15, max: 50, step: 0.1, required: true })} />
+              <div className='form-text'>Enter a number between 15 and 60.</div>
             </div>
           </div>
 
@@ -104,6 +110,7 @@ function App() {
             <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Alcohol Consumption:</label>
             <div className="col-sm-9">
               <input type="number" className="form-control" {...register("alcoholConsumption", { min: 0, max: 20, step: 0.1, required: true })} />
+              <div className='form-text'>Enter a floating point number between 0 and 20.</div>
             </div>
           </div>
 
@@ -111,6 +118,7 @@ function App() {
             <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Physical Activity:</label>
             <div className="col-sm-9">
             <input type="number" className="form-control" {...register("physicalActivity", { min: 0, max: 10, step: 0.1, required: true })} />
+            <div className='form-text'>Enter a floating point number between 0 and 10.</div>
             </div>
           </div>
 
@@ -118,6 +126,7 @@ function App() {
             <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Diet Quality:</label>
             <div className="col-sm-9">
             <input type="number" className="form-control" {...register("dietQuality", { min: 0, max: 10, step: 0.1, required: true })} />
+            <div className='form-text'>Enter a floating point number between 0 and 10.</div>
             </div>
           </div>
 
@@ -125,6 +134,7 @@ function App() {
             <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Sleep Quality:</label>
             <div className="col-sm-9">
             <input type="number" className="form-control" {...register("sleepQuality", { min: 0, max: 10, step: 0.1, required: true })} />
+            <div className='form-text'>Enter a floating point number between 0 and 10.</div>
             </div>
           </div>
 
@@ -132,11 +142,14 @@ function App() {
           
           <div className="row mb-3 mb-sm-3">
                 <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Family History of Alzheimer's:</label>
-                <div className="col-sm-9">
-                <select name="familyHistoryAlzheimers" className="form-select" required>
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
+                <div className="col-sm-9 form-check form-check-inline">
+            
+                    <input type="radio" className='form-check-input' value="0" {...register("familyHistoryAlzheimers", { required: true })} />
+                    <label className='form-check-label'>Yes</label>
+                
+                    <input type="radio" className='form-check-input' value="1" {...register("familyHistoryAlzheimers", { required: true })} />
+                    <label className='form-check-label'>No</label>
+                
                 </div>
             </div>
 
@@ -194,6 +207,7 @@ function App() {
     <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Systolic BP:</label>
     <div className="col-sm-9">
         <input type="number" name="systolicBP" min="90" max="179" className="form-control" required />
+        <div className='form-text'>Enter an integer between 90 and 179.</div>
     </div>
 </div>
 
@@ -201,6 +215,7 @@ function App() {
     <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Diastolic BP:</label>
     <div className="col-sm-9">
         <input type="number" name="diastolicBP" min="60" max="119" className="form-control" required />
+        <div className='form-text'>Enter an integer between 60 and 119.</div>
     </div>
 </div>
 
@@ -208,6 +223,7 @@ function App() {
     <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Cholesterol Total:</label>
     <div className="col-sm-9">
         <input type="number" name="cholesterolTotal" min="150" max="300" step="0.1" className="form-control" required />
+        <div className='form-text'>Enter a floating point number between 150 and 300.</div>
     </div>
 </div>
 
@@ -215,6 +231,7 @@ function App() {
     <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Cholesterol LDL:</label>
     <div className="col-sm-9">
         <input type="number" name="cholesterolLDL" min="50" max="200" step="0.1" className="form-control" required />
+        <div className='form-text'>Enter a floating point number between 50 and 200.</div>
     </div>
 </div>
 
@@ -222,6 +239,7 @@ function App() {
     <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Cholesterol HDL:</label>
     <div className="col-sm-9">
         <input type="number" name="cholesterolHDL" min="20" max="100" step="0.1" className="form-control" required />
+        <div className='form-text'>Enter a floating point number between 20 and 100.</div>
     </div>
 </div>
 
@@ -229,6 +247,7 @@ function App() {
     <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Cholesterol Triglycerides:</label>
     <div className="col-sm-9">
         <input type="number" name="cholesterolTriglycerides" min="50" max="400" step="0.1" className="form-control" required />
+        <div className='form-text'>Enter a floating point number between 50 and 400.</div>
     </div>
 </div>
 
@@ -238,6 +257,7 @@ function App() {
     <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">MMSE:</label>
     <div className="col-sm-9">
         <input type="number" className="form-control" {...register("mmse", { min: 0, max: 30, step: 0.1, required: true })} />
+        <div className='form-text'>Enter a floating point number between 0 and 30.</div>
     </div>
 </div>
 
@@ -245,6 +265,7 @@ function App() {
     <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">Functional Assessment:</label>
     <div className="col-sm-9">
         <input type="number" maxLength={80} className="form-control" {...register("functionalAssessment", { min: 0, max: 10, step: 0.1, required: true })} />
+        <div className='form-text'>Enter a floating point number between 0 and 10.</div>
     </div>
 </div>
 
@@ -272,6 +293,7 @@ function App() {
     <label className="col-sm-3 col-form-label col-form-label-lg mb-1 mb-sm-0">ADL:</label>
     <div className="col-sm-9">
         <input type="number" className="form-control" {...register("adl", { min: 0, max: 10, step: 0.1, required: true })} />
+        <div className='form-text'>Enter a floating point number between 0 and 10.</div>
     </div>
 </div>
 

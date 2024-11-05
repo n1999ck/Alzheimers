@@ -10,9 +10,14 @@ model1.eval()
 
 def get_prediction(user_info):
     print("Getting prediction")
-    print
+    print(type(user_info))
+    print(type(user_info[0]))
+    user_info = [float(i) for i in user_info]
+    print(len(user_info))
     tensor = torch.tensor(user_info)
-    print(tensor)
+    print("\nTensor:")
+    print(tensor.shape)
+    print(tensor.size())
     output1 = model1.forward(tensor)
     print(output1)
     prediction1 = int(output1.round().item())
@@ -36,8 +41,14 @@ def get_current_time():
     return {'time': time.time()}
 
 @app.route('/api/predict', methods=['POST'])
-def predict(request):
+def predict():
+    user_info = []
     print("Request received")
-    print(request.json)
-    prediction = get_prediction(request.json);
-    return prediction
+    print(type(request))
+    print("Request data: " + str(request.data) + "\n")
+    print("Request json:" + str(request.json) + "\n")
+    for key, value in request.json.items():
+        user_info.append(value)
+    print(user_info)
+    prediction = get_prediction(user_info);
+    return jsonify(prediction)

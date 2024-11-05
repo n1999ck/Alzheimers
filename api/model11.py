@@ -13,6 +13,8 @@ import math
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
+
+
 '''
 STEP 1: LOADING DATASET
 '''
@@ -179,6 +181,9 @@ recall = tp / (fn+tp)       # Correctly predicted positives over all actual posi
 
 f1 = 2 * ((precision*recall)/(precision+recall))                        # F1 Score 
 mcc = ((tp*tn) - (fp*fn))/(math.sqrt((tp+fp)*(tp+fn)*(tn+fp)*(tn+fn)))  # Matthews Correlation Coefficient
+
+torch.save(model.state_dict(), 'model.pth')
+
 """ 
 # Print all calculated metrics for test samples
 print("Test Accuracy:\t\t{}%".format(round((total_acc_test/X_test.shape[0])*100, 4)))

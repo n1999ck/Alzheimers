@@ -12,7 +12,7 @@ def get_user_input():
     return 
 
 def get_prediction(user_info):
-    print(user_info)
+    print(type(user_info))
     tensor = torch.tensor(user_info)
     output1 = model1.forward(tensor)
     prediction1 = int(output1.round().item())
