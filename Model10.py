@@ -84,7 +84,7 @@ class FNN(nn.Module):
 STEP 4: INSTANTIATE MODEL CLASS
 '''
 model = FNN().to(device)
-summary(model, (X.shape[1],)) 
+# summary(model, (X.shape[1],)) 
 
 '''
 STEP 5: INSTANTIATE LOSS CLASS

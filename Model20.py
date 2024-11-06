@@ -9,7 +9,6 @@ import pandas as pd
 import numpy as np
 import math
 
-
 # Set the device to GPU if available, otherwise use CPU
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -102,7 +101,7 @@ total_acc_validation_plot = []
 for epoch in range(EPOCHS):
     total_loss_train = 0
     total_acc_train = 0
-    model.train()  # Set model to training mode
+    #model.train()  # Set model to training mode
     for inputs, labels in train_dataloader:
         optimizer.zero_grad()  # Zero the gradients
         predictions = model(inputs).squeeze(1)  # Forward pass
@@ -126,14 +125,14 @@ for epoch in range(EPOCHS):
             total_acc_val += acc
 
     # Record metrics for plotting
-    total_loss_train_plot.append(total_loss_train / len(train_dataloader))
-    total_loss_validation_plot.append(total_loss_val / len(validation_dataloader))
-    total_acc_train_plot.append(total_acc_train / len(X_train))
-    total_acc_validation_plot.append(total_acc_val / len(X_val))
+    total_loss_train_plot.append(round(total_loss_train / len(train_dataloader), 4))
+    total_loss_validation_plot.append(round(total_loss_val / len(validation_dataloader),4))
+    total_acc_train_plot.append(round(total_acc_train / len(X_train),4))
+    total_acc_validation_plot.append(round(total_acc_val / len(X_val),4))
 
     # Print training and validation results for the epoch
     print(f"Epoch {epoch + 1}/{EPOCHS}, Train Loss: {total_loss_train/1000:.4f}, Train Accuracy: {total_acc_train / len(X_train) * 100:.2f}%")
-    print(f"Val Loss: {total_loss_val:.4f}, Val Accuracy: {total_acc_val / len(X_val) * 100:.2f}%")
+    print(f"Val Loss: {total_loss_val/1000:.4f}, Val Accuracy: {total_acc_val / len(X_val) * 100:.2f}%")
     print("=" * 60)
 
 # Testing the Model
