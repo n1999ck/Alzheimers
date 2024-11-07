@@ -6,18 +6,27 @@ model1 = FNN()
 
 model1.eval()
 
-user_info = [72, 0, 0, 2, 33.28973831, 0, 7.890703151, 6.570993383, 7.941403884, 9.878710516, 0, 0, 0, 0, 0, 0, 166, 78, 283.3967969, 92.20006443, 81.92004333, 217.3968725, 11.11477737, 6.30754331, 0, 1, 8.327563008, 0, 1, 0, 0, 1]
+user_info = ['84', '1', '2', '0', '45', '1', '20', '0', '0', '0', '1', '1', '1', '1', '1', '1', '166', '78', '283', '92', '81', '217', '11', '0', '1', '1', '10', '1', '1', '1', '1', '1']
+
+
 #Will be where we pull in user input
 def get_user_input():
     return 
 
 def get_prediction(user_info):
-    print(type(user_info))
+    print("User info full object data type:" + str(type(user_info)))
+    print("User info element 0 data type: " + str(type(user_info[0])))
+    user_info = [float(i) for i in user_info]
     tensor = torch.tensor(user_info)
     output1 = model1.forward(tensor)
     prediction1 = int(output1.round().item())
     predictions = [prediction1]
-    return predictions
+    print("Predictions: " + str(predictions))
+    if(predictions == 0):
+        return(f"Model says...Alzheimers NOT detected :D")
+    else:
+        return(f"Model says...Alzheimers detected :'(")
+    #return predictions
 
 predictions = get_prediction(user_info)
 prediction_num=0
