@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useForm } from "react-hook-form";
-import  DemographicsForm   from "./DemographicsForm";
-import  LifestyleAndBehaviorForm   from "./LifestyleAndBehaviorForm";
-import  CognitiveFunctionalForm   from "./CognitiveFunctionalForm";
-import  MedicalHistoryForm   from "./MedicalHistoryForm";
+import DemographicsForm from "./DemographicsForm";
+import LifestyleAndBehaviorForm from "./LifestyleAndBehaviorForm";
+import CognitiveFunctionalForm from "./CognitiveFunctionalForm";
+import MedicalHistoryForm from "./MedicalHistoryForm";
 
 function App() {
   const { register, handleSubmit } = useForm();
@@ -34,7 +34,7 @@ function App() {
   };
 
   return (
-    <div className="App container">
+    <div className="App container-fluid row">
       <header className="App-header">
         <form
           className="form"
@@ -42,28 +42,33 @@ function App() {
           method="post"
           onSubmit={handleSubmit(onSubmit)}
         >
+          <div className="col-lg-3">
           <h3 className="mt-4">Demographics and Personal Information</h3>
 
           <DemographicsForm register={register} />
+        </div>
 
+        <div className="col-lg-3">
           <h3 className="mt-4">Lifestyle and Behavior</h3>
 
           <LifestyleAndBehaviorForm register={register} />
-
+        </div>
+        <div className="col-lg-3">
           <h3 className="mt-4">Medical History and Conditions</h3>
 
           <MedicalHistoryForm register={register} />
-          
+        </div>
+        <div className="col-lg-3">
           <h3 className="mt-4">Cognitive and Functional Assessments</h3>
 
           <CognitiveFunctionalForm register={register} />
-          
-          <button type="submit" className="btn btn-primary mt-4">
-            Submit
-          </button>
-        </form>
-      </header>
-    </div>
+        </div>
+        <button type="submit" className="btn btn-primary mt-4">
+          Submit
+        </button>
+      </form>
+    </header>
+    </div >
   );
 }
 
