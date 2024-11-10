@@ -3,11 +3,11 @@ import React from "react";
 export default function CognitiveFunctionalForm({ register }) {
   return (
     <div className="section">
-      <div className="row mb-3 mb-sm-3">
+      <div className="row">
         <div className="row">
           <div className="col-sm-4">
             {/*Family History of Alzheimer's */}
-            <div className="row mb-3 mb-sm-3">
+            <div className="row my-3 mb-sm-3">
               <label className=" col-form-label  mb-1 mb-sm-0">
                 Family History of Alzheimer's:
               </label>
@@ -35,7 +35,7 @@ export default function CognitiveFunctionalForm({ register }) {
           </div>
           <div className="col-sm-4">
             {/* Cardiovascular Disease */}
-            <div className="row mb-3 mb-sm-3">
+            <div className="row my-3 mb-sm-3">
               <label className=" col-form-label mb-1 mb-sm-0">
                 Cardiovascular Disease:
               </label>
@@ -63,7 +63,7 @@ export default function CognitiveFunctionalForm({ register }) {
           </div>
           <div className="col-sm-4">
             {/* Diabetes */}
-            <div className="row mb-3 mb-sm-3">
+            <div className="row my-3 mb-sm-3">
               <label className=" col-form-label  mb-1 mb-sm-0">Diabetes:</label>
               <div className="">
                 <div className="form-check form-check-inline">
@@ -91,7 +91,7 @@ export default function CognitiveFunctionalForm({ register }) {
         <div className="row">
           <div className="col-sm-4">
             {/* Depression */}
-            <div className="row mb-3 mb-sm-3">
+            <div className="row my-3 mb-sm-3">
               <label className=" col-form-label  mb-1 mb-sm-0">
                 Depression:
               </label>
@@ -119,7 +119,7 @@ export default function CognitiveFunctionalForm({ register }) {
           </div>
           <div className="col-sm-4">
             {/* Head Injury */}
-            <div className="row mb-3 mb-sm-3">
+            <div className="row my-3 mb-sm-3">
               <label className=" col-form-label  mb-1 mb-sm-0">
                 Head Injury:
               </label>
@@ -147,7 +147,7 @@ export default function CognitiveFunctionalForm({ register }) {
           </div>
           <div className="col-sm-4">
             {/* Hypertension */}
-            <div className="row mb-3 mb-sm-3">
+            <div className="row my-3 mb-sm-3">
               <label className=" col-form-label  mb-1 mb-sm-0">
                 Hypertension:
               </label>
@@ -177,7 +177,7 @@ export default function CognitiveFunctionalForm({ register }) {
         <div className="row">
           <div className="col-sm-4">
             {/* Systolic BP */}
-            <div className="row mb-3 mb-sm-3">
+            <div className="row my-3 mb-sm-3">
               <label className="col-form-label mb-1 mb-sm-0">
                 Systolic BP:
               </label>
@@ -199,7 +199,7 @@ export default function CognitiveFunctionalForm({ register }) {
           </div>
           <div className="col-sm-4">
             {/* Diastolic BP */}
-            <div className="row mb-3 mb-sm-3">
+            <div className="row my-3 mb-sm-3">
               <label className="col-form-label mb-1 mb-sm-0">
                 Diastolic BP:
               </label>
@@ -221,7 +221,7 @@ export default function CognitiveFunctionalForm({ register }) {
           </div>
           <div className="col-sm-4">
             {/* Cholesterol Total */}
-            <div className="row mb-3 mb-sm-3">
+            <div className="row my-3 mb-sm-3">
               <label className=" col-form-label  mb-1 mb-sm-0">
                 Cholesterol Total:
               </label>
@@ -246,7 +246,7 @@ export default function CognitiveFunctionalForm({ register }) {
         <div className="row">
           <div className="col-sm-4">
             {/* Cholesterol LDL */}
-            <div className="row mb-3 mb-sm-3">
+            <div className="row my-3 mb-sm-3">
               <label className=" col-form-label  mb-1 mb-sm-0">
                 Cholesterol LDL:
               </label>
@@ -269,7 +269,7 @@ export default function CognitiveFunctionalForm({ register }) {
           </div>
           <div className="col-sm-4">
             {/* Cholesterol HDL */}
-            <div className="row mb-3 mb-sm-3">
+            <div className="row my-3 mb-sm-3">
               <label className=" col-form-label  mb-1 mb-sm-0">
                 Cholesterol HDL:
               </label>
@@ -292,7 +292,7 @@ export default function CognitiveFunctionalForm({ register }) {
           </div>
           <div className="col-sm-4">
             {/* Cholesterol Triglycerides */}
-            <div className="row mb-3 mb-sm-3">
+            <div className="row my-3 mb-sm-3">
               <label className=" col-form-label  mb-1 mb-sm-0">
                 Cholesterol Triglycerides:
               </label>
