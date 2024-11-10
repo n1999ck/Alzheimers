@@ -20,7 +20,7 @@ dataset.dropna(inplace=True)
 dataset.pop("DoctorInCharge")
 dataset.pop("PatientID") 
 
-#Mac-abs Normalization
+#Max-abs Normalization
 for column in dataset.columns:
     dataset[column] = dataset[column]/dataset[column].abs().max()
 
@@ -74,6 +74,7 @@ class FNN(nn.Module):
         self.linear = nn.Linear(HIDDEN_NEURONS, 1)
         self.sigmoid = nn.Sigmoid()
 
+    # Forward pass
     def forward(self, x):
         x = self.input_layer(x)
         x = self.linear(x)
@@ -84,7 +85,8 @@ class FNN(nn.Module):
 STEP 4: INSTANTIATE MODEL CLASS
 '''
 model = FNN().to(device)
-summary(model, (X.shape[1],)) 
+#summary(model, (X.shape[1],))  # TODO: Fix summary
+
 
 '''
 STEP 5: INSTANTIATE LOSS CLASS
@@ -136,11 +138,8 @@ for epoch in range(EPOCHS):
     total_acc_validation_plot.append(round(total_acc_val/(validation_data.__len__())*100, 4))
 
     print(f"Epoch no. {epoch+1}, Train Loss: {total_loss_train/1000:.4f}, Train Accuracy {(total_acc_train/(X_train.shape[0])*100):.4f}")
-    print(total_acc_train)
-    print(train_dataloader.__len__())
+    print("\n")
     print(f"Epoch no. {epoch+1}, Val Loss: {total_loss_val/1000:.4f}, Val Accuracy {(total_acc_val/(X_val.shape[0])*100):.4f}")
-    print(total_acc_val)
-    print(validation_dataloader.__len__())
     print("="*60)
 
 '''
@@ -169,14 +168,25 @@ with torch.no_grad():
 STEP 9: ASSESS TESTING OUTCOME
 '''
 # Confusion matrix with true neg, false pos, false neg, true pos respectively
-tn, fp, fn, tp = confusion_matrix(y_true=y_label, y_pred=y_pred).ravel()      
+cm = confusion_matrix(y_true=y_label, y_pred=y_pred)   
+tn, fp, fn, tp = cm.ravel()  
 
-precision = tp /(tp+fp)     # Correctly predicted positives over all predicted positives
-specificity = tn / (tn+fp)  # Correctly predicted negatives over all actual negatives
-recall = tp / (fn+tp)       # Correctly predicted positives over all actual positives
+specificity = -1
+precision = -1
+recall = -1
+f1 = -1
+mcc = -1
+# if statements to stop any division by 0 errors
+if((tn+fp)>0):
+    specificity = tn / (tn+fp)  # Correctly predicted negatives over all actual negatives
 
-f1 = 2 * ((precision*recall)/(precision+recall))                        # F1 Score 
-mcc = ((tp*tn) - (fp*fn))/(math.sqrt((tp+fp)*(tp+fn)*(tn+fp)*(tn+fn)))  # Matthews Correlation Coefficient
+if((tp+fp) & (fn+tp)>0):
+    precision = tp /(tp+fp)     # Correctly predicted positives over all predicted positives
+    recall = tp / (fn+tp)       # Correctly predicted positives over all actual positives
+    f1 = 2 * ((precision*recall)/(precision+recall))    # F1 Score 
+
+if((tp+fp) & (tp+fn) & (tn+fp) & (tn+fn) > 0):
+    mcc = ((tp*tn) - (fp*fn))/(math.sqrt((tp+fp)*(tp+fn)*(tn+fp)*(tn+fn)))  # Matthews Correlation Coefficient
 
 # Print all calculated metrics for test samples
 print("Test Accuracy:\t\t{}%".format(round((total_acc_test/X_test.shape[0])*100, 4)))
@@ -193,12 +203,11 @@ print("MCC:\t\t{}".format(round(mcc, 4)))
 STEP 10: PLOT METRICS
 '''
 # Plot confusion matrix for test samples
-confmat = confusion_matrix(y_true=y_label, y_pred=y_pred)
 fig, ax = plt.subplots(figsize=(2.5, 2.5))
-ax.matshow(confmat, cmap=plt.cm.Blues, alpha=0.3)
-for i in range(confmat.shape[0]):
-    for j in range(confmat.shape[1]):
-        ax.text(x=j, y=i, s=confmat[i,j], va='center', ha='center')
+ax.matshow(cm, cmap=plt.cm.Blues, alpha=0.3)
+for i in range(cm.shape[0]):
+    for j in range(cm.shape[1]):
+        ax.text(x=j, y=i, s=cm[i,j], va='center', ha='center')
 ax.xaxis.set_ticks_position('bottom')
 plt.xlabel('Predicted Label')
 plt.ylabel('True label')
@@ -225,7 +234,7 @@ axs[1].legend()
 plt.tight_layout()
 plt.show()
 
+
 #https://github.com/manujosephv/pytorch_tabular
-#https://stackoverflow.com/questions/25009284/how-to-plot-roc-curve-in-python
 
 #https://www.isanasystems.com/machine-learning-handling-dataset-having-multiple-features/
