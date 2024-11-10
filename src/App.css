@@ -37,3 +37,16 @@
   }
 }
  */
+.App {
+  font-family: "Atkinson Hyperlegible", sans-serif;
+}
+
+.section {
+  background-color: #f1f1f6;
+  border-radius: 15px;
+}
+
+.navbar-brand {
+  font-family: "Atkinson Hyperlegible", sans-serif;
+  font-weight: 700;
+}

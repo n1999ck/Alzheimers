@@ -6,6 +6,7 @@ import DemographicsForm from "./DemographicsForm";
 import LifestyleAndBehaviorForm from "./LifestyleAndBehaviorForm";
 import CognitiveFunctionalForm from "./CognitiveFunctionalForm";
 import MedicalHistoryForm from "./MedicalHistoryForm";
+import Header from "./ Header";
 
 function App() {
   const { register, handleSubmit } = useForm();
@@ -34,41 +35,49 @@ function App() {
   };
 
   return (
-    <div className="App container-fluid row">
-      <header className="App-header">
+    <div className="App">
+      <Header />
+      <div className="container-fluid mx-5">
         <form
           className="form"
           action="/api/upload"
           method="post"
           onSubmit={handleSubmit(onSubmit)}
         >
-          <div className="col-lg-3">
-          <h3 className="mt-4">Demographics and Personal Information</h3>
+          <div className="row mx-5">
+            <div className="col-lg-2 col">
+              <h3 className="mt-4">Demographics and Personal Information</h3>
 
-          <DemographicsForm register={register} />
-        </div>
+              <DemographicsForm register={register} />
+            </div>
 
-        <div className="col-lg-3">
-          <h3 className="mt-4">Lifestyle and Behavior</h3>
+            <div className="col-lg-9 col">
+              <div className="row mx-5">
+                <div className=" row">
+                  <h3 className="mt-4">Lifestyle and Behavior</h3>
 
-          <LifestyleAndBehaviorForm register={register} />
-        </div>
-        <div className="col-lg-3">
-          <h3 className="mt-4">Medical History and Conditions</h3>
+                  <LifestyleAndBehaviorForm register={register} />
+                </div>
+                <div className="row">
+                  <h3 className="mt-4">Medical History and Conditions</h3>
 
-          <MedicalHistoryForm register={register} />
-        </div>
-        <div className="col-lg-3">
-          <h3 className="mt-4">Cognitive and Functional Assessments</h3>
+                  <MedicalHistoryForm register={register} />
+                </div>
+                <div className="row">
+                  <h3 className="mt-4">Cognitive and Functional Assessments</h3>
 
-          <CognitiveFunctionalForm register={register} />
-        </div>
-        <button type="submit" className="btn btn-primary mt-4">
-          Submit
-        </button>
-      </form>
-    </header>
-    </div >
+                  <CognitiveFunctionalForm register={register} />
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" className="btn btn-primary mt-4">
+              Submit
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }
 
