@@ -17,6 +17,7 @@ export default function CognitiveFunctionalForm({ register }) {
                     type="radio"
                     className="form-check-input"
                     value="0"
+                    id="familyHistoryAlzheimersNo"
                     {...register("familyHistoryAlzheimers", { required: true })}
                   />
                   <label className="form-check-label">No</label>
@@ -26,6 +27,7 @@ export default function CognitiveFunctionalForm({ register }) {
                     type="radio"
                     className="form-check-input"
                     value="1"
+                    id="familyHistoryAlzheimersYes"
                     {...register("familyHistoryAlzheimers", { required: true })}
                   />
                   <label className="form-check-label">Yes</label>
@@ -45,6 +47,7 @@ export default function CognitiveFunctionalForm({ register }) {
                     type="radio"
                     className="form-check-input"
                     value="0"
+                    id="cardiovascularDiseaseNo"
                     {...register("cardiovascularDisease", { required: true })}
                   />
                   <label className="form-check-label">No</label>
@@ -54,6 +57,7 @@ export default function CognitiveFunctionalForm({ register }) {
                     type="radio"
                     className="form-check-input"
                     value="1"
+                    id="cardiovascularDiseaseYes"
                     {...register("cardiovascularDisease", { required: true })}
                   />
                   <label className="form-check-label">Yes</label>
@@ -71,6 +75,7 @@ export default function CognitiveFunctionalForm({ register }) {
                     type="radio"
                     className="form-check-input"
                     value="0"
+                    id="diabetesNo"
                     {...register("diabetes", { required: true })}
                   />
                   <label className="form-check-label">No</label>
@@ -80,6 +85,7 @@ export default function CognitiveFunctionalForm({ register }) {
                     type="radio"
                     className="form-check-input"
                     value="1"
+                    id="diabetesYes"
                     {...register("diabetes", { required: true })}
                   />
                   <label className="form-check-label">Yes</label>
@@ -101,6 +107,7 @@ export default function CognitiveFunctionalForm({ register }) {
                     type="radio"
                     className="form-check-input"
                     value="0"
+                    id="depressionNo"
                     {...register("depression", { required: true })}
                   />
                   <label className="form-check-label">No</label>
@@ -110,6 +117,7 @@ export default function CognitiveFunctionalForm({ register }) {
                     type="radio"
                     className="form-check-input"
                     value="1"
+                    id="depressionYes"
                     {...register("depression", { required: true })}
                   />
                   <label className="form-check-label">Yes</label>
@@ -129,6 +137,7 @@ export default function CognitiveFunctionalForm({ register }) {
                     type="radio"
                     className="form-check-input"
                     value="0"
+                    id="headInjuryNo"
                     {...register("headInjury", { required: true })}
                   />
                   <label className="form-check-label">No</label>
@@ -138,6 +147,7 @@ export default function CognitiveFunctionalForm({ register }) {
                     type="radio"
                     className="form-check-input"
                     value="1"
+                    id="headInjuryYes"
                     {...register("headInjury", { required: true })}
                   />
                   <label className="form-check-label">Yes</label>
@@ -157,6 +167,7 @@ export default function CognitiveFunctionalForm({ register }) {
                     type="radio"
                     className="form-check-input"
                     value="0"
+                    id="hypertensionNo"
                     {...register("hypertension", { required: true })}
                   />
                   <label className="form-check-label">No</label>
@@ -166,6 +177,7 @@ export default function CognitiveFunctionalForm({ register }) {
                     type="radio"
                     className="form-check-input"
                     value="1"
+                    id="hypertensionYes"
                     {...register("hypertension", { required: true })}
                   />
                   <label className="form-check-label">Yes</label>
@@ -188,6 +200,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   max="179"
                   className="form-control"
                   placeholder="Number between 90 and 179"
+                  id="systolicBP"
                   {...register("systolicBP", {
                     required: true,
                     min: 90,
@@ -210,6 +223,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   max="119"
                   className="form-control"
                   placeholder="Number between 60 and 119"
+                  id="diastolicBP"
                   {...register("diastolicBP", {
                     required: true,
                     min: 60,
@@ -233,6 +247,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   step="0.1"
                   className="form-control"
                   placeholder="Number between 150 and 300"
+                  id="cholesterolTotal"
                   {...register("cholesterolTotal", {
                     required: true,
                     min: 150,
@@ -258,6 +273,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   step="0.1"
                   className="form-control"
                   placeholder="Number between 50 and 200"
+                  id="cholesterolLDL"
                   {...register("cholesterolLDL", {
                     required: true,
                     min: 50,
@@ -281,6 +297,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   step="0.1"
                   className="form-control"
                   placeholder="Number between 20 and 100"
+                  id="cholesterolHDL"
                   {...register("cholesterolHDL", {
                     required: true,
                     min: 20,
@@ -304,6 +321,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   step="0.1"
                   className="form-control"
                   placeholder="Number between 50 and 400"
+                  id="cholesterolTriglycerides"
                   {...register("cholesterolTriglycerides", {
                     required: true,
                     min: 50,

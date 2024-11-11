@@ -13,6 +13,7 @@ export default function CognitiveFunctionalForm({ register }) {
                 type="number"
                 className="form-control"
                 placeholder="Number between 0 and 30"
+                id="mmse"
                 {...register("mmse", {
                   min: 0,
                   max: 30,
@@ -31,6 +32,7 @@ export default function CognitiveFunctionalForm({ register }) {
                 className="form-control"
                 placeholder="Number between 0 and 10"
                 maxLength={80}
+                id="functionalAssessment"
                 {...register("functionalAssessment", {
                   min: 0,
                   max: 10,
@@ -50,6 +52,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   type="radio"
                   className="form-check-input"
                   value="0"
+                  id="memoryComplaintsNo"
                   {...register("memoryComplaints", { required: true })}
                 />
                 <label className="form-check-label">No</label>
@@ -59,6 +62,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   type="radio"
                   className="form-check-input"
                   value="1"
+                  id="memoryComplaintsYes"
                   {...register("memoryComplaints", { required: true })}
                 />
                 <label className="form-check-label">Yes</label>
@@ -78,6 +82,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   type="radio"
                   className="form-check-input"
                   value="0"
+                  id="behavioralProblemsNo"
                   {...register("behavioralProblems", { required: true })}
                 />
                 <label className="form-check-label">No</label>
@@ -87,6 +92,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   type="radio"
                   className="form-check-input"
                   value="1"
+                  id="behavioralProblemsYes"
                   {...register("behavioralProblems", { required: true })}
                 />
                 <label className="form-check-label">Yes</label>
@@ -103,6 +109,7 @@ export default function CognitiveFunctionalForm({ register }) {
                 type="number"
                 className="form-control"
                 placeholder="Number between 0 and 10"
+                id="adl"
                 {...register("adl", {
                   min: 0,
                   max: 10,
@@ -121,6 +128,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   type="radio"
                   className="form-check-input"
                   value="0"
+                  id="confusionNo"
                   {...register("confusion", { required: true })}
                 />
                 <label className="form-check-label">No</label>
@@ -130,6 +138,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   type="radio"
                   className="form-check-input"
                   value="1"
+                  id="confusionYes"
                   {...register("confusion", { required: true })}
                 />
                 <label className="form-check-label">Yes</label>
@@ -149,6 +158,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   type="radio"
                   className="form-check-input"
                   value="0"
+                  id="disorientationNo"
                   {...register("disorientation", { required: true })}
                 />
                 <label className="form-check-label">No</label>
@@ -158,6 +168,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   type="radio"
                   className="form-check-input"
                   value="1"
+                  id="disorientationYes"
                   {...register("disorientation", { required: true })}
                 />
                 <label className="form-check-label">Yes</label>
@@ -176,6 +187,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   type="radio"
                   className="form-check-input"
                   value="0"
+                  id="personalityChangesNo"
                   {...register("personalityChanges", { required: true })}
                 />
                 <label className="form-check-label">No</label>
@@ -185,6 +197,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   type="radio"
                   className="form-check-input"
                   value="1"
+                  id="personalityChangesYes"
                   {...register("personalityChanges", { required: true })}
                 />
                 <label className="form-check-label">Yes</label>
@@ -204,6 +217,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   type="radio"
                   className="form-check-input"
                   value="0"
+                  id="difficultyCompletingTasksNo"
                   {...register("difficultyCompletingTasks", { required: true })}
                 />
                 <label className="form-check-label">No</label>
@@ -213,6 +227,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   type="radio"
                   className="form-check-input"
                   value="1"
+                  id="difficultyCompletingTasksYes"
                   {...register("difficultyCompletingTasks", { required: true })}
                 />
                 <label className="form-check-label">Yes</label>
@@ -233,6 +248,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   type="radio"
                   className="form-check-input"
                   value="0"
+                  id="forgetfulnessNo"
                   {...register("forgetfulness", { required: true })}
                 />
                 <label className="form-check-label">No</label>
@@ -242,6 +258,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   type="radio"
                   className="form-check-input"
                   value="1"
+                  id="forgetfulnessYes"
                   {...register("forgetfulness", { required: true })}
                 />
                 <label className="form-check-label">Yes</label>

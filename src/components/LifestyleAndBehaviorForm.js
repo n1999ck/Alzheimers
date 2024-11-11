@@ -13,6 +13,7 @@ export default function LifestyleAndBehaviorForm({ register }) {
                 type="number"
                 className="form-control"
                 placeholder="Number between 15 and 50"
+                id="bmi"
                 {...register("bmi", {
                   min: 15,
                   max: 50,
@@ -32,6 +33,7 @@ export default function LifestyleAndBehaviorForm({ register }) {
                     type="radio"
                     className="form-check-input"
                     value="0"
+                    id="smokingNo"
                     {...register("smoking", { required: true })}
                   />
                   <label className="form-check-label">No</label>
@@ -41,6 +43,7 @@ export default function LifestyleAndBehaviorForm({ register }) {
                     type="radio"
                     className="form-check-input"
                     value="1"
+                    id="smokingYes"
                     {...register("smoking", { required: true })}
                   />
                   <label className="form-check-label">Yes</label>
@@ -59,6 +62,7 @@ export default function LifestyleAndBehaviorForm({ register }) {
                   type="number"
                   className="form-control"
                   placeholder="Number between 0 and 20"
+                  id="alcoholConsumption"
                   {...register("alcoholConsumption", {
                     min: 0,
                     max: 20,
@@ -82,6 +86,7 @@ export default function LifestyleAndBehaviorForm({ register }) {
                   type="number"
                   className="form-control"
                   placeholder="Number between 0 and 10"
+                  id="physicalActivity"
                   {...register("physicalActivity", {
                     min: 0,
                     max: 10,
@@ -103,6 +108,7 @@ export default function LifestyleAndBehaviorForm({ register }) {
                   type="number"
                   className="form-control"
                   placeholder="Number between 0 and 10"
+                  id="dietQuality"
                   {...register("dietQuality", {
                     min: 0,
                     max: 10,
@@ -124,6 +130,7 @@ export default function LifestyleAndBehaviorForm({ register }) {
                   type="number"
                   className="form-control"
                   placeholder="Number between 0 and 10"
+                  id="sleepQuality"
                   {...register("sleepQuality", {
                     min: 0,
                     max: 10,

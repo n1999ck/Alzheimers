@@ -3,8 +3,6 @@ import React from "react";
 export default function DemographicsForm({ register }) {
   return (
     <div className="row">
-      {" "}
-      {/* Only one row at the top level */}
       {/* Age */}
       <div className="col-12 mb-3">
         <label className="col-form-label ">Age:</label>
@@ -12,6 +10,7 @@ export default function DemographicsForm({ register }) {
           type="number"
           className="form-control"
           placeholder="Number greater than 0"
+          id="age"
           {...register("age", { min: 0, required: true })}
         />
       </div>
@@ -24,6 +23,7 @@ export default function DemographicsForm({ register }) {
               type="radio"
               className="form-check-input"
               value="0"
+              id="gender"
               {...register("gender", { required: true })}
             />
             <label className="form-check-label">Male</label>
@@ -44,6 +44,7 @@ export default function DemographicsForm({ register }) {
         <label className="col-form-label ">Ethnicity:</label>
         <select
           className="form-select"
+          id="ethnicity"
           {...register("ethnicity", { required: true })}
         >
           <option value="0">Hispanic or Latino</option>
@@ -57,6 +58,7 @@ export default function DemographicsForm({ register }) {
         <label className="col-form-label ">Education Level:</label>
         <select
           className="form-select"
+          id="educationLevel"
           {...register("educationLevel", { required: true })}
         >
           <option value="0">Less than High School</option>
