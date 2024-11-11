@@ -12,7 +12,7 @@ export default function LifestyleAndBehaviorForm({ register }) {
               <input
                 type="number"
                 className="form-control"
-                placeholder="Enter a floating point number between 15 and 50."
+                placeholder="Number between 15 and 50"
                 {...register("bmi", {
                   min: 15,
                   max: 50,
@@ -58,7 +58,7 @@ export default function LifestyleAndBehaviorForm({ register }) {
                 <input
                   type="number"
                   className="form-control"
-                  placeholder="Enter a floating point number between 0 and 20."
+                  placeholder="Number between 0 and 20"
                   {...register("alcoholConsumption", {
                     min: 0,
                     max: 20,
@@ -81,7 +81,7 @@ export default function LifestyleAndBehaviorForm({ register }) {
                 <input
                   type="number"
                   className="form-control"
-                  placeholder="Enter a floating point number between 0 and 10."
+                  placeholder="Number between 0 and 10"
                   {...register("physicalActivity", {
                     min: 0,
                     max: 10,
@@ -102,7 +102,7 @@ export default function LifestyleAndBehaviorForm({ register }) {
                 <input
                   type="number"
                   className="form-control"
-                  placeholder="Enter a floating point number between 0 and 10."
+                  placeholder="Number between 0 and 10"
                   {...register("dietQuality", {
                     min: 0,
                     max: 10,
@@ -123,7 +123,7 @@ export default function LifestyleAndBehaviorForm({ register }) {
                 <input
                   type="number"
                   className="form-control"
-                  placeholder="Enter a floating point number between 0 and 10."
+                  placeholder="Number between 0 and 10"
                   {...register("sleepQuality", {
                     min: 0,
                     max: 10,

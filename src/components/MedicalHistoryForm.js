@@ -187,7 +187,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   min="90"
                   max="179"
                   className="form-control"
-                  placeholder="Enter an integer between 90 and 179."
+                  placeholder="Number between 90 and 179"
                   {...register("systolicBP", {
                     required: true,
                     min: 90,
@@ -209,7 +209,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   min="60"
                   max="119"
                   className="form-control"
-                  placeholder="Enter an integer between 60 and 119."
+                  placeholder="Number between 60 and 119"
                   {...register("diastolicBP", {
                     required: true,
                     min: 60,
@@ -232,7 +232,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   max="300"
                   step="0.1"
                   className="form-control"
-                  placeholder="Enter a floating point number between 150 and 300."
+                  placeholder="Number between 150 and 300"
                   {...register("cholesterolTotal", {
                     required: true,
                     min: 150,
@@ -257,7 +257,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   max="200"
                   step="0.1"
                   className="form-control"
-                  placeholder="Enter a floating point number between 50 and 200."
+                  placeholder="Number between 50 and 200"
                   {...register("cholesterolLDL", {
                     required: true,
                     min: 50,
@@ -280,7 +280,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   max="100"
                   step="0.1"
                   className="form-control"
-                  placeholder="Enter a floating point number between 20 and 100."
+                  placeholder="Number between 20 and 100"
                   {...register("cholesterolHDL", {
                     required: true,
                     min: 20,
@@ -303,7 +303,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   max="400"
                   step="0.1"
                   className="form-control"
-                  placeholder="Enter a floating point number between 50 and 400."
+                  placeholder="Number between 50 and 400"
                   {...register("cholesterolTriglycerides", {
                     required: true,
                     min: 50,

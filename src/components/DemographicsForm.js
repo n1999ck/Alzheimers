@@ -2,42 +2,43 @@ import React from "react";
 
 export default function DemographicsForm({ register }) {
   return (
-    <div className="row"> {/* Only one row at the top level */}
-      
+    <div className="row">
+      {" "}
+      {/* Only one row at the top level */}
       {/* Age */}
       <div className="col-12 mb-3">
         <label className="col-form-label ">Age:</label>
         <input
           type="number"
           className="form-control"
-          placeholder="Floating point number greater than 0."
+          placeholder="Number greater than 0"
           {...register("age", { min: 0, required: true })}
         />
       </div>
-
       {/* Gender */}
       <div className="col-12 mb-3">
         <label className="col-form-label ">Gender:</label>
-        <div className="form-check form-check-inline">
-          <input
-            type="radio"
-            className="form-check-input"
-            value="0"
-            {...register("gender", { required: true })}
-          />
-          <label className="form-check-label">Male</label>
-        </div>
-        <div className="form-check form-check-inline">
-          <input
-            type="radio"
-            className="form-check-input"
-            value="1"
-            {...register("gender", { required: true })}
-          />
-          <label className="form-check-label">Female</label>
+        <div>
+          <div className="form-check form-check-inline">
+            <input
+              type="radio"
+              className="form-check-input"
+              value="0"
+              {...register("gender", { required: true })}
+            />
+            <label className="form-check-label">Male</label>
+          </div>
+          <div className="form-check form-check-inline">
+            <input
+              type="radio"
+              className="form-check-input"
+              value="1"
+              {...register("gender", { required: true })}
+            />
+            <label className="form-check-label">Female</label>
+          </div>
         </div>
       </div>
-
       {/* Ethnicity */}
       <div className="col-12 mb-3">
         <label className="col-form-label ">Ethnicity:</label>
@@ -51,7 +52,6 @@ export default function DemographicsForm({ register }) {
           <option value="3">Asian</option>
         </select>
       </div>
-
       {/* Education Level */}
       <div className="col-12 mb-3">
         <label className="col-form-label ">Education Level:</label>
@@ -65,7 +65,6 @@ export default function DemographicsForm({ register }) {
           <option value="3">Bachelor’s Degree or Higher</option>
         </select>
       </div>
-
     </div>
   );
 }

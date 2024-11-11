@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useForm } from "react-hook-form";
-import DemographicsForm from "./DemographicsForm";
-import LifestyleAndBehaviorForm from "./LifestyleAndBehaviorForm";
-import CognitiveFunctionalForm from "./CognitiveFunctionalForm";
-import MedicalHistoryForm from "./MedicalHistoryForm";
-import Header from "./ Header";
+import DemographicsForm from "./components/DemographicsForm";
+import LifestyleAndBehaviorForm from "./components/LifestyleAndBehaviorForm";
+import CognitiveFunctionalForm from "./components/CognitiveFunctionalForm";
+import MedicalHistoryForm from "./components/MedicalHistoryForm";
+import Header from "./components/ Header";
 
 function App() {
   const { register, handleSubmit } = useForm();

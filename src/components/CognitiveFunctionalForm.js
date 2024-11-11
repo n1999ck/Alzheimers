@@ -12,7 +12,7 @@ export default function CognitiveFunctionalForm({ register }) {
               <input
                 type="number"
                 className="form-control"
-                placeholder="Enter a floating point number between 0 and 30."
+                placeholder="Number between 0 and 30"
                 {...register("mmse", {
                   min: 0,
                   max: 30,
@@ -29,7 +29,7 @@ export default function CognitiveFunctionalForm({ register }) {
               <input
                 type="number"
                 className="form-control"
-                placeholder="Enter a floating point number between 0 and 10."
+                placeholder="Number between 0 and 10"
                 maxLength={80}
                 {...register("functionalAssessment", {
                   min: 0,
@@ -102,7 +102,7 @@ export default function CognitiveFunctionalForm({ register }) {
               <input
                 type="number"
                 className="form-control"
-                placeholder="Enter a floating point number between 0 and 10."
+                placeholder="Number between 0 and 10"
                 {...register("adl", {
                   min: 0,
                   max: 10,
