@@ -9,11 +9,7 @@ import pandas as pd
 import numpy as np
 import math
 
-# pip install torch torchsummary scikit-learn matplotlib pandas numpy
-
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
-
 
 '''
 STEP 1: LOADING DATASET
@@ -35,10 +31,10 @@ Y = np.array(dataset.iloc[:, -1]) #Y=Labels
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3)
 X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5)
 
-""" print("Training set is: {} rows which is {} %".format(X_train.shape, round(X_train.shape[0]/dataset.shape[0], 4)*100))
+print("Training set is: {} rows which is {} %".format(X_train.shape, round(X_train.shape[0]/dataset.shape[0], 4)*100))
 print("Validation set is: {} rows which is {} %".format(X_val.shape, round(X_val.shape[0]/dataset.shape[0], 4)*100))
 print("Testing set is: {} rows which is {} %".format(X_test.shape, round(X_test.shape[0]/dataset.shape[0], 4)*100))
- """
+
 '''
 STEP 2: MAKING DATASET ITERABLE
 '''
@@ -70,27 +66,29 @@ testing_dataloader = DataLoader(testing_data, batch_size=BATCH_SIZE, shuffle=Fal
 '''
 STEP 3: CREATE MODEL CLASS
 '''
-class FNN(nn.Module):
+class MLP(nn.Module):
     def __init__(self):
-        super(FNN, self).__init__()
+        super(MLP, self).__init__()
 
         self.input_layer = nn.Linear(X.shape[1], HIDDEN_NEURONS)
-        self.linear = nn.Linear(HIDDEN_NEURONS, 1)
-        self.sigmoid = nn.Sigmoid()
+        self.hidden_layer1 = nn.Linear(HIDDEN_NEURONS, HIDDEN_NEURONS)
+        self.hidden_layer2 = nn.Linear(HIDDEN_NEURONS, HIDDEN_NEURONS)
+        self.output_layer = nn.Linear(HIDDEN_NEURONS, 1)
+        self.relu = nn.ReLU()
+        self.sigmoid = nn.Sigmoid() 
 
     # Forward pass
     def forward(self, x):
-        x = self.input_layer(x)
-        x = self.linear(x)
-        x = self.sigmoid(x)
+        x = self.relu(self.input_layer(x))  # Apply input layer and ReLU
+        x = self.relu(self.hidden_layer1(x))  # Apply first hidden layer and ReLU
+        x = self.relu(self.hidden_layer2(x))  # Apply second hidden layer and ReLU
+        x = self.sigmoid(self.output_layer(x))  # Apply output layer and Sigmoid
         return x
-
 '''
 STEP 4: INSTANTIATE MODEL CLASS
 '''
-model = FNN().to(device)
+model = MLP().to(device)
 #summary(model, (X.shape[1],))  # TODO: Fix summary
-
 
 '''
 STEP 5: INSTANTIATE LOSS CLASS
@@ -140,17 +138,11 @@ for epoch in range(EPOCHS):
     total_acc_train_plot.append(round(total_acc_train/(training_data.__len__())*100, 4))
     total_loss_validation_plot.append(round(total_loss_val/(validation_data.__len__()), 4))
     total_acc_validation_plot.append(round(total_acc_val/(validation_data.__len__())*100, 4))
-""" 
+
     print(f"Epoch no. {epoch+1}, Train Loss: {total_loss_train/1000:.4f}, Train Accuracy {(total_acc_train/(X_train.shape[0])*100):.4f}")
     print("\n")
     print(f"Epoch no. {epoch+1}, Val Loss: {total_loss_val/1000:.4f}, Val Accuracy {(total_acc_val/(X_val.shape[0])*100):.4f}")
-<<<<<<<< HEAD:api/model11.py
-    print(total_acc_val)
-    print(validation_dataloader.__len__())
-    print("="*60) """
-========
     print("="*60)
->>>>>>>> origin/main:model1.py
 
 '''
 STEP 8: TEST THE MODEL
@@ -174,7 +166,7 @@ with torch.no_grad():
         for item in labels:
             y_label.append(int(item))  
 
-'''
+''''
 STEP 9: ASSESS TESTING OUTCOME
 '''
 # Confusion matrix with true neg, false pos, false neg, true pos respectively
@@ -198,9 +190,6 @@ if((tp+fp) & (fn+tp)>0):
 if((tp+fp) & (tp+fn) & (tn+fp) & (tn+fn) > 0):
     mcc = ((tp*tn) - (fp*fn))/(math.sqrt((tp+fp)*(tp+fn)*(tn+fp)*(tn+fn)))  # Matthews Correlation Coefficient
 
-torch.save(model.state_dict(), 'model.pth')
-
-""" 
 # Print all calculated metrics for test samples
 print("Test Accuracy:\t\t{}%".format(round((total_acc_test/X_test.shape[0])*100, 4)))
 print("Total correct:\t\t{}".format(total_acc_test))
@@ -210,17 +199,12 @@ print("Precision:\t{}".format(round(precision, 4)))
 print("Specificity:\t{}".format(round(specificity, 4)))
 print("Recall:\t\t{}".format(round(recall, 4)))
 print("F1:\t\t{}".format(round(f1, 4)))
-print("MCC:\t\t{}".format(round(mcc, 4))) """
+print("MCC:\t\t{}".format(round(mcc, 4)))
 
 '''
 STEP 10: PLOT METRICS
 '''
-<<<<<<<< HEAD:api/model11.py
-""" # Plot confusion matrix for test samples
-confmat = confusion_matrix(y_true=y_label, y_pred=y_pred)
-========
 # Plot confusion matrix for test samples
->>>>>>>> origin/main:model1.py
 fig, ax = plt.subplots(figsize=(2.5, 2.5))
 ax.matshow(cm, cmap=plt.cm.Blues, alpha=0.3)
 for i in range(cm.shape[0]):
@@ -250,9 +234,14 @@ axs[1].set_ylim([0,100])
 axs[1].legend()
 
 plt.tight_layout()
-plt.show() """
+plt.show()
 
 
 #https://github.com/manujosephv/pytorch_tabular
+#https://stackoverflow.com/questions/25009284/how-to-plot-roc-curve-in-python
 
 #https://www.isanasystems.com/machine-learning-handling-dataset-having-multiple-features/
+
+
+# .78 + .60 + .82 + .75 = 2.95
+.78/2.95 
