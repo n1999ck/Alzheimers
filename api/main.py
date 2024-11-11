@@ -18,8 +18,11 @@ def get_prediction(user_info):
     print("User info element 0 data type: " + str(type(user_info[0])))
     user_info = [float(i) for i in user_info]
     tensor = torch.tensor(user_info)
+    print(tensor)
     output1 = model1.forward(tensor)
+    print("Output: " + str(output1))
     prediction1 = int(output1.round().item())
+    print("Prediction: " + str(prediction1))
     predictions = [prediction1]
     print("Predictions: " + str(predictions))
     if(predictions == 0):

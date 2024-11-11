@@ -6,7 +6,15 @@ import DemographicsForm from "./components/DemographicsForm";
 import LifestyleAndBehaviorForm from "./components/LifestyleAndBehaviorForm";
 import CognitiveFunctionalForm from "./components/CognitiveFunctionalForm";
 import MedicalHistoryForm from "./components/MedicalHistoryForm";
-import Header from "./components/ Header";
+import Header from "./components/Header";
+
+//TODO:
+// 1. Fix submit button - make smaller, sticky at bottom right
+// 2. Fix styling to match medicalHistoryForm
+// 3. Add validation perhaps
+// 4. and/or change reaction to invalid inputs
+// 5. Fix number inputs for decimals lol
+// 6. Loading icon while waiting for model to start up
 
 function App() {
   const { register, handleSubmit } = useForm();
@@ -45,7 +53,7 @@ function App() {
           onSubmit={handleSubmit(onSubmit)}
         >
           <div className="row mx-5">
-            <div className="col-lg-2 col">
+            <div className="col-lg-2 col-sm-2">
               <h3 className="mt-4">Demographics and Personal Information</h3>
 
               <DemographicsForm register={register} />

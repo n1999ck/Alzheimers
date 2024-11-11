@@ -23,7 +23,7 @@ export default function DemographicsForm({ register }) {
               type="radio"
               className="form-check-input"
               value="0"
-              id="gender"
+              id="genderMale"
               {...register("gender", { required: true })}
             />
             <label className="form-check-label">Male</label>
@@ -33,6 +33,7 @@ export default function DemographicsForm({ register }) {
               type="radio"
               className="form-check-input"
               value="1"
+              id="genderFemale"
               {...register("gender", { required: true })}
             />
             <label className="form-check-label">Female</label>
