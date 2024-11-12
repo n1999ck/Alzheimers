@@ -1,4 +1,5 @@
 import torch
+import time
 from torch.utils.data import Dataset
 import pandas as pd
 import numpy as np
@@ -8,6 +9,9 @@ from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.svm import SVC
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+print("Loading model 4...")
+start_time = time.time()
 
 '''
 STEP 1: LOADING DATASET
@@ -29,10 +33,10 @@ Y = np.array(dataset.iloc[:, -1]) #Y=Labels
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3)
 X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5)
 
-print("Training set is: {} rows which is {} %".format(X_train.shape, round(X_train.shape[0]/dataset.shape[0], 4)*100))
+""" print("Training set is: {} rows which is {} %".format(X_train.shape, round(X_train.shape[0]/dataset.shape[0], 4)*100))
 print("Validation set is: {} rows which is {} %".format(X_val.shape, round(X_val.shape[0]/dataset.shape[0], 4)*100))
 print("Testing set is: {} rows which is {} %".format(X_test.shape, round(X_test.shape[0]/dataset.shape[0], 4)*100))
-
+ """
 '''
 STEP 2: MAKING DATASET ITERABLE
 '''
@@ -54,6 +58,7 @@ testing_data = CSVDataset(X_test, y_test)
 class SVM():
     svm = SVC(kernel='rbf', gamma='scale', C=2)
     def __init__(self):
+        inner_start_time = time.time()
         self.svm.fit(X_train, y_train)
 
         y_train_predict = self.svm.predict(X_train)
@@ -61,8 +66,8 @@ class SVM():
         
         train_acc = accuracy_score(y_train,y_train_predict)
         test_acc = accuracy_score(y_test, y_test_predict)
-        print(f"The SVC training {train_acc*100:.2f}%")
-        print(f"The Support Vector model's accuracy on the testing dataset is: {test_acc*100:.2f}%")
+        """ print(f"The SVC training {train_acc*100:.2f}%")
+        print(f"The Support Vector model's accuracy on the testing dataset is: {test_acc*100:.2f}%") """
         
         # Confusion matrix with true neg, false pos, false neg, true pos respectively
         cm = confusion_matrix(y_true=y_test, y_pred=y_test_predict)   
@@ -90,3 +95,6 @@ class SVM():
         print("Recall:\t\t{}".format(round(recall, 4)))
         print("F1:\t\t{}".format(round(f1, 4)))
         print("MCC:\t\t{}".format(round(mcc, 4)))
+        print("Model 4 (within SVM()) loaded in {} seconds".format(round(time.time()-inner_start_time, 2)))
+
+print("Model 4 loaded in {} seconds".format(round(time.time()-start_time, 2)))

@@ -6,8 +6,7 @@ from main import get_prediction
 
 app = Flask(__name__, static_folder='../build', static_url_path='/')
 
-model1 = FNN()
-model1.eval()
+print("App started...")
 
 # def get_prediction(user_info):
 #     print("Getting prediction")
@@ -50,4 +49,12 @@ def predict():
     print("User info:")
     print(user_info)
     prediction = get_prediction(user_info);
+    print("Prediction results: " + str(prediction))
+    print(str(type(prediction)))
+    print(prediction[2])
+    prediction[2] = int(prediction[2][0])
+    print(prediction[3])
+    prediction[3] = int(prediction[3][0])
+    print("Prediction results after conversion: " + str(prediction))
+
     return jsonify(prediction)

@@ -148,10 +148,6 @@ for epoch in range(EPOCHS):
     print(total_acc_val)
     print(validation_dataloader.__len__())
     print("="*60) """
-========
-    print("="*60)
->>>>>>>> origin/main:model1.py
-
 '''
 STEP 8: TEST THE MODEL
 '''
@@ -215,7 +211,7 @@ print("MCC:\t\t{}".format(round(mcc, 4))) """
 '''
 STEP 10: PLOT METRICS
 '''
-<<<<<<<< HEAD:api/model11.py
+
 """ # Plot confusion matrix for test samples
 confmat = confusion_matrix(y_true=y_label, y_pred=y_pred)
 ========
