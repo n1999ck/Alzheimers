@@ -40,17 +40,17 @@ command to run if program contains helper info
 
 ## Authors
 
-Contributors names
-'The Braingineers'
-**Kelly Payne**
-**Jaden Jefferson**
-**Jacob Tillmon**
-**Nick Miller**
+Contributors names  
+'The Braingineers'  
+**Kelly Payne**  
+**Jaden Jefferson**  
+**Jacob Tillmon**  
+**Nick Miller**  
 
 ## Version History
 * 0.1
     * Initial Release
 
 ## Acknowledgments
-The Braingineers team would like to acknowledge the help of Dr. Yi Zhou in gathering resources to make this project possible.
+The Braingineers team would like to acknowledge the help of Dr. Yi Zhou in gathering resources to make this project possible.  
 We would also like to thank Joe Papa, author of PyTorch Pocket Reference, which was heavily referenced in the creation of these models.
