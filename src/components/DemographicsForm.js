@@ -9,10 +9,10 @@ export default function DemographicsForm({ register }) {
         <input
           type="number"
           className="form-control"
-          placeholder="Number greater than 0"
           id="age"
           {...register("age", { min: 0, required: true })}
         />
+        <div className="form-text">Number greater than 0</div>
       </div>
       {/* Gender */}
       <div className="col-12 mb-3">

@@ -12,7 +12,7 @@ export default function LifestyleAndBehaviorForm({ register }) {
               <input
                 type="number"
                 className="form-control"
-                placeholder="Number between 15 and 50"
+                
                 id="bmi"
                 {...register("bmi", {
                   min: 15,
@@ -21,6 +21,9 @@ export default function LifestyleAndBehaviorForm({ register }) {
                   required: true,
                 })}
               />
+              <div className="form-text">
+                Number between 15 and 50
+                </div>
             </div>
           </div>
           <div className="col-sm-4">
@@ -48,6 +51,7 @@ export default function LifestyleAndBehaviorForm({ register }) {
                   />
                   <label className="form-check-label">Yes</label>
                 </div>
+                
               </div>
             </div>
           </div>
@@ -61,7 +65,7 @@ export default function LifestyleAndBehaviorForm({ register }) {
                 <input
                   type="number"
                   className="form-control"
-                  placeholder="Number between 0 and 20"
+                  
                   id="alcoholConsumption"
                   {...register("alcoholConsumption", {
                     min: 0,
@@ -71,6 +75,9 @@ export default function LifestyleAndBehaviorForm({ register }) {
                   })}
                 />
               </div>
+              <div className="form-text">
+                Number between 0 and 10
+                </div>
             </div>
           </div>
         </div>
@@ -85,7 +92,7 @@ export default function LifestyleAndBehaviorForm({ register }) {
                 <input
                   type="number"
                   className="form-control"
-                  placeholder="Number between 0 and 10"
+                  
                   id="physicalActivity"
                   {...register("physicalActivity", {
                     min: 0,
@@ -95,6 +102,9 @@ export default function LifestyleAndBehaviorForm({ register }) {
                   })}
                 />
               </div>
+              <div className="form-text">
+                Number between 0 and 10
+                </div>
             </div>
           </div>
           <div className="col-sm-4">
@@ -107,7 +117,7 @@ export default function LifestyleAndBehaviorForm({ register }) {
                 <input
                   type="number"
                   className="form-control"
-                  placeholder="Number between 0 and 10"
+                  
                   id="dietQuality"
                   {...register("dietQuality", {
                     min: 0,
@@ -117,6 +127,9 @@ export default function LifestyleAndBehaviorForm({ register }) {
                   })}
                 />
               </div>
+              <div className="form-text">
+                Number between 0 and 10
+                </div>
             </div>
           </div>
           <div className="col-sm-4">
@@ -129,7 +142,7 @@ export default function LifestyleAndBehaviorForm({ register }) {
                 <input
                   type="number"
                   className="form-control"
-                  placeholder="Number between 0 and 10"
+                  
                   id="sleepQuality"
                   {...register("sleepQuality", {
                     min: 0,
@@ -139,6 +152,9 @@ export default function LifestyleAndBehaviorForm({ register }) {
                   })}
                 />
               </div>
+              <div className="form-text">
+                Number between 0 and 10
+                </div>
             </div>
           </div>
         </div>

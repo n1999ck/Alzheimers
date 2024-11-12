@@ -50,3 +50,10 @@
   font-family: "Atkinson Hyperlegible", sans-serif;
   font-weight: 700;
 }
+
+.fixedButton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: auto;
+}

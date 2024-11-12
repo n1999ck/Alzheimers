@@ -12,7 +12,7 @@ export default function CognitiveFunctionalForm({ register }) {
               <input
                 type="number"
                 className="form-control"
-                placeholder="Number between 0 and 30"
+                
                 id="mmse"
                 {...register("mmse", {
                   min: 0,
@@ -21,6 +21,9 @@ export default function CognitiveFunctionalForm({ register }) {
                   required: true,
                 })}
               />
+              <div className="form-text">
+                Number between 0 and 30
+              </div>
             </div>
           </div>
           <div className="col-sm-4">
@@ -30,7 +33,7 @@ export default function CognitiveFunctionalForm({ register }) {
               <input
                 type="number"
                 className="form-control"
-                placeholder="Number between 0 and 10"
+                
                 maxLength={80}
                 id="functionalAssessment"
                 {...register("functionalAssessment", {
@@ -40,6 +43,9 @@ export default function CognitiveFunctionalForm({ register }) {
                   required: true,
                 })}
               />
+              <div className="form-text">
+                Number between 0 and 10
+                </div>
             </div>
           </div>
           <div className="col-sm-4">
@@ -108,7 +114,7 @@ export default function CognitiveFunctionalForm({ register }) {
               <input
                 type="number"
                 className="form-control"
-                placeholder="Number between 0 and 10"
+                
                 id="adl"
                 {...register("adl", {
                   min: 0,
@@ -117,6 +123,9 @@ export default function CognitiveFunctionalForm({ register }) {
                   required: true,
                 })}
               />
+              <div className="form-text">
+                Number between 0 and 10
+                </div>
             </div>
           </div>
           <div className="col-sm-4">

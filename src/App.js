@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import "bootstrap/dist/css/bootstrap.min.css";
+import  Button from "react-bootstrap/Button";
 import { useForm } from "react-hook-form";
 import DemographicsForm from "./components/DemographicsForm";
 import LifestyleAndBehaviorForm from "./components/LifestyleAndBehaviorForm";
 import CognitiveFunctionalForm from "./components/CognitiveFunctionalForm";
 import MedicalHistoryForm from "./components/MedicalHistoryForm";
 import Header from "./components/Header";
-
+import Modal from "react-bootstrap/Modal";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 //TODO:
 // 1. Fix submit button - make smaller, sticky at bottom right
 // 2. Fix styling to match medicalHistoryForm
@@ -18,6 +21,10 @@ import Header from "./components/Header";
 
 function App() {
   const { register, handleSubmit } = useForm();
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+  const [results, setResults] = useState({});
 
   const onSubmit = (data) => {
     console.log(typeof data);
@@ -34,7 +41,8 @@ function App() {
       .then((response) => response.json())
       .then((data) => {
         console.log("Success:", data);
-        alert(data);
+        setResults(data);
+        handleShow();
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -78,13 +86,30 @@ function App() {
                 </div>
               </div>
             </div>
-
-            <button type="submit" className="btn btn-primary mt-4">
+            <Button type="submit" variant="success" size="lg" className="fixedButton">
               Submit
-            </button>
+            </Button>
+            
           </div>
         </form>
       </div>
+    
+    
+    <Modal show={show} onHide={handleClose} classname={"ResultsModall"}>
+        <Modal.Header closeButton={true}></Modal.Header>
+        <Modal.Body>
+            <Container fluid>
+                <Row>
+                    <Col>
+                    <div>
+                        <p>Hello</p>
+                        <p>{results}</p>
+                    </div>
+                    </Col>
+                </Row>
+            </Container>
+        </Modal.Body>
+    </Modal>
     </div>
   );
 }

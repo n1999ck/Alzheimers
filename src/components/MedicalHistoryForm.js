@@ -199,7 +199,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   min="90"
                   max="179"
                   className="form-control"
-                  placeholder="Number between 90 and 179"
+                  
                   id="systolicBP"
                   {...register("systolicBP", {
                     required: true,
@@ -208,6 +208,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   })}
                 />
               </div>
+              <div className="form-text">Number between 90 and 179</div>
             </div>
           </div>
           <div className="col-sm-4">
@@ -222,7 +223,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   min="60"
                   max="119"
                   className="form-control"
-                  placeholder="Number between 60 and 119"
+                  
                   id="diastolicBP"
                   {...register("diastolicBP", {
                     required: true,
@@ -231,6 +232,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   })}
                 />
               </div>
+              <div className="form-text">Number between 60 and 119</div>
             </div>
           </div>
           <div className="col-sm-4">
@@ -246,7 +248,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   max="300"
                   step="0.1"
                   className="form-control"
-                  placeholder="Number between 150 and 300"
+                  
                   id="cholesterolTotal"
                   {...register("cholesterolTotal", {
                     required: true,
@@ -255,6 +257,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   })}
                 />
               </div>
+                  <div className="form-text">Number between 150 and 300</div>
             </div>
           </div>
         </div>
@@ -272,7 +275,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   max="200"
                   step="0.1"
                   className="form-control"
-                  placeholder="Number between 50 and 200"
+                  
                   id="cholesterolLDL"
                   {...register("cholesterolLDL", {
                     required: true,
@@ -281,6 +284,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   })}
                 />
               </div>
+              <div className="form-text">Number between 50 and 200</div>
             </div>
           </div>
           <div className="col-sm-4">
@@ -296,7 +300,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   max="100"
                   step="0.1"
                   className="form-control"
-                  placeholder="Number between 20 and 100"
+                  
                   id="cholesterolHDL"
                   {...register("cholesterolHDL", {
                     required: true,
@@ -305,6 +309,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   })}
                 />
               </div>
+              <div className="form-text">Number between 20 and 100</div>
             </div>
           </div>
           <div className="col-sm-4">
@@ -320,7 +325,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   max="400"
                   step="0.1"
                   className="form-control"
-                  placeholder="Number between 50 and 400"
+                  
                   id="cholesterolTriglycerides"
                   {...register("cholesterolTriglycerides", {
                     required: true,
@@ -329,6 +334,7 @@ export default function CognitiveFunctionalForm({ register }) {
                   })}
                 />
               </div>
+              <div className="form-text">Number between 50 and 400</div>
             </div>
           </div>
         </div>
