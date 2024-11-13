@@ -8,7 +8,7 @@ This web application predicts the likelihood of Alzheimer’s disease based on u
 ![License](https://img.shields.io/badge/license-GNU%20GPL%20v3.0-blue)
 
 ## Visuals
-![Screenshot of Application Form](https://via.placeholder.com/500x300)  
+![Screenshot of Application Form](https://via.placeholder.com/500x300)  TODO: screenshot
 *Form Screenshot: Users enter personal, lifestyle, and medical information for analysis.*
 
 ## Installation
@@ -18,7 +18,7 @@ This web application predicts the likelihood of Alzheimer’s disease based on u
 To run this project, ensure you have the following software and packages installed:
 
 #### System Requirements
-- **Node.js**: Version X.X.X or higher
+- **Node.js**: Version X.X.X or higher TODO: versions
 - **Python**: Version X.X.X or higher (compatible with `pip`)
 
 #### Node Packages
