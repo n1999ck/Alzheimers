@@ -17,7 +17,7 @@ Necessary libraries are:
 * Pandas
 * MatPlotLib
 
-Operating system has only been tested on Windows 10/11 machines.
+Operating system used for testing and development was conducted on Windows 10/11 machines.
 
 ### Installing
 
@@ -53,4 +53,5 @@ Contributors names
 
 ## Acknowledgments
 The Braingineers team would like to acknowledge the help of Dr. Yi Zhou in gathering resources to make this project possible.  
-We would also like to thank Joe Papa, author of PyTorch Pocket Reference, which was heavily referenced in the creation of these models.
+We would also like to thank Joe Papa, author of 'PyTorch Pocket Reference', which was heavily referenced in the creation of these models.  
+In addition, Sebastion Raschka, Vahid Mirjalili and Yuxi (Hayden) Liu for their work in the book 'Machine Learning with PyTorch and SciKit-Learn'.
