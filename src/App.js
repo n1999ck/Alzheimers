@@ -18,6 +18,10 @@ import Col from "react-bootstrap/Col";
 // 4. and/or change reaction to invalid inputs
 // 5. Fix number inputs for decimals lol!!
 // 6. Loading icon while waiting for model to start up
+// 7. 3C5087 - color for navbar and titles
+// 8. Patient icon - male or female change
+// 9. Change title sizes 
+// 10. User Document
 
 function App() {
   const { register, handleSubmit } = useForm();
