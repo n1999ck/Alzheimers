@@ -85,6 +85,10 @@ class FNN(nn.Module):
         x = self.linear(x)
         x = self.sigmoid(x)
         return x
+    
+    def get_test_acc(self):
+        return total_acc_test/X_test.shape[0]
+
 
 '''
 STEP 4: INSTANTIATE MODEL CLASS
@@ -199,9 +203,10 @@ torch.save(model.state_dict(), 'model.pth')
 
 
 # Print all calculated metrics for test samples
-""" print("Test Accuracy:\t\t{}%".format(round((total_acc_test/X_test.shape[0])*100, 4)))
+print("Test Accuracy:\t\t{}%".format(round((total_acc_test/X_test.shape[0])*100, 4)))
 print("Total correct:\t\t{}".format(total_acc_test))
 print("Total predictions:\t{}".format(X_test.shape[0]))
+"""
 print("-"*60)
 print("Precision:\t{}".format(round(precision, 4)))
 print("Specificity:\t{}".format(round(specificity, 4)))

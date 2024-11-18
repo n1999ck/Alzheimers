@@ -16,7 +16,7 @@ import Col from "react-bootstrap/Col";
 // 2. Fix styling to match medicalHistoryForm
 // 3. Add validation perhaps
 // 4. and/or change reaction to invalid inputs
-// 5. Fix number inputs for decimals lol
+// 5. Fix number inputs for decimals lol!!
 // 6. Loading icon while waiting for model to start up
 
 function App() {
@@ -25,6 +25,8 @@ function App() {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const [results, setResults] = useState({});
+  const [accuracies, setAccuracies] = useState({});
+  const [diagnosis, setDiagnosis] = useState("");
 
   const onSubmit = (data) => {
     console.log(typeof data);
@@ -42,13 +44,39 @@ function App() {
       .then((data) => {
         console.log("Success:", data);
         setResults(data);
-        handleShow();
+        calculateDiagnosis();
       })
       .catch((error) => {
         console.error("Error:", error);
         alert("An error occurred while uploading the data. Please try again.");
       });
+      fetch("/api/accuracies")
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Success:", data);
+      setAccuracies(data);
+      calculateDiagnosis();
+      handleShow();
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("An error occurred while uploading the data. Please try again.");
+    });
   };
+
+
+  const calculateDiagnosis = () => {
+    var weightedResults = [];
+    for (let key in results) {
+      if (results.hasOwnProperty(key) && accuracies.hasOwnProperty(key)) {
+        console.log("Result: " + results[key]);
+        console.log("Accuracy: " + accuracies[key]);
+        weightedResults.push(results[key] * accuracies[key]);
+      }
+    }
+    console.log("Weighted results: ", weightedResults);
+    setDiagnosis(weightedResults.reduce((a, b) => a + b, 0));
+  }
 
   return (
     <div className="App">
@@ -95,15 +123,19 @@ function App() {
       </div>
     
     
-    <Modal show={show} onHide={handleClose} classname={"ResultsModall"}>
-        <Modal.Header closeButton={true}></Modal.Header>
+    <Modal show={show} onHide={handleClose} className={"ResultsModal"}>
+        <Modal.Header closeButton={true}>
+            <Modal.Title>Results</Modal.Title>
+        </Modal.Header>
         <Modal.Body>
             <Container fluid>
                 <Row>
                     <Col>
                     <div>
+                      
                         <p>Hello</p>
                         <p>{results}</p>
+                        <p>{diagnosis}</p>
                     </div>
                     </Col>
                 </Row>

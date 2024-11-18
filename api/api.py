@@ -2,26 +2,11 @@ import time
 import torch
 from flask import Flask, request, jsonify
 from model11 import FNN
-from main import get_prediction
+from main import get_prediction, get_test_acc
 
 app = Flask(__name__, static_folder='../build', static_url_path='/')
 
 print("App started...")
-
-# def get_prediction(user_info):
-#     print("Getting prediction")
-#     print(type(user_info))
-#     print(type(user_info[0]))
-#     user_info = [float(i) for i in user_info]
-#     print(type(user_info)[0])
-#     tensor = torch.tensor(user_info)
-#     output1 = model1.forward(tensor)
-#     print("Output: " + str(output1))
-#     prediction1 = int(output1.round().item())
-#     print("Prediction: " + str(prediction1))
-#     predictions = [prediction1]
-#     print("Predictions: " + str(predictions))
-#     return predictions
 
 @app.errorhandler(404)
 def not_found(e):
@@ -46,15 +31,22 @@ def predict():
     # print("Request json:" + str(request.json) + "\n")
     for key, value in request.json.items():
         user_info.append(value)
-    print("User info:")
-    print(user_info)
+    # print("User info:")
+    # print(user_info)
     prediction = get_prediction(user_info);
-    print("Prediction results: " + str(prediction))
-    print(str(type(prediction)))
-    print(prediction[2])
+    # print("Prediction results: " + str(prediction))
+    # # print(str(type(prediction)))
+    # print(prediction[2])
     prediction[2] = int(prediction[2][0])
-    print(prediction[3])
+    # print(prediction[3])
     prediction[3] = int(prediction[3][0])
-    print("Prediction results after conversion: " + str(prediction))
+    # print("Prediction results after conversion: " + str(prediction))
 
     return jsonify(prediction)
+
+@app.route('/api/accuracies', methods=['GET'])
+def get_accuracies():
+    print("Getting accuracies...")
+    accuracies = get_test_acc()
+    print("Accuracies: " + str(accuracies))
+    return jsonify(accuracies)

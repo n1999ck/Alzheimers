@@ -9,9 +9,9 @@ describe("Lifestyle and Behavior Form", () => {
 
       cy.get("#smokingNo").check();
 
-      cy.get("#alcoholConsumption").type("2.56");
+      cy.get("#alcoholConsumption").type("3");
 
-      cy.get("physicalActivity").type("3");
+      cy.get("#physicalActivity").type("3");
 
       cy.get("#dietQuality").type("8");
 

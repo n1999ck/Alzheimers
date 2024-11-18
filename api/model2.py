@@ -88,6 +88,9 @@ class MLP(nn.Module):
         x = self.relu(self.hidden_layer2(x))  # Apply second hidden layer and ReLU
         x = self.sigmoid(self.output_layer(x))  # Apply output layer and Sigmoid
         return x
+    
+    def get_test_acc(self):
+        return total_acc_test/X_test.shape[0]
 '''
 STEP 4: INSTANTIATE MODEL CLASS
 '''
@@ -193,11 +196,12 @@ if((tp+fp) & (fn+tp)>0):
 
 if((tp+fp) & (tp+fn) & (tn+fp) & (tn+fn) > 0):
     mcc = ((tp*tn) - (fp*fn))/(math.sqrt((tp+fp)*(tp+fn)*(tn+fp)*(tn+fn)))  # Matthews Correlation Coefficient
-""" 
+
 # Print all calculated metrics for test samples
 print("Test Accuracy:\t\t{}%".format(round((total_acc_test/X_test.shape[0])*100, 4)))
 print("Total correct:\t\t{}".format(total_acc_test))
 print("Total predictions:\t{}".format(X_test.shape[0]))
+"""
 print("-"*60)
 print("Precision:\t{}".format(round(precision, 4)))
 print("Specificity:\t{}".format(round(specificity, 4)))

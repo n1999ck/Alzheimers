@@ -57,6 +57,10 @@ testing_data = CSVDataset(X_test, y_test)
 
 class SVM():
     svm = SVC(kernel='rbf', gamma='scale', C=2)
+    test_acc = -1
+
+    def get_test_acc(self):
+        return self.test_acc
     def __init__(self):
         inner_start_time = time.time()
         self.svm.fit(X_train, y_train)
@@ -65,9 +69,9 @@ class SVM():
         y_test_predict = self.svm.predict(X_test)
         
         train_acc = accuracy_score(y_train,y_train_predict)
-        test_acc = accuracy_score(y_test, y_test_predict)
-        """ print(f"The SVC training {train_acc*100:.2f}%")
-        print(f"The Support Vector model's accuracy on the testing dataset is: {test_acc*100:.2f}%") """
+        self.test_acc = accuracy_score(y_test, y_test_predict)
+        print(f"The SVC training {train_acc*100:.2f}%")
+        print(f"The Support Vector model's accuracy on the testing dataset is: {self.test_acc*100:.2f}%")
         
         # Confusion matrix with true neg, false pos, false neg, true pos respectively
         cm = confusion_matrix(y_true=y_test, y_pred=y_test_predict)   
@@ -90,11 +94,9 @@ class SVM():
         if((tp+fp) & (tp+fn) & (tn+fp) & (tn+fn) > 0):
             mcc = ((tp*tn) - (fp*fn))/(math.sqrt((tp+fp)*(tp+fn)*(tn+fp)*(tn+fn)))  # Matthews Correlation Coefficient
 
-        print("Precision:\t{}".format(round(precision, 4)))        
+        """print("Precision:\t{}".format(round(precision, 4)))        
         print("Specificity:\t{}".format(round(specificity, 4)))
         print("Recall:\t\t{}".format(round(recall, 4)))
         print("F1:\t\t{}".format(round(f1, 4)))
-        print("MCC:\t\t{}".format(round(mcc, 4)))
+        print("MCC:\t\t{}".format(round(mcc, 4))) """
         print("Model 4 (within SVM()) loaded in {} seconds".format(round(time.time()-inner_start_time, 2)))
-
-print("Model 4 loaded in {} seconds".format(round(time.time()-start_time, 2)))

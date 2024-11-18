@@ -20,4 +20,13 @@ patient_diagnoses = [
     for row in random_rows
 ]
 print(random_rows)
+
+for row in random_rows:
+    row.pop('DoctorInCharge')
+    row.pop('PatientID')
+
 print(patient_diagnoses)
+
+# Save the extracted data to a JSON file
+with open(json_file_path, 'w') as jsonfile:
+    json.dump(random_rows, jsonfile, indent=4)  # Write the data to the JSON file

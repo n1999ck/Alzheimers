@@ -56,6 +56,11 @@ testing_data = CSVDataset(X_test, y_test)
 
 class RFC():
     rfc = RandomForestClassifier(n_estimators=64, max_depth=6, min_samples_leaf=2)
+    test_acc = -1
+
+    def get_test_acc(self):
+        return self.test_acc
+    
     def __init__(self):
         inner_start_time = time.time()
         self.rfc.fit(X_train, y_train)
@@ -64,9 +69,9 @@ class RFC():
         y_test_predict = self.rfc.predict(X_test)
 
         train_acc = accuracy_score(y_train,y_train_predict)
-        test_acc = accuracy_score(y_test, y_test_predict)
-        """  print(f"The RFC training {train_acc*100:.2f}%")
-        print(f"The Random Forest model's accuracy on the testing dataset is: {test_acc*100:.2f}%") """
+        self.test_acc = accuracy_score(y_test, y_test_predict)
+        print(f"The RFC training {train_acc*100:.2f}%")
+        print(f"The Random Forest model's accuracy on the testing dataset is: {self.test_acc*100:.2f}%")
         
         # Confusion matrix with true neg, false pos, false neg, true pos respectively
         cm = confusion_matrix(y_true=y_test, y_pred=y_test_predict)   

@@ -5,31 +5,19 @@ describe("Cognitive Functional Form", () => {
   });
 
   it("should fill out the cognitive functional form", () => {
-    // Family History of Alzheimer's - selecting 'Yes'
-    cy.get("#familyHistoryAlzheimersYes").check();
-
-    // Cardiovascular Disease - selecting 'No'
-    cy.get("#cardiovascularDiseaseNo").check();
-
-    // Diabetes - selecting 'Yes'
-    cy.get("#diabetesYes").check();
-
-    // Depression - selecting 'No'
-    cy.get("#depressionNo").check();
-
-    // Head Injury - selecting 'Yes'
-    cy.get("#headInjuryYes").check();
-
-    // Hypertension - selecting 'No'
-    cy.get("#hypertensionNo").check();
-
     // Entering values in numeric fields
-    cy.get("#systolicBP").type("120");
-    cy.get("#diastolicBP").type("80");
-    cy.get("#cholesterolTotal").type("200");
-    cy.get("#cholesterolLDL").type("100");
-    cy.get("#cholesterolHDL").type("50");
-    cy.get("#cholesterolTriglycerides").type("150");
+    cy.get("#mmse").type("25");
+    cy.get("#functionalAssessment").type("20");
+    cy.get("#adl").type("6");
+
+    cy.get("#memoryComplaintsYes").check();
+
+    cy.get("#behavioralProblemsYes").check();
+    cy.get("#confusionYes").check();
+    cy.get("#disorientationYes").check();
+    cy.get("#personalityChangesYes").check();
+    cy.get("#difficultyCompletingTasksYes").check();
+    cy.get("#forgetfulnessYes").check();
 
   });
 });

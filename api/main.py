@@ -22,51 +22,62 @@ model_1 = FNN()
 model_2 = MLP()
 model_3 = RFC()
 model_4 = SVM()
+models = [model_1, model_2, model_3, model_4]
 
 # Putting PyTorch models into eval mode
 model_1.eval()
 model_2.eval()
+
+
 
 '''
 Gets the prediction of all models. 
 Parameters - User_info: array (of size 32)
 '''
 def get_prediction(user_info):
-    print("User info full object data type:" + str(type(user_info)))
-    print("User info element 0 data type: " + str(type(user_info[0])))
+    # print("User info full object data type:" + str(type(user_info)))
+    # print("User info element 0 data type: " + str(type(user_info[0])))
     user_info = [float(i) for i in user_info]
     tensor = torch.tensor(user_info)
-    print("User info element 0 data type after conversion: " + str(type(user_info[0])))
-    print(tensor)
-    print("Running model 1...")
+    # print("User info element 0 data type after conversion: " + str(type(user_info[0])))
+    # print(tensor)
+    # print("Running model 1...")
     output1 = model_1.forward(tensor)
-    print("Output 1: " + str(output1))
-    print("Running model 2...")
+    # print("Output 1: " + str(output1))
+    # print("Running model 2...")
     output2 = model_2.forward(tensor)
-    print("Output 2: " + str(output2))
+    # print("Output 2: " + str(output2))
     prediction1 = int(output1.round().item())
-    print("Prediction 1: " + str(prediction1))
+    # print("Prediction 1: " + str(prediction1))
     prediction2 = int(output2.round().item())
-    print("Prediction 2: " + str(prediction2))
-    print("Running model 3...")
+    # print("Prediction 2: " + str(prediction2))
+    # print("Running model 3...")
     prediction3 = model_3.rfc.predict(tensor.reshape(1,-1))
-    print("Prediction 3: " + str(prediction3))
-    print("Running model 4...")
+    # print("Prediction 3: " + str(prediction3))
+    # print("Running model 4...")
     prediction4 = model_4.svm.predict(tensor.reshape(1,-1))
-    print("Prediction 4: " + str(prediction4))
+    # print("Prediction 4: " + str(prediction4))
     predictions = [prediction1, prediction2, prediction3, prediction4]
     print("Predictions: " + str(predictions))
     return predictions
 
-predictions = get_prediction(user_info)
+def get_test_acc():
+    accuracies = []
+    for model in models:
+        accuracies.append(model.get_test_acc())
 
-# Evaluting each model based on the patients data in user_input
-prediction_num=0
-print("Getting predictions...")
-for prediction in predictions: 
-    prediction_num +=1
-    if(prediction == 0):
-        print(f"Model {prediction_num} says...Alzheimers NOT detected :D")
-    else:
-        print(f"Model {prediction_num} says...Alzheimers detected :'(")
+    print("Model accuracies: " + str(accuracies))
+    return accuracies
+
+# predictions = get_prediction(user_info)
+
+# # Evaluting each model based on the patients data in user_input
+# prediction_num=0
+# print("Getting predictions...")
+# for prediction in predictions: 
+#     prediction_num +=1
+#     if(prediction == 0):
+#         print(f"Model {prediction_num} says...Alzheimers NOT detected :D")
+#     else:
+#         print(f"Model {prediction_num} says...Alzheimers detected :'(")
         
