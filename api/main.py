@@ -34,10 +34,10 @@ model_2.eval()
 Gets the prediction of all models. 
 Parameters - User_info: array (of size 32)
 '''
-def get_prediction(user_info):
+def get_prediction(user_input):
     # print("User info full object data type:" + str(type(user_info)))
     # print("User info element 0 data type: " + str(type(user_info[0])))
-    user_info = [float(i) for i in user_info]
+    user_input = [float(i) for i in user_input]
     tensor = torch.tensor(user_info)
     # print("User info element 0 data type after conversion: " + str(type(user_info[0])))
     # print(tensor)

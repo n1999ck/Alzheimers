@@ -49,6 +49,7 @@
 .navbar-brand {
   font-family: "Atkinson Hyperlegible", sans-serif;
   font-weight: 700;
+  font-size: 2.5rem;
 }
 
 .fixedButton {
@@ -56,4 +57,9 @@
   bottom: 20px;
   right: 20px;
   width: auto;
+}
+
+.sectionTitle {
+  color: #3c5087;
+  font-weight: 700;
 }

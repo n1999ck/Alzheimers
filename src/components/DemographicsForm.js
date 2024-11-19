@@ -1,8 +1,14 @@
-import React from "react";
+import React, {useState} from "react";
+
 
 export default function DemographicsForm({ register }) {
+  const [gender, setGender] = useState("");
+
   return (
     <div className="row">
+
+      <img src={gender === "" ? "/assets/default.svg": gender === "male" ? "/assets/male.svg" : "/assets/female.svg"}/>
+      
       {/* Age */}
       <div className="col-12 mb-3">
         <label className="col-form-label ">Age:</label>
@@ -25,6 +31,7 @@ export default function DemographicsForm({ register }) {
               value="0"
               id="genderMale"
               {...register("gender", { required: true })}
+              onClick={() => {setGender("male")}}
             />
             <label className="form-check-label">Male</label>
           </div>
@@ -35,6 +42,7 @@ export default function DemographicsForm({ register }) {
               value="1"
               id="genderFemale"
               {...register("gender", { required: true })}
+              onClick={() => {setGender("female")}}
             />
             <label className="form-check-label">Female</label>
           </div>

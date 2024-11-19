@@ -11,18 +11,24 @@ import Modal from "react-bootstrap/Modal";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+
+
 //TODO:
-// 1. Fix submit button - make smaller, sticky at bottom right
+// --------1. Fix submit button - make smaller, sticky at bottom right
 // 2. Fix styling to match medicalHistoryForm
 // 3. Add validation perhaps
 // 4. and/or change reaction to invalid inputs
 // 5. Fix number inputs for decimals lol!!
 // 6. Loading icon while waiting for model to start up
-// 7. 3C5087 - color for navbar and titles
-// 8. Patient icon - male or female change
+// ------7. 3C5087 - color for navbar and titles
+// ------8. Patient icon - male or female change
 // 9. Change title sizes 
 // 10. User Document
 // 11. Finish modal
+// 12. Later on - about page
+// 13. Later on - save entries, cache result
+// 14. Model architecture drawings ? 
+
 
 function App() {
   const { register, handleSubmit } = useForm();
@@ -95,7 +101,7 @@ function App() {
         >
           <div className="row mx-5">
             <div className="col-lg-2 col-sm-2">
-              <h3 className="mt-4">Demographics and Personal Information</h3>
+              <h3 className="mt-4 sectionTitle">Demographics and Personal Information</h3>
 
               <DemographicsForm register={register} />
             </div>
@@ -103,23 +109,23 @@ function App() {
             <div className="col-lg-9 col">
               <div className="row mx-5">
                 <div className=" row">
-                  <h3 className="mt-4">Lifestyle and Behavior</h3>
+                  <h3 className="mt-4 sectionTitle">Lifestyle and Behavior</h3>
 
                   <LifestyleAndBehaviorForm register={register} />
                 </div>
                 <div className="row">
-                  <h3 className="mt-4">Medical History and Conditions</h3>
+                  <h3 className="mt-4 sectionTitle">Medical History and Conditions</h3>
 
                   <MedicalHistoryForm register={register} />
                 </div>
                 <div className="row">
-                  <h3 className="mt-4">Cognitive and Functional Assessments</h3>
+                  <h3 className="mt-4 sectionTitle">Cognitive and Functional Assessments</h3>
 
                   <CognitiveFunctionalForm register={register} />
                 </div>
               </div>
             </div>
-            <Button type="submit" variant="success" size="lg" className="fixedButton">
+            <Button type="submit" onClick= {console.log(register)}variant="success" size="lg" className="fixedButton">
               Submit
             </Button>
             
@@ -130,14 +136,15 @@ function App() {
     
     <Modal show={show} onHide={handleClose} className={"ResultsModal"}>
         <Modal.Header closeButton={true}>
-            <Modal.Title>Results</Modal.Title>
+            <Modal.Title>Diagnosis: {diagnosis === 0 ? "Alzheimer's Unlikely" : "Alzheimer's Likely"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Container fluid>
                 <Row>
                     <Col>
                     <div>
-                      
+                        <p>Our neural networks have determined that the patient {diagnosis === 0 ? "is unlikely to suffer from Alzheimer's disease." : "is likely to suffer from Alzheimer's disease."}</p>
+
                         <p>Hello</p>
                         <p>{results}</p>
                         <p>{diagnosis}</p>
