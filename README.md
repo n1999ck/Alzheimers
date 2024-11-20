@@ -17,7 +17,7 @@ Necessary libraries are:
 * Pandas
 * MatPlotLib
 
-Operating system used for testing and development was conducted on Windows 10/11 machines.
+Operating system used for testing and development was conducted on Windows 10/11 and Ubuntu 22.04 (Pop!_OS).
 
 ### Installing
 
