@@ -29,6 +29,12 @@ import Col from "react-bootstrap/Col";
 // 13. Later on - save entries, cache result
 // 14. Model architecture drawings ? 
 
+// BEFORE PRESENTATION:
+// 1. Fix styling
+// 2. Change title sizes
+// 3. Finish modal !!!
+// 4. DECIMALS
+
 
 function App() {
   const { register, handleSubmit } = useForm();
@@ -144,7 +150,7 @@ function App() {
                     <Col>
                     <div>
                         <p>Our neural networks have determined that the patient {diagnosis === 0 ? "is unlikely to suffer from Alzheimer's disease." : "is likely to suffer from Alzheimer's disease."}</p>
-
+  
                         <p>Hello</p>
                         <p>{results}</p>
                         <p>{diagnosis}</p>
