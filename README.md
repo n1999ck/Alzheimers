@@ -11,7 +11,7 @@ This web application predicts the likelihood of Alzheimer’s disease based on u
 
 ## Visuals
 
-![Screenshot of Application Form](https://via.placeholder.com/500x300)  TODO: screenshot
+![Screenshot of Application Form](https://github.com/n1999ck/Alzheimers/blob/webClient/screenshot.PNG?raw=true) 
 *Form Screenshot: Users enter personal, lifestyle, and medical information for analysis.*
 
 ## Installation
