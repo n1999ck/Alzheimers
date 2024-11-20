@@ -149,11 +149,8 @@ function App() {
                 <Row>
                     <Col>
                     <div>
+                      
                         <p>Our neural networks have determined that the patient {diagnosis === 0 ? "is unlikely to suffer from Alzheimer's disease." : "is likely to suffer from Alzheimer's disease."}</p>
-  
-                        <p>Hello</p>
-                        <p>{results}</p>
-                        <p>{diagnosis}</p>
                     </div>
                     </Col>
                 </Row>
