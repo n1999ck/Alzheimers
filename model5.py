@@ -1,8 +1,8 @@
 import torch
 from sklearn.metrics import accuracy_score, confusion_matrix
-from sklearn.svm import SVC
-from sklearn.ensemble import BaggingClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 from data_extractor import PatientData
+from sklearn.model_selection import GridSearchCV
 import matplotlib.pyplot as plt
 import joblib
 import math
@@ -14,12 +14,12 @@ dotenv.load_dotenv(env_file)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 data = PatientData() 
 
-class SVM():
+class XGB():
 
     def __init__(self):
-        self.svm = SVC(kernel='rbf', gamma=0.007, C=10)
-        self.bgc = BaggingClassifier(estimator=self.svm, n_estimators=5, random_state=0)
-        
+        self.xgb = GradientBoostingClassifier(n_estimators=50, learning_rate=1.0,
+    max_depth=1, random_state=0)
+
         # Model metric variables as attributes
         self.training_accuracy = 0
         self.testing_accuracy = 0
@@ -31,12 +31,12 @@ class SVM():
         self.mcc = -1
 
     def train(self):
-        self.bgc.fit(data.X_train_no_val, data.y_train_no_val)
-        y_pred = self.bgc.predict(data.X_train_no_val)
+        self.xgb.fit(data.X_train_no_val, data.y_train_no_val)
+        y_pred = self.xgb.predict(data.X_train_no_val)
         self.get_train_metrics(data.y_train_no_val, y_pred)
     
     def test(self):
-        self.pred = self.bgc.predict(data.X_test_no_val)
+        self.pred = self.xgb.predict(data.X_test_no_val)
         self.get_test_metrics(data.y_test_no_val, self.pred)
 
     def get_train_metrics(self, y_true, y_pred):
@@ -83,11 +83,11 @@ class SVM():
         ax.xaxis.set_ticks_position('bottom')
         plt.xlabel('Predicted Label')
         plt.ylabel('True label')
-        plt.savefig('matrix_svm.png')
+        plt.savefig('matrix_xgb.png')
    
     def check_metrics(self)-> bool:
-        curr_acc = float(os.getenv('SVM_TESTING_ACCURACY'))
-        curr_rec = float(os.getenv('SVM_RECALL'))
+        curr_acc = float(os.getenv('XGB_TESTING_ACCURACY'))
+        curr_rec = float(os.getenv('XGB_RECALL'))
         print("New: {}".format(self.testing_accuracy + (self.recall*100)))
         print("Old: {}".format(curr_acc+(curr_rec*100)))
         print(self.recall)
@@ -99,28 +99,28 @@ class SVM():
         return False
 
     def save_metrics(self):
-        os.environ['SVM_TRAINING_ACCURACY'] = str(self.training_accuracy)
-        os.environ['SVM_TESTING_ACCURACY'] = str(self.testing_accuracy)
-        os.environ['SVM_SPECIFICITY'] = str(self.specificity)
-        os.environ['SVM_PRECISION'] = str(self.precision)
-        os.environ['SVM_RECALL'] = str(self.recall)
-        os.environ['SVM_F1'] = str(self.f1)
-        os.environ['SVM_MCC'] = str(self.mcc)
+        os.environ['XGB_TRAINING_ACCURACY'] = str(self.training_accuracy)
+        os.environ['XGB_TESTING_ACCURACY'] = str(self.testing_accuracy)
+        os.environ['XGB_SPECIFICITY'] = str(self.specificity)
+        os.environ['XGB_PRECISION'] = str(self.precision)
+        os.environ['XGB_RECALL'] = str(self.recall)
+        os.environ['XGB_F1'] = str(self.f1)
+        os.environ['XGB_MCC'] = str(self.mcc)
 
-        dotenv.set_key(env_file, 'SVM_TRAINING_ACCURACY', os.environ['SVM_TRAINING_ACCURACY'])
-        dotenv.set_key(env_file, 'SVM_TESTING_ACCURACY', os.environ['SVM_TESTING_ACCURACY'])
-        dotenv.set_key(env_file, 'SVM_SPECIFICITY', os.environ['SVM_SPECIFICITY'])
-        dotenv.set_key(env_file, 'SVM_PRECISION', os.environ['SVM_PRECISION'])
-        dotenv.set_key(env_file, 'SVM_RECALL', os.environ['SVM_RECALL'])
-        dotenv.set_key(env_file, 'SVM_F1', os.environ['SVM_F1'])
-        dotenv.set_key(env_file, 'SVM_MCC', os.environ['SVM_MCC'])
+        dotenv.set_key(env_file, 'XGB_TRAINING_ACCURACY', os.environ['XGB_TRAINING_ACCURACY'])
+        dotenv.set_key(env_file, 'XGB_TESTING_ACCURACY', os.environ['XGB_TESTING_ACCURACY'])
+        dotenv.set_key(env_file, 'XGB_SPECIFICITY', os.environ['XGB_SPECIFICITY'])
+        dotenv.set_key(env_file, 'XGB_PRECISION', os.environ['XGB_PRECISION'])
+        dotenv.set_key(env_file, 'XGB_RECALL', os.environ['XGB_RECALL'])
+        dotenv.set_key(env_file, 'XGB_F1', os.environ['XGB_F1'])
+        dotenv.set_key(env_file, 'XGB_MCC', os.environ['XGB_MCC'])
 
 def main(): 
-    model = SVM()
+    model = XGB()
     model.train()
     model.test()
     if(model.check_metrics()):
-        joblib.dump(model, "model_svm.joblib")
+        joblib.dump(model, "model_xgb.joblib")
         print("MODEL IMPROVED! New model saved.")
 
     for i in range(50):
