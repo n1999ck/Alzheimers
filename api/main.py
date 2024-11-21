@@ -1,18 +1,17 @@
 '''
-The saved sklearn models are with 323 samples not 322. Trying to get a new saved model of both will fix this. 
-    ^Need a better model for it to be overridden
-
-Validation Accuracy in FNN & MLP scripts are not accurate. Training and Testing are. 
-    ^Not the biggest concern right now. Will fix eventually.
+TODO: Save models
+TODO: Create meta classifier
+TODO: Extract 'LOADING DATA' portion to its own file
 '''
+
 import torch
 import joblib
 import os
 from model1 import FNN  # Feedforward Neural Network- PyTorch
 from model2 import MLP  # Multilayer Perceptron     - PyTorch
 from model3 import RFC  # Random Forest Classifier  - Sklearn
-from model4 import SVM  # Support Vector Machine    - Sklearn
-from api.model5 import XGB  # Gradient Boosting         - Sklearn
+from model4 import SVM  # Support Vector Classifier - Sklearn
+from model5 import XGB  # Gradient Boosting         - Sklearn
 
 # Creation of patient data
 user_info = [72, 0, 0, 2, 33.28973831, 0, 7.890703151, 6.570993383, 7.941403884, 9.878710516, 0, 0, 0, 0, 0, 0, 166, 78, 283.3967969, 92.20006443, 81.92004333, 217.3968725, 11.11477737, 6.30754331, 0, 1, 8.327563008, 0, 1, 0, 0, 1]
@@ -24,11 +23,14 @@ for i, feature in enumerate(user_info):
     else:
         user_info[i] = 0
 
+
+# Passing module classes into callable variables
 model_1 = FNN()
 model_2 = MLP()
 model_3 = RFC()
 model_4 = SVM()
 model_5 = XGB()
+models = [model_1, model_2, model_3, model_4, model_5]
 
 # Passing module classes into callable variables
 state_dict_1 = torch.load("./model_fnn.pt", weights_only=True)
@@ -60,7 +62,6 @@ def get_weights()-> list[4]:
         (float(os.getenv('XGB_TESTING_ACCURACY')) + float(os.getenv('XGB_RECALL')))/ model_sum
     ]
     return weights
-
 '''
 Gets the prediction of all models. 
 Parameters - User_info: array (of size 32)
@@ -97,7 +98,17 @@ def meta_classifier(predictions, prediction_weights):
     else:
         print(f"Meta classifier says...Alzheimers detected :'(")
 
-prediction = meta_classifier(poll_predictions(user_info), get_weights())
 
 
+def get_prediction(user_input):
+    prediction = meta_classifier(poll_predictions(user_input), get_weights())
+    return prediction
+
+def get_test_acc():
+    accuracies = []
+    for model in models:
+        accuracies.append(model.get_test_acc())
+
+    print("Model accuracies: " + str(accuracies))
+    return accuracies
 

@@ -1,7 +1,7 @@
 import torch
 from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.ensemble import GradientBoostingClassifier
-from data_extractor import PatientData
+from api.data_extractor import PatientData
 from sklearn.model_selection import GridSearchCV
 import matplotlib.pyplot as plt
 import joblib
