@@ -31,13 +31,6 @@ Operating system used for testing and development was conducted on Windows 10/11
 * Open 'main.py'
 * Press the run button in your IDE
 
-## Help
-
-Any advise for common problems or issues.
-```
-command to run if program contains helper info
-```
-
 ## Authors
 
 Contributors names  
