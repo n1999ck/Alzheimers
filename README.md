@@ -1,4 +1,56 @@
-# Alzheimer’s Disease Prediction App
+# Predicting Alzheimer's
+
+This is a simple program which takes data pertaining to an individual and feeds it to models to determine if they are at risk of developing Alzheimer's.
+
+## Description
+
+An in-depth paragraph about your project and overview of use.
+The program takes in all kinds of data, including medical history, family history and traits that will be used by four trained deep learning models to predict if the user is at risk of developing Alzheimers. The models used are an FNN, an MLP, an SVM and a DF Classifier. They have each been trained using various features which now lead to an accurate prediction.
+
+## Getting Started
+
+### Dependencies
+Necessary libraries are:
+* PyTorch
+* NumPy
+* SciKit-Learn
+* Pandas
+* MatPlotLib
+
+Operating system used for testing and development was conducted on Windows 10/11 and Ubuntu 22.04 (Pop!_OS).
+
+### Installing
+
+* Download the main branch from [GitHub](https://github.com/n1999ck/Alzheimers) and extract the files onto your machine. 
+
+### Executing program
+
+* How to run the program:
+* Locate where your extracted files are saved
+* Open the extracted file folder
+* Open 'main.py'
+* Press the run button in your IDE
+
+## Authors
+
+Contributors names  
+'The Braingineers'  
+**Kelly Payne**  
+**Jaden Jefferson**  
+**Jacob Tillmon**  
+**Nick Miller**  
+
+## Version History
+* 0.1
+    * Initial Release
+
+## Acknowledgments
+The Braingineers team would like to acknowledge the help of Dr. Yi Zhou in gathering resources to make this project possible.  
+We would also like to thank Joe Papa, author of 'PyTorch Pocket Reference', which was heavily referenced in the creation of these models.  
+In addition, Sebastion Raschka, Vahid Mirjalili and Yuxi (Hayden) Liu for their work in the book 'Machine Learning with PyTorch and SciKit-Learn'.
+
+
+# MindWise: Web Client for Alzheimer's Predictor
 
 ## Description
 
@@ -22,8 +74,8 @@ To run this project, ensure you have the following software and packages install
 
 #### System Requirements
 
-- **Node.js**: Version X.X.X or higher TODO: versions
-- **Python**: Version X.X.X or higher (compatible with `pip`)
+- **Node.js**: Version 10.8.2 or higher TODO: versions
+- **Python**: Version 3.12.1 or higher (compatible with `pip`)
 
 #### Node Packages
 
@@ -36,10 +88,9 @@ npm install
 Alternatively, here is the main list of required packages, located in `package.json`:
 
 - **react**: `18.3.1`
-- **react-bootstrap**: `X.X.X` TODO: version
+- **react-bootstrap**: `2.10.5` TODO: version
 - **react-hook-form**: `7.53.1`
-- **react-bootstrap**: `5.3.3`
-- **halfmoon**: `2.0.2`
+- **bootstrap**: `5.3.3`
 - **flask**: `0.2.10`
 
 #### Python (pip) Packages
@@ -52,14 +103,15 @@ pip install -r requirements.txt --TODO: make requirements.txt
 
 The required packages, listed in `requirements.txt`, include:
 
-- **Flask**: `X.X.X`
-- **numpy**: `X.X.X`
-- **scikit-learn**: `X.X.X`
-- TODO: finish this lol
+torchsummary scikit-learn matplotlib pandas numpy flask python-dotenv
 
----
+- **Flask**: `3.0.3`
+- **numpy**: `2.1.1`
+- **scikit-learn**: `1.5.2`
+- **pandas**: `2.2.3`
+- **torch**: `2.4.1`
+- **torchsummary**: `1.5.1`
 
-This way, users know where to look and how to install each package group. Let me know if you'd like any adjustments!
 
 ### Steps
 
@@ -109,9 +161,9 @@ This way, users know where to look and how to install each package group. Let me
 
 ## Usage
 
-- **Form Input**: Users fill out sections on demographics, lifestyle, medical history, and cognitive assessments.
-- **Submit**: Click the Submit button to send data to the back-end API.
-- **Output**: The app returns a prediction based on the user’s input data.
+- **Form Input**: Enter patient data in each field. All input is done through radio buttons, numerical inputs, or selection drop-downs.
+- **Submit**: Click the Submit button to send data to the back-end API for processing.
+- **Output**: The app displays output in a modal.
 
 ## Support
 
@@ -135,7 +187,6 @@ For testing, use:
 
 ```bash
 npx cypress open # Frontend tests
-pytest     # Backend tests
 ```
 
 ## Authors and Acknowledgments
