@@ -1,83 +1,81 @@
-# **MindWise User Documentation**
+# **User Documentation for Alzheimer’s Prediction Tool**
 
-## **Table of Contents**
-
-1. **Introduction**
-   - Overview of the application
-   - Purpose and intended audience
-   - Features and functionality
-
-2. **Getting Started**
-   - System requirements
-   - Installation and setup
-   - Launching the application
-
-3. **Using the Application**
-   - Overview of the user interface
-   - Step-by-step instructions
-     - Filling out the demographics form
-     - Submitting the form for prediction
-     - Viewing the results
-   - Interpreting prediction results
-   - Error handling and troubleshooting common issues
-
-4. **Technical Overview**
-   - Brief description of backend functionality
-   - Overview of API endpoints (e.g., `/api/predict`)
-     - Request payload structure
-     - Response format
-   - Explanation of the prediction process (e.g., neural network and data processing)
-
-5. **Best Practices**
-   - Tips for entering data
-   - Understanding the limitations of the predictions
-   - Data privacy considerations
-
-6. **FAQ**
-   - Answers to common questions about the tool
-   - What to do if results seem inaccurate
-   - How to report issues or provide feedback
-
-7. **Advanced Usage (Optional)**
-   - Using the application via the API
-   - Sample API requests and responses
-   - Customizing input data for different prediction scenarios
-
-8. **Troubleshooting**
-   - Backend connection errors
-   - How to check if the backend is loading
-   - Common issues with form submission and data validation
-
-9. **Version History**
-   - List of application versions
-   - Features and bug fixes for each release
-
-10. **Contact and Support**
-    - How to contact the development team
-    - Links to support resources
-    - Feedback submission form or email address
+### **Table of Contents**
+1. Overview  
+2. System Requirements  
+3. Installation and Setup  
+4. Using the Application  
+    - Data Input  
+    - Results Interpretation  
+5. Troubleshooting  
+6. FAQs  
+7. Contact and Support  
 
 ---
 
-### **Details for Each Section**
+## **1. Overview**  
+The Alzheimer’s Prediction Tool is designed to assist medical professionals in assessing the likelihood of Alzheimer’s disease using patient demographics and clinical data. This tool leverages machine learning to provide an early indication, helping clinicians prioritize diagnostic evaluations.
 
-#### **Introduction**
-MindWise is an easy-to-use, powerful application for predicting Alzheimer's diagnoses in patients. It's intended for medical professionals in clinical settings.
+### **Key Features**:  
+- Intuitive web-based interface.  
+- Fast, predictive analysis based on input data.  
 
-#### **Getting Started**
-Explain how to set up and launch the application, covering installation steps and system requirements.
+**Note**: This tool is not a substitute for clinical judgment. Results should always be confirmed with standard diagnostic procedures.
 
-#### **Using the Application**
-Include:
-- A screenshot of the interface.
-- Clear steps for filling out the demographics form (e.g., entering age, selecting gender).
-- A brief guide to submitting the form and understanding the prediction output.
+---
 
-#### **Technical Overview**
-Describe how the backend works, focusing on what happens after the form submission, and provide a clear, beginner-friendly explanation of the data flow.
+## **2. System Requirements**  
+- **Browser**: Latest versions of Chrome, Firefox, or Edge.  
+- **Network**: Stable internet connection for accessing the tool and backend server.  
 
-#### **FAQ**
-Address anticipated questions about the application's usage and purpose.
+---
 
-#### **Troubleshooting**
-Offer actionable tips for diagnosing and resolving common issues. Provide details about backend status (e.g., loading indicator implementation) and server connectivity checks.
+## **3. Installation and Setup**  
+1. Access the application via mindwise.fake.url. 
+2. No additional installation is required; the tool is web-based.  
+
+---
+
+## **4. Using the Application**  
+
+### **Enter the Data**  
+1. **Enter Patient Information:**  
+   - The MindWise model uses a variety of data points about each patient for analysis.
+   - Enter the relevant information for each input.
+2. **Submit for Analysis:**  
+   - Review the data before submission.
+3. **View Results**
+   - A modal will display the model's prediction:
+   - **Likely to have Alzheimer’s**: Indicates a higher risk based on the provided data.  
+   - **Unlikely to have Alzheimer’s**: Indicates a lower risk.  
+
+---
+
+## **5. Troubleshooting**  
+### Common Issues  
+- **Prediction Not Loading:**  
+  - Verify internet connection.  
+  - Ensure all required fields are completed.  
+
+- **Error Message Received:**  
+  - Check if inputs follow the specified format (e.g., age must be a positive number).  
+  - Retry after refreshing the browser.
+
+---
+
+## **6. FAQs**  
+### **Is patient data stored?**  
+No, all data is processed securely in real-time and not stored.  
+
+### **How accurate is the prediction?**  
+The prediction is based on trained machine learning models with a validation accuracy of 92.26%. Always confirm with clinical diagnostics.  
+
+### **Can I export or save the results?**  
+Not currently. Future updates may include these features.  
+
+---
+
+## **7. Contact and Support**  
+For further assistance, reach out to:  
+- **Email**: support@mindwise.fake.url  
+- **Phone**: 1-800-555-WISE
