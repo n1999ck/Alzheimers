@@ -14,7 +14,7 @@ import os
 import dotenv
 
 
-env_file = dotenv.find_dotenv("C:/Users/PATH/TO/FILE/.env")
+env_file = dotenv.find_dotenv("results/.env")
 dotenv.load_dotenv(env_file)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 data = PatientData()
@@ -156,7 +156,7 @@ class FNN(nn.Module):
         ax.xaxis.set_ticks_position('bottom')
         plt.xlabel('Predicted Label')
         plt.ylabel('True label')
-        plt.savefig('matrix_fnn.png')
+        plt.savefig('results/matrix_fnn.png')
 
     def train(self):
         
@@ -258,7 +258,7 @@ def main():
     model.train()
     model.test()
     if(model.check_metrics()):
-        torch.save(model.state_dict(), "./model_fnn.pt")
+        torch.save(model.state_dict(), "saved models/model_fnn.pt")
         print("MODEL IMPROVED! New model saved.")
 
     for i in range(50):

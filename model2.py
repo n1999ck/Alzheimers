@@ -8,7 +8,7 @@ import math
 import os
 import dotenv
 
-env_file = dotenv.find_dotenv("C:/Users/PATH/TO/FILE/.env")
+env_file = dotenv.find_dotenv("results/.env")
 dotenv.load_dotenv(env_file)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 data = PatientData()
@@ -153,7 +153,7 @@ class MLP(nn.Module):
         ax.xaxis.set_ticks_position('bottom')
         plt.xlabel('Predicted Label')
         plt.ylabel('True label')
-        plt.savefig('matrix_mlp.png')
+        plt.savefig('results/matrix_mlp.png')
 
     def train(self):
         for epoch in range(EPOCHS):
@@ -255,7 +255,7 @@ def main():
     model.train()
     model.test()
     if(model.check_metrics()):
-        torch.save(model.state_dict(), "./model_mlp.pt")
+        torch.save(model.state_dict(), "saved models/model_mlp.pt")
         print("MODEL IMPROVED! New model saved.")
     
     i=0

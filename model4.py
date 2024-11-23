@@ -9,7 +9,7 @@ import math
 import os
 import dotenv
 
-env_file = dotenv.find_dotenv("C:/Users/PATH/TO/FILE/.env")
+env_file = dotenv.find_dotenv("results/.env")
 dotenv.load_dotenv(env_file)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 data = PatientData() 
@@ -83,7 +83,7 @@ class SVM():
         ax.xaxis.set_ticks_position('bottom')
         plt.xlabel('Predicted Label')
         plt.ylabel('True label')
-        plt.savefig('matrix_svm.png')
+        plt.savefig('results/matrix_svm.png')
    
     def check_metrics(self)-> bool:
         curr_acc = float(os.getenv('SVM_TESTING_ACCURACY'))
@@ -120,7 +120,7 @@ def main():
     model.train()
     model.test()
     if(model.check_metrics()):
-        joblib.dump(model, "model_svm.joblib")
+        joblib.dump(model, "saved models/model_svm.joblib")
         print("MODEL IMPROVED! New model saved.")
 
     for i in range(50):
