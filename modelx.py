@@ -45,6 +45,7 @@ class MetaClassifier():
         self.recall = -1
         self.f1 = -1
         self.mcc = -1
+        self.overhead = -1
 
     def get_metrics(self, y_pred, y_label):
         self.accuracy = accuracy_score(y_true=y_label, y_pred=y_pred)*100
@@ -151,6 +152,7 @@ class MetaClassifier():
         return final_prediction
 
     def test(self):
+        start_time = time.time()
         i = 0
         total_accurate = 0
 
@@ -161,6 +163,9 @@ class MetaClassifier():
             if(prediction == self.y_label[i]):
                 total_accurate+=1
             i+=1
+        end_time = time.time()
+        total_training_time = end_time - start_time
+        self.overhead = total_training_time
         self.accuracy = total_accurate
         self.get_metrics(self.y_pred, self.y_label)
 
@@ -187,7 +192,8 @@ class MetaClassifier():
         os.environ['META_TP'] = str(self.tp)
         os.environ['META_FP'] = str(self.fp)
         os.environ['META_TN'] = str(self.tn)
-        os.environ['META_FN'] = str(self.fn)  
+        os.environ['META_FN'] = str(self.fn) 
+        os.environ['META_OVERHEAD'] = str(self.overhead)
 
         dotenv.set_key(env_file, 'META_ACCURACY', os.environ['META_ACCURACY'])
         dotenv.set_key(env_file, 'META_SPECIFICITY', os.environ['META_SPECIFICITY'])
@@ -199,6 +205,7 @@ class MetaClassifier():
         dotenv.set_key(env_file, 'META_FP', os.environ['META_FP'])
         dotenv.set_key(env_file, 'META_TN', os.environ['META_TN'])
         dotenv.set_key(env_file, 'META_FN', os.environ['META_FN'])
+        dotenv.set_key(env_file, 'META_OVERHEAD', os.environ['META_OVERHEAD'])
 def main(): 
     model = MetaClassifier()
     model.test()
