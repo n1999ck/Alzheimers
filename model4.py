@@ -148,7 +148,7 @@ class SVM():
         os.environ['SVM_TESTING_FP'] = str(self.test_fp)
         os.environ['SVM_TESTING_TN'] = str(self.test_tn)
         os.environ['SVM_TESTING_FN'] = str(self.test_fn)   
-        os.environ['SVM_TESTING_FN'] = str(self.testing_overhead)
+        os.environ['SVM_TESTING_OVERHEAD'] = str(self.testing_overhead)
 
         dotenv.set_key(env_file, 'SVM_TRAINING_ACCURACY', os.environ['SVM_TRAINING_ACCURACY'])
         dotenv.set_key(env_file, 'SVM_TRAINING_SPECIFICITY', os.environ['SVM_TRAINING_SPECIFICITY'])
