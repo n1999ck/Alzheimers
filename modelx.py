@@ -3,7 +3,7 @@ import joblib
 import math
 import os
 from data_extractor import PatientData
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score, f1_score, matthews_corrcoef
 import matplotlib.pyplot as plt
 import dotenv
 from model1 import FNN  # Feedforward Neural Network- PyTorch
@@ -39,46 +39,42 @@ class MetaClassifier():
         self.y_pred = []
         self.y_label = list(data.y_test)
 
-        self.training_accuracy = 0
-        self.testing_accuracy = 0
-
-        self.specificity = -1
+        self.accuracy = 0
+        self.specificity= -1
         self.precision = -1
         self.recall = -1
         self.f1 = -1
         self.mcc = -1
 
-    def get_test_metrics(self, y_pred, y_label):
+    def get_metrics(self, y_pred, y_label):
+        self.accuracy = accuracy_score(y_true=y_label, y_pred=y_pred)*100
 
-        self.testing_accuracy = (self.testing_accuracy/(len(y_label)))*100
         # Confusion matrix with true neg, false pos, false neg, true pos respectively
         cm = confusion_matrix(y_true=y_label, y_pred=y_pred)  
-        tn, fp, fn, tp = cm.ravel()  
+        self.tn, self.fp, self.fn, self.tp = cm.ravel()   
 
+        self.precision = precision_score(y_true=y_label, y_pred=y_pred, zero_division=0.0)
+        self.recall = recall_score(y_true=y_label, y_pred=y_pred, zero_division=0.0)
+        self.f1 = f1_score(y_true=y_label, y_pred=y_pred, zero_division=0.0)
+        self.mcc = matthews_corrcoef(y_true=y_label, y_pred=y_pred)
+        
         # if statements to stop any division by 0 errors
-        if((tn+fp)>0):
-            self.specificity = tn / (tn+fp)  # Correctly predicted negatives over all actual negatives
-
-        if((tp+fp) & (fn+tp)>0):
-            self.precision = tp /(tp+fp)     # Correctly predicted positives over all predicted positives
-            self.recall = tp / (fn+tp)       # Correctly predicted positives over all actual positives
-            self.f1 = 2 * ((self.precision*self.recall)/(self.precision+self.recall))    # F1 Score 
-
-        if((tp+fp) & (tp+fn) & (tn+fp) & (tn+fn) > 0):
-            self.mcc = ((tp*tn) - (fp*fn))/(math.sqrt((tp+fp)*(tp+fn)*(tn+fp)*(tn+fn)))  # Matthews Correlation Coefficient
+        if((self.tn+self.fp)>0):
+            self.specificity = self.tn / (self.tn+self.fp)  # Correctly predicted negatives over all actual negatives
 
         # Print all calculated metrics for test samples
-        print("Test Accuracy:\t\t{}%".format(round(self.testing_accuracy, 4)))
-        print("Total correct:\t\t{}".format(self.testing_accuracy))
-        print("Total predictions:\t{}".format(len(data.y_test)))
+        print("Test Accuracy:\t\t{}%".format(round(self.accuracy, 4)))
+        print("Total correct:\t\t{}".format(self.accuracy))
+        print("Total predictions:\t{}".format(len(data.y_test_no_val)))
         print("-"*60)
-        print("Precision:\t{}".format(round(self.precision, 4)))
-        print("Specificity:\t{}".format(round(self.specificity, 4)))
-        print("Recall:\t\t{}".format(round(self.recall, 4)))
-        print("F1:\t\t{}".format(round(self.f1, 4)))
-        print("MCC:\t\t{}".format(round(self.mcc, 4)))
+        print("Testing Precision:\t{}".format(round(self.precision, 4)))
+        print("Testing Specificity:\t{}".format(round(self.specificity, 4)))
+        print("Testing Recall:\t\t{}".format(round(self.recall, 4)))
+        print("Testing F1:\t\t{}".format(round(self.f1, 4)))
+        print("Testing MCC:\t\t{}".format(round(self.mcc, 4)))
 
-    def save_test_metrics_display(self, y_pred, y_label):
+
+    def save_metrics_display(self, y_pred, y_label):
         # Confusion matrix with true neg, false pos, false neg, true pos respectively
         cm = confusion_matrix(y_true=y_label, y_pred=y_pred)   
 
@@ -95,22 +91,22 @@ class MetaClassifier():
 
     def get_weights(self)-> list[4]:
         model_sum = float(os.getenv('FNN_TESTING_ACCURACY')) + \
-        float(os.getenv('FNN_RECALL'))*100 + \
+        float(os.getenv('FNN_TESTING_RECALL'))*100 + \
         float(os.getenv('MLP_TESTING_ACCURACY')) + \
-        float(os.getenv('MLP_RECALL'))*100 + \
+        float(os.getenv('MLP_TESTING_RECALL'))*100 + \
         float(os.getenv('RFC_TESTING_ACCURACY')) + \
-        float(os.getenv('RFC_RECALL'))*100 + \
+        float(os.getenv('RFC_TESTING_RECALL'))*100 + \
         float(os.getenv('SVM_TESTING_ACCURACY')) + \
-        float(os.getenv('SVM_RECALL'))*100 + \
+        float(os.getenv('SVM_TESTING_RECALL'))*100 + \
         float(os.getenv('XGB_TESTING_ACCURACY')) + \
-        float(os.getenv('XGB_RECALL'))*100
+        float(os.getenv('XGB_TESTING_RECALL'))*100
         print(model_sum)
         weights = [
-            ((float(os.getenv('FNN_TESTING_ACCURACY')) + float(os.getenv('FNN_RECALL')))/ model_sum)-.7,
-            ((float(os.getenv('MLP_TESTING_ACCURACY')) + float(os.getenv('MLP_RECALL')))/ model_sum),
-            ((float(os.getenv('RFC_TESTING_ACCURACY')) + float(os.getenv('RFC_RECALL')))/ model_sum)+.7,
-            ((float(os.getenv('SVM_TESTING_ACCURACY')) + float(os.getenv('SVM_RECALL')))/ model_sum)-.7,
-            ((float(os.getenv('XGB_TESTING_ACCURACY')) + float(os.getenv('XGB_RECALL')))/ model_sum)+.7
+            ((float(os.getenv('FNN_TESTING_ACCURACY')) + float(os.getenv('FNN_TESTING_RECALL')))/ model_sum)-.7,
+            ((float(os.getenv('MLP_TESTING_ACCURACY')) + float(os.getenv('MLP_TESTING_RECALL')))/ model_sum),
+            ((float(os.getenv('RFC_TESTING_ACCURACY')) + float(os.getenv('RFC_TESTING_RECALL')))/ model_sum)+.7,
+            ((float(os.getenv('SVM_TESTING_ACCURACY')) + float(os.getenv('SVM_TESTING_RECALL')))/ model_sum)-.7,
+            ((float(os.getenv('XGB_TESTING_ACCURACY')) + float(os.getenv('XGB_TESTING_RECALL')))/ model_sum)+.7
         ]
         return weights
 
@@ -125,7 +121,7 @@ class MetaClassifier():
         prediction1 = int(output1.round().item())
         prediction2 = int(output2.round().item())
         prediction3 = self.model_3.rfc.predict(tensor.reshape(1,-1))
-        prediction4 = self.model_4.bgc.predict(tensor.reshape(1,-1))
+        prediction4 = self.model_4.svm.predict(tensor.reshape(1,-1))
         prediction5 = self.model_5.xgb.predict(tensor.reshape(1,-1))
         predictions = [prediction1, prediction2, prediction3, prediction4, prediction5]
         return predictions
@@ -165,39 +161,44 @@ class MetaClassifier():
             if(prediction == self.y_label[i]):
                 total_accurate+=1
             i+=1
-        self.testing_accuracy = total_accurate
-        self.get_test_metrics(self.y_pred, self.y_label)
+        self.accuracy = total_accurate
+        self.get_metrics(self.y_pred, self.y_label)
 
     def check_metrics(self)-> bool:
-        curr_acc = float(os.getenv('META_TESTING_ACCURACY'))
+        curr_acc = float(os.getenv('META_ACCURACY'))
         curr_rec = float(os.getenv('META_RECALL'))
-        print("New: {}".format(self.testing_accuracy + (self.recall*100)))
+        print("New: {}".format(self.accuracy + (self.recall*100)))
         print("Old: {}".format(curr_acc+(curr_rec*100)))
         print(self.recall)
-        print(self.testing_accuracy)
-        if(self.testing_accuracy + (self.recall*100) > curr_acc+(curr_rec*100)):
+        print(self.accuracy)
+        if(self.accuracy + (self.recall*100) > curr_acc+(curr_rec*100)):
             self.save_metrics()
-            self.save_test_metrics_display(self.y_pred, self.y_label)
+            self.save_metrics_display(self.y_pred, self.y_label)
             return True
         return False
 
     def save_metrics(self):
-        os.environ['META_TRAINING_ACCURACY'] = str(self.training_accuracy)
-        os.environ['META_TESTING_ACCURACY'] = str(self.testing_accuracy)
+        os.environ['META_ACCURACY'] = str(self.accuracy)
         os.environ['META_SPECIFICITY'] = str(self.specificity)
         os.environ['META_PRECISION'] = str(self.precision)
         os.environ['META_RECALL'] = str(self.recall)
         os.environ['META_F1'] = str(self.f1)
         os.environ['META_MCC'] = str(self.mcc)
+        os.environ['META_TP'] = str(self.tp)
+        os.environ['META_FP'] = str(self.fp)
+        os.environ['META_TN'] = str(self.tn)
+        os.environ['META_FN'] = str(self.fn)  
 
-        dotenv.set_key(env_file, 'META_TRAINING_ACCURACY', os.environ['META_TRAINING_ACCURACY'])
-        dotenv.set_key(env_file, 'META_TESTING_ACCURACY', os.environ['META_TESTING_ACCURACY'])
+        dotenv.set_key(env_file, 'META_ACCURACY', os.environ['META_ACCURACY'])
         dotenv.set_key(env_file, 'META_SPECIFICITY', os.environ['META_SPECIFICITY'])
         dotenv.set_key(env_file, 'META_PRECISION', os.environ['META_PRECISION'])
         dotenv.set_key(env_file, 'META_RECALL', os.environ['META_RECALL'])
         dotenv.set_key(env_file, 'META_F1', os.environ['META_F1'])
         dotenv.set_key(env_file, 'META_MCC', os.environ['META_MCC'])
-
+        dotenv.set_key(env_file, 'META_TP', os.environ['META_TP'])
+        dotenv.set_key(env_file, 'META_FP', os.environ['META_FP'])
+        dotenv.set_key(env_file, 'META_TN', os.environ['META_TN'])
+        dotenv.set_key(env_file, 'META_FN', os.environ['META_FN'])
 def main(): 
     model = MetaClassifier()
     model.test()

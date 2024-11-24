@@ -65,8 +65,8 @@ class MLP(nn.Module):
         self.total_acc_train_plot = []
         self.total_acc_validation_plot = []
 
-        self.X_train_pred=[]
-        self.X_train_label=[]
+        self.y_train_pred=[]
+        self.y_train_label=[]
         self.y_test_pred=[]
         self.y_test_label=[]
 
@@ -125,20 +125,20 @@ class MLP(nn.Module):
         plt.tight_layout()
         plt.savefig('results/train/epochs_mlp.png')
 
-    def get_matrix_metrics(self, X_train_pred, X_train_label, y_test_pred, y_test_label):
+    def get_matrix_metrics(self, y_train_pred, y_train_label, y_test_pred, y_test_label):
 
         self.training_accuracy = (self.testing_accuracy/(testing_data.__len__()))*100
         self.testing_accuracy = (self.testing_accuracy/(testing_data.__len__()))*100
         # Confusion matrix with true neg, false pos, false neg, true pos respectively
-        train_cm = confusion_matrix(y_true=X_train_label, y_pred=X_train_pred)  
+        train_cm = confusion_matrix(y_true=y_train_label, y_pred=y_train_pred)  
         test_cm = confusion_matrix(y_true=y_test_label, y_pred=y_test_pred)  
         self.train_tn, self.train_fp, self.train_fn, self.train_tp = train_cm.ravel() 
         self.test_tn, self.test_fp, self.test_fn, self.test_tp = test_cm.ravel()   
 
-        self.training_precision = precision_score(y_true=X_train_label, y_pred=X_train_pred, zero_division=0.0)
-        self.training_recall = recall_score(y_true=X_train_label, y_pred=X_train_pred, zero_division=0.0)
-        self.training_f1 = f1_score(y_true=X_train_label, y_pred=X_train_pred, zero_division=0.0)
-        self.training_mcc = matthews_corrcoef(y_true=X_train_label, y_pred=X_train_pred)
+        self.training_precision = precision_score(y_true=y_train_label, y_pred=y_train_pred, zero_division=0.0)
+        self.training_recall = recall_score(y_true=y_train_label, y_pred=y_train_pred, zero_division=0.0)
+        self.training_f1 = f1_score(y_true=y_train_label, y_pred=y_train_pred, zero_division=0.0)
+        self.training_mcc = matthews_corrcoef(y_true=y_train_label, y_pred=y_train_pred)
 
         self.testing_precision = precision_score(y_true=y_test_label, y_pred=y_test_pred, zero_division=0.0)
         self.testing_recall = recall_score(y_true=y_test_label, y_pred=y_test_pred, zero_division=0.0)
@@ -184,8 +184,8 @@ class MLP(nn.Module):
     def train(self):
         
         for epoch in range(EPOCHS):
-            self.X_train_pred=[]
-            self.X_train_label=[]
+            self.y_train_pred=[]
+            self.y_train_label=[]
             self.training_accuracy = 0
             self.training_loss = 0
             self.validation_accuracy = 0
@@ -203,9 +203,9 @@ class MLP(nn.Module):
                 self.optimizer.zero_grad()
 
                 for item in prediction:
-                    self.X_train_pred.append(int(item.round()))
+                    self.y_train_pred.append(int(item.round()))
                 for item in labels:
-                    self.X_train_label.append(int(item))
+                    self.y_train_label.append(int(item))
 
             with torch.no_grad():
                 acc=0
@@ -242,7 +242,7 @@ class MLP(nn.Module):
                 for item in labels:
                     self.y_test_label.append(int(item))  
 
-        self.get_matrix_metrics(self.X_train_pred, self.X_train_label, self.y_test_pred, self.y_test_label)
+        self.get_matrix_metrics(self.y_train_pred, self.y_train_label, self.y_test_pred, self.y_test_label)
     
     def check_metrics(self)-> bool:
         curr_acc = float(os.getenv('MLP_TESTING_ACCURACY'))
@@ -254,7 +254,7 @@ class MLP(nn.Module):
         if(self.testing_accuracy + (self.testing_recall*100) > curr_acc+(curr_rec*100)):
             self.save_attributes()
             self.save_epochs_metrics_display()
-            self.save_matrix_display(self.X_train_pred, self.X_train_label, False)
+            self.save_matrix_display(self.y_train_pred, self.y_train_label, False)
             self.save_matrix_display(self.y_test_pred, self.y_test_label, True)
             return True
         return False
