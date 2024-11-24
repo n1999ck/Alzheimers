@@ -13,7 +13,7 @@ from model4 import SVM  # Support Vector Machine    - Sklearn
 from model5 import XGB  # Gradient Boosting         - Sklearn
 
 data = PatientData()
-env_file = dotenv.find_dotenv("C:/Users/PATH/TO/FILE/.env")
+env_file = dotenv.find_dotenv("results/.env")
 dotenv.load_dotenv(env_file)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -26,14 +26,14 @@ class MetaClassifier():
         self.model_5 = XGB()
 
         # Passing module classes into callable variables
-        self.state_dict_1 = torch.load("./model_fnn.pt", weights_only=True)
-        self.state_dict_2 = torch.load("./model_mlp.pt", weights_only=True)
+        self.state_dict_1 = torch.load("saved models/model_fnn.pt", weights_only=True)
+        self.state_dict_2 = torch.load("saved models/model_mlp.pt", weights_only=True)
 
         self.model_1.load_state_dict(self.state_dict_1)
         self.model_2.load_state_dict(self.state_dict_2)
-        self.model_3 = joblib.load("model_rfc.joblib")
-        self.model_4 = joblib.load("model_svm.joblib")
-        self.model_5 = joblib.load("model_xgb.joblib")
+        self.model_3 = joblib.load("saved models/model_rfc.joblib")
+        self.model_4 = joblib.load("saved models/model_svm.joblib")
+        self.model_5 = joblib.load("saved models/model_xgb.joblib")
 
         # Model metric variables as attributes
         self.y_pred = []
@@ -91,7 +91,7 @@ class MetaClassifier():
         ax.xaxis.set_ticks_position('bottom')
         plt.xlabel('Predicted Label')
         plt.ylabel('True label')
-        plt.savefig('matrix_meta.png')
+        plt.savefig('results/matrix_meta.png')
 
     def get_weights(self)-> list[4]:
         model_sum = float(os.getenv('FNN_TESTING_ACCURACY')) + \
