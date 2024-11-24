@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import math
 import os
 import dotenv
+import time
 
 env_file = dotenv.find_dotenv("results/.env")
 dotenv.load_dotenv(env_file)
@@ -75,6 +76,7 @@ class FNN(nn.Module):
         self.training_recall = -1
         self.training_f1 = -1
         self.training_mcc = -1
+        self.training_overhead=-1
 
         self.validation_accuracy = 0
         self.validation_loss = 0
@@ -86,6 +88,7 @@ class FNN(nn.Module):
         self.testing_recall = -1
         self.testing_f1 = -1
         self.testing_mcc = -1
+        self.testing_overhead=-1
 
         #HYPERPARAMETERS variables as model attributes
         self.BATCH_SIZE=BATCH_SIZE
@@ -178,7 +181,7 @@ class FNN(nn.Module):
             plt.savefig('results/train/train_matrix_fnn.png')
 
     def train(self):
-        
+        start_time = time.time()
         for epoch in range(EPOCHS):
             self.y_train_pred=[]
             self.y_train_label=[]
@@ -212,6 +215,9 @@ class FNN(nn.Module):
                     self.validation_loss += batch_loss.item()
                     acc = ((prediction).round() == labels).sum().item()
                     self.validation_accuracy += acc
+            end_time = time.time()
+            total_training_time = end_time - start_time
+            self.training_overhead = total_training_time
             
             self.training_loss = self.training_loss/(training_data.__len__())
             self.training_accuracy = (self.training_accuracy/(training_data.__len__()))*100
@@ -223,6 +229,7 @@ class FNN(nn.Module):
             self.total_acc_validation_plot.append(round(self.validation_accuracy, 4))
 
     def test(self):
+        start_time = time.time()
         with torch.no_grad():
             acc=0
             for data in testing_dataloader:
@@ -236,7 +243,10 @@ class FNN(nn.Module):
                 for item in prediction:
                     self.y_test_pred.append(int(item.round()))
                 for item in labels:
-                    self.y_test_label.append(int(item))  
+                    self.y_test_label.append(int(item))
+        end_time = time.time()
+        total_testing_time = end_time - start_time
+        self.testing_overhead = total_testing_time
 
         self.get_matrix_metrics(self.y_train_pred, self.y_train_label, self.y_test_pred, self.y_test_label)
     
@@ -267,6 +277,7 @@ class FNN(nn.Module):
         os.environ['FNN_TRAINING_FP'] = str(self.train_fp)
         os.environ['FNN_TRAINING_TN'] = str(self.train_tn)
         os.environ['FNN_TRAINING_FN'] = str(self.train_fn)
+        os.environ['FNN_TRAINING_OVERHEAD'] = str(self.training_overhead)
         
         os.environ['FNN_VALIDATION_ACCURACY'] = str(self.validation_accuracy)
         os.environ['FNN_VALIDATION_LOSS'] = str(self.validation_loss)
@@ -282,6 +293,7 @@ class FNN(nn.Module):
         os.environ['FNN_TESTING_FP'] = str(self.test_fp)
         os.environ['FNN_TESTING_TN'] = str(self.test_tn)
         os.environ['FNN_TESTING_FN'] = str(self.test_fn)
+        os.environ['FNN_TESTING_OVERHEAD'] = str(self.testing_overhead)
 
         os.environ['FNN_BATCH_SIZE'] = str(self.BATCH_SIZE)
         os.environ['FNN_EPOCHS'] = str(self.EPOCHS)
@@ -299,6 +311,7 @@ class FNN(nn.Module):
         dotenv.set_key(env_file, 'FNN_TRAINING_FP', os.environ['FNN_TRAINING_FP'])
         dotenv.set_key(env_file, 'FNN_TRAINING_TN', os.environ['FNN_TRAINING_TN'])
         dotenv.set_key(env_file, 'FNN_TRAINING_FN', os.environ['FNN_TRAINING_FN'])
+        dotenv.set_key(env_file, 'FNN_TRAINING_OVERHEAD', os.environ['FNN_TRAINING_OVERHEAD'])
 
         dotenv.set_key(env_file, 'FNN_VALIDATION_ACCURACY', os.environ['FNN_VALIDATION_ACCURACY'])
         dotenv.set_key(env_file, 'FNN_VALIDATION_LOSS', os.environ['FNN_VALIDATION_LOSS'])
@@ -314,6 +327,7 @@ class FNN(nn.Module):
         dotenv.set_key(env_file, 'FNN_TESTING_FP', os.environ['FNN_TESTING_FP'])
         dotenv.set_key(env_file, 'FNN_TESTING_TN', os.environ['FNN_TESTING_TN'])
         dotenv.set_key(env_file, 'FNN_TESTING_FN', os.environ['FNN_TESTING_FN'])
+        dotenv.set_key(env_file, 'FNN_TESTING_OVERHEAD', os.environ['FNN_TESTING_OVERHEAD'])
 
         dotenv.set_key(env_file, 'FNN_BATCH_SIZE', os.environ['FNN_BATCH_SIZE'])
         dotenv.set_key(env_file, 'FNN_EPOCHS', os.environ['FNN_EPOCHS'])
