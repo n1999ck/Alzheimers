@@ -326,6 +326,7 @@ class MLP(nn.Module):
         dotenv.set_key(env_file, 'MLP_TRAINING_FP', os.environ['MLP_TRAINING_FP'])
         dotenv.set_key(env_file, 'MLP_TRAINING_TN', os.environ['MLP_TRAINING_TN'])
         dotenv.set_key(env_file, 'MLP_TRAINING_FN', os.environ['MLP_TRAINING_FN'])
+        dotenv.set_key(env_file, 'MLP_TRAINING_OVERHEAD', os.environ['MLP_TRAINING_OVERHEAD'])
 
         dotenv.set_key(env_file, 'MLP_VALIDATION_ACCURACY', os.environ['MLP_VALIDATION_ACCURACY'])
         dotenv.set_key(env_file, 'MLP_VALIDATION_LOSS', os.environ['MLP_VALIDATION_LOSS'])
@@ -341,6 +342,7 @@ class MLP(nn.Module):
         dotenv.set_key(env_file, 'MLP_TESTING_FP', os.environ['MLP_TESTING_FP'])
         dotenv.set_key(env_file, 'MLP_TESTING_TN', os.environ['MLP_TESTING_TN'])
         dotenv.set_key(env_file, 'MLP_TESTING_FN', os.environ['MLP_TESTING_FN'])
+        dotenv.set_key(env_file, 'MLP_TESTING_OVERHEAD', os.environ['MLP_TESTING_OVERHEAD'])
 
         dotenv.set_key(env_file, 'MLP_BATCH_SIZE', os.environ['MLP_BATCH_SIZE'])
         dotenv.set_key(env_file, 'MLP_EPOCHS', os.environ['MLP_EPOCHS'])
