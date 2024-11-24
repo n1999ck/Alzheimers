@@ -35,6 +35,7 @@ class SVM():
         self.testing_recall = -1
         self.testing_f1 = -1
         self.testing_mcc = -1
+        self.testing_overhead = -1
 
     def train(self):
         start_time = time.time()
