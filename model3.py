@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import joblib
 import os
 import dotenv
+import time
 
 env_file = dotenv.find_dotenv("results/.env")
 dotenv.load_dotenv(env_file)
@@ -24,6 +25,7 @@ class RFC():
         self.training_recall = -1
         self.training_f1 = -1
         self.training_mcc = -1
+        self.training_overhead = -1
 
         self.testing_accuracy = 0
         self.testing_specificity= -1
@@ -31,14 +33,23 @@ class RFC():
         self.testing_recall = -1
         self.testing_f1 = -1
         self.testing_mcc = -1
+        self.testing_overhead = -1
 
     def train(self):
+        start_time = time.time()
         self.rfc.fit(data.X_train_no_val, data.y_train_no_val)
         self.y_train_pred = self.rfc.predict(data.X_train_no_val)
+        end_time = time.time()
+        total_time = end_time - start_time
+        self.training_overhead = total_time
     
     def test(self):
+        start_time = time.time()
         self.y_test_pred = self.rfc.predict(data.X_test_no_val)
         self.get_metrics(self.y_train_pred, data.y_train_no_val, self.y_test_pred, data.y_test_no_val)
+        end_time = time.time()
+        total_time = end_time - start_time
+        self.testing_overhead = total_time
 
     def get_metrics(self, y_train_pred, y_train_label, y_test_pred, y_test_label):
 
@@ -123,6 +134,7 @@ class RFC():
         os.environ['RFC_TRAINING_FP'] = str(self.train_fp)
         os.environ['RFC_TRAINING_TN'] = str(self.train_tn)
         os.environ['RFC_TRAINING_FN'] = str(self.train_fn)
+        os.environ['RFC_TRAINING_OVERHEAD'] = str(self.training_overhead)
         
         os.environ['RFC_TESTING_ACCURACY'] = str(self.testing_accuracy)
         os.environ['RFC_TESTING_SPECIFICITY'] = str(self.testing_specificity)
@@ -133,7 +145,8 @@ class RFC():
         os.environ['RFC_TESTING_TP'] = str(self.test_tp)
         os.environ['RFC_TESTING_FP'] = str(self.test_fp)
         os.environ['RFC_TESTING_TN'] = str(self.test_tn)
-        os.environ['RFC_TESTING_FN'] = str(self.test_fn)     
+        os.environ['RFC_TESTING_FN'] = str(self.test_fn)  
+        os.environ['RFC_TESTING_OVERHEAD'] = str(self.testing_overhead)
 
         dotenv.set_key(env_file, 'RFC_TRAINING_ACCURACY', os.environ['RFC_TRAINING_ACCURACY'])
         dotenv.set_key(env_file, 'RFC_TRAINING_SPECIFICITY', os.environ['RFC_TRAINING_SPECIFICITY'])
@@ -145,6 +158,7 @@ class RFC():
         dotenv.set_key(env_file, 'RFC_TRAINING_FP', os.environ['RFC_TRAINING_FP'])
         dotenv.set_key(env_file, 'RFC_TRAINING_TN', os.environ['RFC_TRAINING_TN'])
         dotenv.set_key(env_file, 'RFC_TRAINING_FN', os.environ['RFC_TRAINING_FN'])
+        dotenv.set_key(env_file, 'RFC_TRAINING_OVERHEAD', os.environ['RFC_TRAINING_OVERHEAD'])
 
         dotenv.set_key(env_file, 'RFC_TESTING_ACCURACY', os.environ['RFC_TESTING_ACCURACY'])
         dotenv.set_key(env_file, 'RFC_TESTING_SPECIFICITY', os.environ['RFC_TESTING_SPECIFICITY'])
@@ -156,6 +170,7 @@ class RFC():
         dotenv.set_key(env_file, 'RFC_TESTING_FP', os.environ['RFC_TESTING_FP'])
         dotenv.set_key(env_file, 'RFC_TESTING_TN', os.environ['RFC_TESTING_TN'])
         dotenv.set_key(env_file, 'RFC_TESTING_FN', os.environ['RFC_TESTING_FN'])
+        dotenv.set_key(env_file, 'RFC_TESTING_OVERHEAD', os.environ['RFC_TESTING_OVERHEAD'])
 
 def main(): 
     model = RFC()
