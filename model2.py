@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import math
 import os
 import dotenv
+import time
 
 env_file = dotenv.find_dotenv("results/.env")
 dotenv.load_dotenv(env_file)
@@ -88,6 +89,8 @@ class MLP(nn.Module):
         self.testing_recall = -1
         self.testing_f1 = -1
         self.testing_mcc = -1
+        self.training_overhead=-1
+        self.testing_overhead=-1
 
         #HYPERPARAMETERS variables as model attributes
         self.BATCH_SIZE=BATCH_SIZE
@@ -182,7 +185,7 @@ class MLP(nn.Module):
             plt.savefig('results/train/train_matrix_mlp.png')
 
     def train(self):
-        
+        start_time = time.time()  # Record the start time of training
         for epoch in range(EPOCHS):
             self.y_train_pred=[]
             self.y_train_label=[]
@@ -216,6 +219,14 @@ class MLP(nn.Module):
                     self.validation_loss += batch_loss.item()
                     acc = ((prediction).round() == labels).sum().item()
                     self.validation_accuracy += acc
+
+            # Calculate training time
+            end_time = time.time()  # Record the end time of training
+            total_training_time = end_time - start_time  # Calculate the time spent in training
+            self.training_overhead = total_training_time
+
+            # Calculate average time per epoch
+            average_epoch_time = total_training_time / EPOCHS
             
             self.training_loss = self.training_loss/(training_data.__len__())
             self.training_accuracy = (self.training_accuracy/(training_data.__len__()))*100
@@ -225,8 +236,13 @@ class MLP(nn.Module):
             self.total_acc_train_plot.append(round(self.training_accuracy, 4))
             self.total_loss_validation_plot.append(round(self.validation_loss, 4))
             self.total_acc_validation_plot.append(round(self.validation_accuracy, 4))
+            
+            # Print total and average training time
+            print(f"Total Training Time: {self.training_overhead:.2f} seconds")
+            print(f"Average Time per Epoch: {average_epoch_time:.2f} seconds")
 
     def test(self):
+        start_time = time.time() # Record the start time of testing
         with torch.no_grad():
             acc=0
             for data in testing_dataloader:
@@ -242,7 +258,7 @@ class MLP(nn.Module):
                 for item in labels:
                     self.y_test_label.append(int(item))  
 
-        self.get_matrix_metrics(self.y_train_pred, self.y_train_label, self.y_test_pred, self.y_test_label)
+        self.get_matrix_metrics(self.X_train_pred, self.X_train_label, self.y_test_pred, self.y_test_label)
     
     def check_metrics(self)-> bool:
         curr_acc = float(os.getenv('MLP_TESTING_ACCURACY'))
@@ -271,6 +287,7 @@ class MLP(nn.Module):
         os.environ['MLP_TRAINING_FP'] = str(self.train_fp)
         os.environ['MLP_TRAINING_TN'] = str(self.train_tn)
         os.environ['MLP_TRAINING_FN'] = str(self.train_fn)
+        os.environ['MLP_TRAINING_OVERHEAD'] = str(self.training_overhead)
         
         os.environ['MLP_VALIDATION_ACCURACY'] = str(self.validation_accuracy)
         os.environ['MLP_VALIDATION_LOSS'] = str(self.validation_loss)
@@ -286,6 +303,7 @@ class MLP(nn.Module):
         os.environ['MLP_TESTING_FP'] = str(self.test_fp)
         os.environ['MLP_TESTING_TN'] = str(self.test_tn)
         os.environ['MLP_TESTING_FN'] = str(self.test_fn)
+        os.environ['MLP_TESTING_OVERHEAD'] = str(self.testing_overhead)
 
         os.environ['MLP_BATCH_SIZE'] = str(self.BATCH_SIZE)
         os.environ['MLP_EPOCHS'] = str(self.EPOCHS)
@@ -303,6 +321,7 @@ class MLP(nn.Module):
         dotenv.set_key(env_file, 'MLP_TRAINING_FP', os.environ['MLP_TRAINING_FP'])
         dotenv.set_key(env_file, 'MLP_TRAINING_TN', os.environ['MLP_TRAINING_TN'])
         dotenv.set_key(env_file, 'MLP_TRAINING_FN', os.environ['MLP_TRAINING_FN'])
+        dotenv.set_key(env_file, 'MLP_TRAINING_OVERHEAD', os.environ['MLP_TRAINING_OVERHEAD'])
 
         dotenv.set_key(env_file, 'MLP_VALIDATION_ACCURACY', os.environ['MLP_VALIDATION_ACCURACY'])
         dotenv.set_key(env_file, 'MLP_VALIDATION_LOSS', os.environ['MLP_VALIDATION_LOSS'])
@@ -318,6 +337,7 @@ class MLP(nn.Module):
         dotenv.set_key(env_file, 'MLP_TESTING_FP', os.environ['MLP_TESTING_FP'])
         dotenv.set_key(env_file, 'MLP_TESTING_TN', os.environ['MLP_TESTING_TN'])
         dotenv.set_key(env_file, 'MLP_TESTING_FN', os.environ['MLP_TESTING_FN'])
+        dotenv.set_key(env_file, 'MLP_TESTING_OVERHEAD', os.environ['MLP_TESTING_OVERHEAD'])
 
         dotenv.set_key(env_file, 'MLP_BATCH_SIZE', os.environ['MLP_BATCH_SIZE'])
         dotenv.set_key(env_file, 'MLP_EPOCHS', os.environ['MLP_EPOCHS'])
