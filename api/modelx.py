@@ -10,10 +10,10 @@ from model1 import FNN  # Feedforward Neural Network- PyTorch
 from model2 import MLP  # Multilayer Perceptron     - PyTorch
 from model3 import RFC  # Random Forest Classifier  - Sklearn
 from model4 import SVM  # Support Vector Machine    - Sklearn
-from api.model5 import XGB  # Gradient Boosting         - Sklearn
+from model5 import XGB  # Gradient Boosting         - Sklearn
 
 data = PatientData()
-env_file = dotenv.find_dotenv("C:/Users/PATH/TO/FILE/.env")
+env_file = dotenv.find_dotenv(".env")
 dotenv.load_dotenv(env_file)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -26,14 +26,14 @@ class MetaClassifier():
         self.model_5 = XGB()
 
         # Passing module classes into callable variables
-        self.state_dict_1 = torch.load("./model_fnn.pt", weights_only=True)
-        self.state_dict_2 = torch.load("./model_mlp.pt", weights_only=True)
+        self.state_dict_1 = torch.load("api/model_fnn.pt", weights_only=True)
+        self.state_dict_2 = torch.load("api/model_mlp.pt", weights_only=True)
 
         self.model_1.load_state_dict(self.state_dict_1)
         self.model_2.load_state_dict(self.state_dict_2)
-        self.model_3 = joblib.load("model_rfc.joblib")
-        self.model_4 = joblib.load("model_svm.joblib")
-        self.model_5 = joblib.load("model_xgb.joblib")
+        self.model_3 = joblib.load("api/model_rfc.joblib")
+        self.model_4 = joblib.load("api/model_svm.joblib")
+        self.model_5 = joblib.load("api/tmodel_xgb.joblib")
 
         # Model metric variables as attributes
         self.y_pred = []

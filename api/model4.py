@@ -115,17 +115,23 @@ class SVM():
         dotenv.set_key(env_file, 'SVM_F1', os.environ['SVM_F1'])
         dotenv.set_key(env_file, 'SVM_MCC', os.environ['SVM_MCC'])
 
-def main(): 
-    model = SVM()
+def main():
+    for i in range(50):
+        model = SVM()
+        model.train()
+        model.test()
+        if(model.check_metrics()):
+            joblib.dump(model, "model_svm.joblib")
+            print("MODEL IMPROVED! New model saved.")
+"""     model = SVM()
     model.train()
     model.test()
     if(model.check_metrics()):
         joblib.dump(model, "model_svm.joblib")
-        print("MODEL IMPROVED! New model saved.")
-
-    for i in range(50):
+        print("MODEL IMPROVED! New model saved.") 
+  for i in range(50):
         main()
-
+ """
 '''
     run_model = True
     while(run_model):

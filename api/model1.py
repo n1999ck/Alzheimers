@@ -256,16 +256,17 @@ class FNN(nn.Module):
         dotenv.set_key(env_file, 'FNN_MCC', os.environ['FNN_MCC'])
 
 def main(): 
-    model = FNN()
-    model.train()
-    model.test()
-    if(model.check_metrics()):
-        torch.save(model.state_dict(), "./model_fnn.pt")
-        print("MODEL IMPROVED! New model saved.")
-
     for i in range(50):
-        main()
+        model = FNN()
+        model.train()
+        model.test()
+        if(model.check_metrics()):
+            torch.save(model.state_dict(), "./model_fnn.pt")
+            print("MODEL IMPROVED! New model saved.")
 
+"""     for i in range(50):
+        main()
+ """
 '''
     run_model = True
     while(run_model):

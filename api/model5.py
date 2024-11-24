@@ -115,16 +115,17 @@ class XGB():
         dotenv.set_key(env_file, 'XGB_F1', os.environ['XGB_F1'])
         dotenv.set_key(env_file, 'XGB_MCC', os.environ['XGB_MCC'])
 
-def main(): 
-    model = XGB()
-    model.train()
-    model.test()
-    if(model.check_metrics()):
-        joblib.dump(model, "model_xgb.joblib")
-        print("MODEL IMPROVED! New model saved.")
+def main():
+    for i in range(50): 
+        model = XGB()
+        model.train()
+        model.test()
+        if(model.check_metrics()):
+            joblib.dump(model, "model_xgb.joblib")
+            print("MODEL IMPROVED! New model saved.")
 
-    for i in range(50):
-        main()
+    # for i in range(50):
+    #     main()
 
 '''
     run_model = True

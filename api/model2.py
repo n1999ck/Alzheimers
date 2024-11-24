@@ -253,16 +253,17 @@ class MLP(nn.Module):
         dotenv.set_key(env_file, 'MLP_MCC', os.environ['MLP_MCC'])
 
 def main(): 
-    model = MLP()
-    model.train()
-    model.test()
-    if(model.check_metrics()):
-        torch.save(model.state_dict(), "./model_mlp.pt")
-        print("MODEL IMPROVED! New model saved.")
-    
-    i=0
     for i in range(50):
-        main()
+        model = MLP()
+        model.train()
+        model.test()
+        if(model.check_metrics()):
+            torch.save(model.state_dict(), "./model_mlp.pt")
+            print("MODEL IMPROVED! New model saved.")
+    
+"""     i=0
+    for i in range(50):
+        main() """
 
 '''
     run_model = True

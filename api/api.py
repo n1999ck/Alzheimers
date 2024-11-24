@@ -2,6 +2,11 @@ import time
 import torch
 from flask import Flask, request, jsonify
 from model11 import FNN
+from model1 import FNN  # Feedforward Neural Network- PyTorch
+from model2 import MLP  # Multilayer Perceptron     - PyTorch
+from model3 import RFC  # Random Forest Classifier  - Sklearn
+from model4 import SVM  # Support Vector Machine    - Sklearn
+from model5 import XGB 
 from main import get_prediction, get_test_acc
 
 app = Flask(__name__, static_folder='../build', static_url_path='/')

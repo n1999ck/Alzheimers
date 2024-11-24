@@ -114,8 +114,15 @@ class RFC():
         dotenv.set_key(env_file, 'RFC_F1', os.environ['RFC_F1'])
         dotenv.set_key(env_file, 'RFC_MCC', os.environ['RFC_MCC'])
 
-def main(): 
-    model = RFC()
+def main():
+    for i in range(50):
+        model = RFC()
+        model.train()
+        model.test()
+        if(model.check_metrics()):
+            joblib.dump(model, "model_rfc.joblib")
+            print("MODEL IMPROVED! New model saved.")
+"""     model = RFC()
     model.train()
     model.test()
     if(model.check_metrics()):
@@ -123,7 +130,7 @@ def main():
         print("MODEL IMPROVED! New model saved.")
 
     for i in range(50):
-        main()
+        main() """
 
 '''
     run_model = True

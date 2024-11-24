@@ -7,11 +7,7 @@ TODO: Extract 'LOADING DATA' portion to its own file
 import torch
 import joblib
 import os
-from model1 import FNN  # Feedforward Neural Network- PyTorch
-from model2 import MLP  # Multilayer Perceptron     - PyTorch
-from model3 import RFC  # Random Forest Classifier  - Sklearn
-from model4 import SVM  # Support Vector Classifier - Sklearn
-from model5 import XGB  # Gradient Boosting         - Sklearn
+from modelx import FNN, MLP, RFC, SVM, XGB
 
 # Creation of patient data
 user_info = [72, 0, 0, 2, 33.28973831, 0, 7.890703151, 6.570993383, 7.941403884, 9.878710516, 0, 0, 0, 0, 0, 0, 166, 78, 283.3967969, 92.20006443, 81.92004333, 217.3968725, 11.11477737, 6.30754331, 0, 1, 8.327563008, 0, 1, 0, 0, 1]
@@ -31,16 +27,22 @@ model_3 = RFC()
 model_4 = SVM()
 model_5 = XGB()
 models = [model_1, model_2, model_3, model_4, model_5]
+print("Opened models")
 
 # Passing module classes into callable variables
-state_dict_1 = torch.load("./model_fnn.pt", weights_only=True)
-state_dict_2 = torch.load("./model_mlp.pt", weights_only=True)
+state_dict_1 = torch.load("model_fnn.pt", weights_only=True)
+state_dict_2 = torch.load("model_mlp.pt", weights_only=True)
+
+print("Loaded models into variables or something")
 
 model_1.load_state_dict(state_dict_1)
 model_2.load_state_dict(state_dict_2)
 model_3 = joblib.load("model_rfc.joblib")
 model_4 = joblib.load("model_svm.joblib")
 model_5 = joblib.load("model_xgb.joblib")
+
+print("Loaded saved models")
+
 
 def get_weights()-> list[4]:
     model_sum = float(os.getenv('FNN_TESTING_ACCURACY')) + \
