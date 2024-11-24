@@ -78,6 +78,7 @@ class MLP(nn.Module):
         self.training_recall = -1
         self.training_f1 = -1
         self.training_mcc = -1
+        self.training_overhead=-1
 
         self.validation_accuracy = 0
         self.validation_loss = 0
@@ -89,7 +90,6 @@ class MLP(nn.Module):
         self.testing_recall = -1
         self.testing_f1 = -1
         self.testing_mcc = -1
-        self.training_overhead=-1
         self.testing_overhead=-1
 
         #HYPERPARAMETERS variables as model attributes
@@ -257,6 +257,9 @@ class MLP(nn.Module):
                     self.y_test_pred.append(int(item.round()))
                 for item in labels:
                     self.y_test_label.append(int(item))  
+        end_time = time.time()
+        total_testing_time = end_time - start_time
+        self.testing_overhead = total_testing_time
 
         self.get_matrix_metrics(self.X_train_pred, self.X_train_label, self.y_test_pred, self.y_test_label)
     
