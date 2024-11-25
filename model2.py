@@ -261,7 +261,7 @@ class MLP(nn.Module):
         total_testing_time = end_time - start_time
         self.testing_overhead = total_testing_time
 
-        self.get_matrix_metrics(self.X_train_pred, self.X_train_label, self.y_test_pred, self.y_test_label)
+        self.get_matrix_metrics(self.y_train_pred, self.y_train_label, self.y_test_pred, self.y_test_label)
     
     def check_metrics(self)-> bool:
         curr_acc = float(os.getenv('MLP_TESTING_ACCURACY'))
