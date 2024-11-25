@@ -18,10 +18,9 @@ class PatientData():
         # dataset -> DataFrame Object    
         self.dataset = pd.read_csv('Dataset.csv', encoding="Latin-1") #ISO-8859-1 used in basic latin. UTF-8 for anything else
         self.dataset.dropna(inplace=True)
-        self.dataset.pop("DoctorInCharge")
-        self.dataset.pop("PatientID") 
         self.dataset = shuffle(self.dataset, random_state=42)
         self.labels = self.dataset.pop("Diagnosis")
+        self.dataset = self.dataset[['FunctionalAssessment', 'ADL', 'MMSE']]
         self.feature_names = self.dataset.columns
 
         #Max-abs Normalization 
