@@ -1,23 +1,19 @@
-'''
-TODO: Give attributes as metrics
-TODO: Save metrics into txt file
-'''
-
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 from data_extractor import PatientData
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, matthews_corrcoef
 import matplotlib.pyplot as plt
 import math
 import os
 import dotenv
-
+import time
 
 env_file = dotenv.find_dotenv("results/.env")
 dotenv.load_dotenv(env_file)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 data = PatientData()
+
 '''
 STEP 1: MAKING DATASET ITERABLE
 '''
@@ -68,21 +64,37 @@ class FNN(nn.Module):
         self.total_acc_train_plot = []
         self.total_acc_validation_plot = []
 
-        self.y_pred=[]
-        self.y_label=[]
+        self.y_train_pred=[]
+        self.y_train_label=[]
+        self.y_test_pred=[]
+        self.y_test_label=[]
 
         self.training_accuracy = 0
         self.training_loss = 0
+        self.training_specificity= -1
+        self.training_precision = -1
+        self.training_recall = -1
+        self.training_f1 = -1
+        self.training_mcc = -1
+        self.training_overhead=-1
+
         self.validation_accuracy = 0
         self.validation_loss = 0
+
         self.testing_accuracy = 0
         self.testing_loss = 0
+        self.testing_specificity= -1
+        self.testing_precision = -1
+        self.testing_recall = -1
+        self.testing_f1 = -1
+        self.testing_mcc = -1
+        self.testing_overhead=-1
 
-        self.specificity = -1
-        self.precision = -1
-        self.recall = -1
-        self.f1 = -1
-        self.mcc = -1
+        #HYPERPARAMETERS variables as model attributes
+        self.BATCH_SIZE=BATCH_SIZE
+        self.EPOCHS=EPOCHS
+        self.HIDDEN_NEURONS=HIDDEN_NEURONS
+        self.LR=LR
 
     # Forward pass
     def forward(self, x):
@@ -91,7 +103,7 @@ class FNN(nn.Module):
         x = self.sigmoid(x)
         return x
 
-    def save_train_metrics_display(self):
+    def save_epochs_metrics_display(self):
         # Plot accuracy and loss for test samples
         figs, axs = plt.subplots(nrows=1, ncols=2, figsize=(15,5))
         axs[0].plot(self.total_loss_train_plot, label="Train Loss")
@@ -111,39 +123,46 @@ class FNN(nn.Module):
         axs[1].legend()
 
         plt.tight_layout()
-        plt.savefig('train_fnn.png')
+        plt.savefig('results/train/epochs_fnn.png')
 
-    def get_test_metrics(self, y_pred, y_label):
-
+    def get_matrix_metrics(self, y_train_pred, y_train_label, y_test_pred, y_test_label):
+        self.training_accuracy = (self.testing_accuracy/(testing_data.__len__()))*100
         self.testing_accuracy = (self.testing_accuracy/(testing_data.__len__()))*100
         # Confusion matrix with true neg, false pos, false neg, true pos respectively
-        cm = confusion_matrix(y_true=y_label, y_pred=y_pred)  
-        tn, fp, fn, tp = cm.ravel()  
+        train_cm = confusion_matrix(y_true=y_train_label, y_pred=y_train_pred)  
+        test_cm = confusion_matrix(y_true=y_test_label, y_pred=y_test_pred)  
+        self.train_tn, self.train_fp, self.train_fn, self.train_tp = train_cm.ravel() 
+        self.test_tn, self.test_fp, self.test_fn, self.test_tp = test_cm.ravel()   
 
+        self.training_precision = precision_score(y_true=y_train_label, y_pred=y_train_pred, zero_division=0.0)
+        self.training_recall = recall_score(y_true=y_train_label, y_pred=y_train_pred, zero_division=0.0)
+        self.training_f1 = f1_score(y_true=y_train_label, y_pred=y_train_pred, zero_division=0.0)
+        self.training_mcc = matthews_corrcoef(y_true=y_train_label, y_pred=y_train_pred)
+
+        self.testing_precision = precision_score(y_true=y_test_label, y_pred=y_test_pred, zero_division=0.0)
+        self.testing_recall = recall_score(y_true=y_test_label, y_pred=y_test_pred, zero_division=0.0)
+        self.testing_f1 = f1_score(y_true=y_test_label, y_pred=y_test_pred, zero_division=0.0)
+        self.testing_mcc = matthews_corrcoef(y_true=y_test_label, y_pred=y_test_pred)
+        
         # if statements to stop any division by 0 errors
-        if((tn+fp)>0):
-            self.specificity = tn / (tn+fp)  # Correctly predicted negatives over all actual negatives
+        if((self.train_tn+self.train_fp)>0):
+            self.training_specificity = self.train_tn / (self.train_tn+self.train_fp)  # Correctly predicted negatives over all actual negatives
 
-        if((tp+fp) & (fn+tp)>0):
-            self.precision = tp /(tp+fp)     # Correctly predicted positives over all predicted positives
-            self.recall = tp / (fn+tp)       # Correctly predicted positives over all actual positives
-            self.f1 = 2 * ((self.precision*self.recall)/(self.precision+self.recall))    # F1 Score 
-
-        if((tp+fp) & (tp+fn) & (tn+fp) & (tn+fn) > 0):
-            self.mcc = ((tp*tn) - (fp*fn))/(math.sqrt((tp+fp)*(tp+fn)*(tn+fp)*(tn+fn)))  # Matthews Correlation Coefficient
+        if((self.test_tn+self.test_fp)>0):
+            self.training_specificity = self.train_tn / (self.train_tn+self.train_fp)  # Correctly predicted negatives over all actual negatives
 
         # Print all calculated metrics for test samples
         print("Test Accuracy:\t\t{}%".format(round(self.testing_accuracy, 4)))
         print("Total correct:\t\t{}".format(self.testing_accuracy))
         print("Total predictions:\t{}".format(testing_data.__len__()))
         print("-"*60)
-        print("Precision:\t{}".format(round(self.precision, 4)))
-        print("Specificity:\t{}".format(round(self.specificity, 4)))
-        print("Recall:\t\t{}".format(round(self.recall, 4)))
-        print("F1:\t\t{}".format(round(self.f1, 4)))
-        print("MCC:\t\t{}".format(round(self.mcc, 4)))
+        print("Testing Precision:\t{}".format(round(self.testing_precision, 4)))
+        print("Testing Specificity:\t{}".format(round(self.testing_specificity, 4)))
+        print("Testing Recall:\t\t{}".format(round(self.testing_recall, 4)))
+        print("Testing F1:\t\t{}".format(round(self.testing_f1, 4)))
+        print("Testing MCC:\t\t{}".format(round(self.testing_mcc, 4)))
 
-    def save_test_metrics_display(self, y_pred, y_label):
+    def save_matrix_display(self, y_pred, y_label, testing):
         # Confusion matrix with true neg, false pos, false neg, true pos respectively
         cm = confusion_matrix(y_true=y_label, y_pred=y_pred)   
 
@@ -156,11 +175,16 @@ class FNN(nn.Module):
         ax.xaxis.set_ticks_position('bottom')
         plt.xlabel('Predicted Label')
         plt.ylabel('True label')
-        plt.savefig('results/matrix_fnn.png')
+        if(testing):
+            plt.savefig('results/test/test_matrix_fnn.png')
+        else:
+            plt.savefig('results/train/train_matrix_fnn.png')
 
     def train(self):
-        
+        start_time = time.time()
         for epoch in range(EPOCHS):
+            self.y_train_pred=[]
+            self.y_train_label=[]
             self.training_accuracy = 0
             self.training_loss = 0
             self.validation_accuracy = 0
@@ -177,6 +201,11 @@ class FNN(nn.Module):
                 self.optimizer.step()
                 self.optimizer.zero_grad()
 
+                for item in prediction:
+                    self.y_train_pred.append(int(item.round()))
+                for item in labels:
+                    self.y_train_label.append(int(item))
+
             with torch.no_grad():
                 acc=0
                 for data in validation_dataloader:
@@ -186,6 +215,9 @@ class FNN(nn.Module):
                     self.validation_loss += batch_loss.item()
                     acc = ((prediction).round() == labels).sum().item()
                     self.validation_accuracy += acc
+            end_time = time.time()
+            total_training_time = end_time - start_time
+            self.training_overhead = total_training_time
             
             self.training_loss = self.training_loss/(training_data.__len__())
             self.training_accuracy = (self.training_accuracy/(training_data.__len__()))*100
@@ -197,6 +229,7 @@ class FNN(nn.Module):
             self.total_acc_validation_plot.append(round(self.validation_accuracy, 4))
 
     def test(self):
+        start_time = time.time()
         with torch.no_grad():
             acc=0
             for data in testing_dataloader:
@@ -208,50 +241,98 @@ class FNN(nn.Module):
                 self.testing_accuracy += acc
 
                 for item in prediction:
-                    self.y_pred.append(int(item.round()))
+                    self.y_test_pred.append(int(item.round()))
                 for item in labels:
-                    self.y_label.append(int(item))  
+                    self.y_test_label.append(int(item))
+        end_time = time.time()
+        total_testing_time = end_time - start_time
+        self.testing_overhead = total_testing_time
 
-        self.get_test_metrics(self.y_pred, self.y_label)
+        self.get_matrix_metrics(self.y_train_pred, self.y_train_label, self.y_test_pred, self.y_test_label)
     
     def check_metrics(self)-> bool:
         curr_acc = float(os.getenv('FNN_TESTING_ACCURACY'))
-        curr_rec = float(os.getenv('FNN_RECALL'))
-        print("New: {}".format(self.testing_accuracy + (self.recall*100)))
+        curr_rec = float(os.getenv('FNN_TESTING_RECALL'))
+        print("New: {}".format(self.testing_accuracy + (self.testing_recall*100)))
         print("Old: {}".format(curr_acc+(curr_rec*100)))
-        print(self.recall)
+        print(self.testing_recall)
         print(self.testing_accuracy)
-        if(self.testing_accuracy + (self.recall*100) > curr_acc+(curr_rec*100)):
-            self.save_metrics()
-            self.save_train_metrics_display()
-            self.save_test_metrics_display(self.y_pred, self.y_label)
+        if(self.testing_accuracy + (self.testing_recall*100) > curr_acc+(curr_rec*100)):
+            self.save_attributes()
+            self.save_epochs_metrics_display()
+            self.save_matrix_display(self.y_train_pred, self.y_train_label, False)
+            self.save_matrix_display(self.y_test_pred, self.y_test_label, True)
             return True
         return False
 
-    def save_metrics(self):
+    def save_attributes(self):
         os.environ['FNN_TRAINING_ACCURACY'] = str(self.training_accuracy)
         os.environ['FNN_TRAINING_LOSS'] = str(self.training_loss)
+        os.environ['FNN_TRAINING_SPECIFICITY'] = str(self.training_specificity)
+        os.environ['FNN_TRAINING_PRECISION'] = str(self.training_precision)
+        os.environ['FNN_TRAINING_RECALL'] = str(self.training_recall)
+        os.environ['FNN_TRAINING_F1'] = str(self.training_f1)
+        os.environ['FNN_TRAINING_MCC'] = str(self.training_mcc)
+        os.environ['FNN_TRAINING_TP'] = str(self.train_tp)
+        os.environ['FNN_TRAINING_FP'] = str(self.train_fp)
+        os.environ['FNN_TRAINING_TN'] = str(self.train_tn)
+        os.environ['FNN_TRAINING_FN'] = str(self.train_fn)
+        os.environ['FNN_TRAINING_OVERHEAD'] = str(self.training_overhead)
+        
         os.environ['FNN_VALIDATION_ACCURACY'] = str(self.validation_accuracy)
         os.environ['FNN_VALIDATION_LOSS'] = str(self.validation_loss)
+
         os.environ['FNN_TESTING_ACCURACY'] = str(self.testing_accuracy)
         os.environ['FNN_TESTING_LOSS'] = str(self.testing_loss)
-        os.environ['FNN_SPECIFICITY'] = str(self.specificity)
-        os.environ['FNN_PRECISION'] = str(self.precision)
-        os.environ['FNN_RECALL'] = str(self.recall)
-        os.environ['FNN_F1'] = str(self.f1)
-        os.environ['FNN_MCC'] = str(self.mcc)
+        os.environ['FNN_TESTING_SPECIFICITY'] = str(self.testing_specificity)
+        os.environ['FNN_TESTING_PRECISION'] = str(self.testing_precision)
+        os.environ['FNN_TESTING_RECALL'] = str(self.testing_recall)
+        os.environ['FNN_TESTING_F1'] = str(self.testing_f1)
+        os.environ['FNN_TESTING_MCC'] = str(self.testing_mcc)
+        os.environ['FNN_TESTING_TP'] = str(self.test_tp)
+        os.environ['FNN_TESTING_FP'] = str(self.test_fp)
+        os.environ['FNN_TESTING_TN'] = str(self.test_tn)
+        os.environ['FNN_TESTING_FN'] = str(self.test_fn)
+        os.environ['FNN_TESTING_OVERHEAD'] = str(self.testing_overhead)
+
+        os.environ['FNN_BATCH_SIZE'] = str(self.BATCH_SIZE)
+        os.environ['FNN_EPOCHS'] = str(self.EPOCHS)
+        os.environ['FNN_HIDDEN_NEURONS'] = str(self.HIDDEN_NEURONS)
+        os.environ['FNN_LR'] = str(self.LR)       
 
         dotenv.set_key(env_file, 'FNN_TRAINING_ACCURACY', os.environ['FNN_TRAINING_ACCURACY'])
         dotenv.set_key(env_file, 'FNN_TRAINING_LOSS', os.environ['FNN_TRAINING_LOSS'])
+        dotenv.set_key(env_file, 'FNN_TRAINING_SPECIFICITY', os.environ['FNN_TRAINING_SPECIFICITY'])
+        dotenv.set_key(env_file, 'FNN_TRAINING_PRECISION', os.environ['FNN_TRAINING_PRECISION'])
+        dotenv.set_key(env_file, 'FNN_TRAINING_RECALL', os.environ['FNN_TRAINING_RECALL'])
+        dotenv.set_key(env_file, 'FNN_TRAINING_F1', os.environ['FNN_TRAINING_F1'])
+        dotenv.set_key(env_file, 'FNN_TRAINING_MCC', os.environ['FNN_TRAINING_MCC'])
+        dotenv.set_key(env_file, 'FNN_TRAINING_TP', os.environ['FNN_TRAINING_TP'])
+        dotenv.set_key(env_file, 'FNN_TRAINING_FP', os.environ['FNN_TRAINING_FP'])
+        dotenv.set_key(env_file, 'FNN_TRAINING_TN', os.environ['FNN_TRAINING_TN'])
+        dotenv.set_key(env_file, 'FNN_TRAINING_FN', os.environ['FNN_TRAINING_FN'])
+        dotenv.set_key(env_file, 'FNN_TRAINING_OVERHEAD', os.environ['FNN_TRAINING_OVERHEAD'])
+
         dotenv.set_key(env_file, 'FNN_VALIDATION_ACCURACY', os.environ['FNN_VALIDATION_ACCURACY'])
         dotenv.set_key(env_file, 'FNN_VALIDATION_LOSS', os.environ['FNN_VALIDATION_LOSS'])
+
         dotenv.set_key(env_file, 'FNN_TESTING_ACCURACY', os.environ['FNN_TESTING_ACCURACY'])
         dotenv.set_key(env_file, 'FNN_TESTING_LOSS', os.environ['FNN_TESTING_LOSS'])
-        dotenv.set_key(env_file, 'FNN_SPECIFICITY', os.environ['FNN_SPECIFICITY'])
-        dotenv.set_key(env_file, 'FNN_PRECISION', os.environ['FNN_PRECISION'])
-        dotenv.set_key(env_file, 'FNN_RECALL', os.environ['FNN_RECALL'])
-        dotenv.set_key(env_file, 'FNN_F1', os.environ['FNN_F1'])
-        dotenv.set_key(env_file, 'FNN_MCC', os.environ['FNN_MCC'])
+        dotenv.set_key(env_file, 'FNN_TESTING_SPECIFICITY', os.environ['FNN_TESTING_SPECIFICITY'])
+        dotenv.set_key(env_file, 'FNN_TESTING_PRECISION', os.environ['FNN_TESTING_PRECISION'])
+        dotenv.set_key(env_file, 'FNN_TESTING_RECALL', os.environ['FNN_TESTING_RECALL'])
+        dotenv.set_key(env_file, 'FNN_TESTING_F1', os.environ['FNN_TESTING_F1'])
+        dotenv.set_key(env_file, 'FNN_TESTING_MCC', os.environ['FNN_TESTING_MCC'])
+        dotenv.set_key(env_file, 'FNN_TESTING_TP', os.environ['FNN_TESTING_TP'])
+        dotenv.set_key(env_file, 'FNN_TESTING_FP', os.environ['FNN_TESTING_FP'])
+        dotenv.set_key(env_file, 'FNN_TESTING_TN', os.environ['FNN_TESTING_TN'])
+        dotenv.set_key(env_file, 'FNN_TESTING_FN', os.environ['FNN_TESTING_FN'])
+        dotenv.set_key(env_file, 'FNN_TESTING_OVERHEAD', os.environ['FNN_TESTING_OVERHEAD'])
+
+        dotenv.set_key(env_file, 'FNN_BATCH_SIZE', os.environ['FNN_BATCH_SIZE'])
+        dotenv.set_key(env_file, 'FNN_EPOCHS', os.environ['FNN_EPOCHS'])
+        dotenv.set_key(env_file, 'FNN_HIDDEN_NEURONS', os.environ['FNN_HIDDEN_NEURONS'])
+        dotenv.set_key(env_file, 'FNN_LR', os.environ['FNN_LR']) 
 
 def main(): 
     model = FNN()
